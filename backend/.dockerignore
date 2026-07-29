@@ -1,0 +1,14 @@
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Ortam değişkenleri ve sanal ortam
+.env
+.venv/
+env/
+venv/
+ENV/
+
+# İşletim sistemi kalıntıları
+.DS_Store
+Thumbs.db

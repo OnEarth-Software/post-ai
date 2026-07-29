@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  backend:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: post_generate_ai_backend
+    volumes:
+      # Koddaki değişikliklerin anında (hot-reload) yansıması için klasörü map ediyoruz
+      - ./backend:/app
+    ports:
+      - "8000:8000"
+    environment:
+      - ENVIRONMENT=development
+    env_file:
+      - ./backend/.env
+    restart: unless-stopped
