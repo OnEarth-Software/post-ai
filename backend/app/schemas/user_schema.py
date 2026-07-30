@@ -16,7 +16,6 @@ class UserCreate(UserBase):
 class UserResponse(UserBase):
     id: UUID
     plan_id: Optional[UUID]
-    is_active: bool
     created_at: datetime
     
     model_config = {"from_attributes": True}
