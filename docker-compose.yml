@@ -16,3 +16,21 @@ services:
     env_file:
       - ./backend/.env
     restart: unless-stopped
+
+  frontend:
+    build: 
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: post_generate_ai_frontend
+    volumes:
+      # Kod değişikliklerinin anında yansıması (hot-reload) için
+      - ./frontend:/app
+      # Kendi bilgisayarımızdaki (eğer varsa) node_modules klasörünün Docker içindekini ezmesini engelliyoruz
+      - /app/node_modules
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+    restart: unless-stopped
+    depends_on:
+      - backend
