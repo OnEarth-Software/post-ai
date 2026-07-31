@@ -1,0 +1,246 @@
+.main {
+    width: 100%;
+    min-height: 100vh;
+    background-color: #fafbfc;
+    padding: 6rem 2rem;
+}
+
+.header {
+    text-align: center;
+    max-width: 800px;
+    margin: 0 auto 4rem auto;
+}
+
+.title {
+    font-size: 3rem;
+    font-weight: 800;
+    color: var(--foreground);
+    margin-bottom: 1rem;
+    letter-spacing: -0.02em;
+}
+
+.subtitle {
+    font-size: 1.1rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+}
+
+/* PRICING GRID */
+.pricingGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+    max-width: 1100px;
+    margin: 0 auto 6rem auto;
+    align-items: stretch;
+}
+
+.card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 3rem 2.5rem;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+.cardPopular {
+    border: 2px solid #059669;
+    box-shadow: 0 10px 25px -5px rgba(5, 150, 105, 0.15);
+}
+
+.popularBadge {
+    position: absolute;
+    top: -14px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #059669;
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 800;
+    padding: 0.35rem 1rem;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.planName {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--foreground);
+    margin-bottom: 0.25rem;
+}
+
+.planDesc {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin-bottom: 2rem;
+}
+
+.priceWrapper {
+    display: flex;
+    align-items: baseline;
+    margin-bottom: 2.5rem;
+}
+
+.price {
+    font-size: 3rem;
+    font-weight: 800;
+    color: var(--foreground);
+}
+
+.priceCustom {
+    font-size: 2.2rem;
+}
+
+.period {
+    font-size: 1rem;
+    color: var(--text-muted);
+    font-weight: 500;
+    margin-left: 0.25rem;
+}
+
+.featuresList {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 3rem 0;
+    flex-grow: 1; /* Pushes button to bottom */
+}
+
+.featureItem {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+    font-size: 0.95rem;
+    color: #475569;
+}
+
+.featureIcon {
+    color: #059669;
+    flex-shrink: 0;
+}
+
+.featureIconWatermark {
+    color: #94a3b8;
+    flex-shrink: 0;
+}
+
+.button {
+    width: 100%;
+    padding: 1rem;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btnOutline {
+    background: transparent;
+    border: 1px solid #d1d5db;
+    color: var(--foreground);
+}
+
+.btnOutline:hover {
+    border-color: #9ca3af;
+    background: #f9fafb;
+}
+
+.btnPrimary {
+    background: #059669;
+    border: 1px solid #059669;
+    color: white;
+}
+
+.btnPrimary:hover {
+    background: #047857;
+    border-color: #047857;
+}
+
+/* FAQ SECTION */
+.faqSection {
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+.faqTitle {
+    text-align: center;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--foreground);
+    margin-bottom: 3rem;
+}
+
+.faqList {
+    display: flex;
+    flex-direction: column;
+}
+
+.faqItem {
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.faqQuestion {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 0;
+    background: none;
+    border: none;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--foreground);
+    cursor: pointer;
+    text-align: left;
+}
+
+.faqQuestion:hover {
+    color: var(--primary);
+}
+
+.faqIcon {
+    color: #94a3b8;
+    transition: transform 0.3s ease;
+}
+
+.faqIconOpen {
+    transform: rotate(180deg);
+}
+
+.faqAnswer {
+    padding-bottom: 1.5rem;
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    line-height: 1.6;
+    display: none;
+}
+
+.faqAnswerOpen {
+    display: block;
+}
+
+@media (max-width: 1024px) {
+    .pricingGrid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .pricingGrid {
+        grid-template-columns: 1fr;
+    }
+    .title {
+        font-size: 2.5rem;
+    }
+}
