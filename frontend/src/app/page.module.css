@@ -1,0 +1,312 @@
+.main {
+    width: 100%;
+}
+
+/* HERO SECTION */
+.hero {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    padding: 5rem 4rem;
+    max-width: 1400px;
+    margin: 0 auto;
+    align-items: center;
+}
+
+.heroContent {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.5rem;
+}
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background-color: var(--badge-bg);
+    color: var(--badge-text);
+    padding: 0.4rem 0.8rem;
+    border-radius: 9999px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.badgeIcon {
+    color: var(--primary);
+}
+
+.title {
+    font-size: 2.75rem;
+    line-height: 1.2;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: #1f2937;
+}
+
+.highlight {
+    color: var(--primary);
+}
+
+.description {
+    font-size: 1.125rem;
+    line-height: 1.6;
+    color: var(--text-muted);
+    max-width: 90%;
+}
+
+.actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.primaryButton {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background-color: var(--primary);
+    color: white;
+    padding: 0.8rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: background-color 0.2s ease;
+}
+
+.primaryButton:hover {
+    background-color: var(--primary-hover);
+}
+
+.secondaryButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: transparent;
+    color: var(--foreground);
+    border: 1px solid var(--border);
+    padding: 0.8rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: background-color 0.2s ease;
+}
+
+.secondaryButton:hover {
+    background-color: var(--badge-bg);
+}
+
+/* PLATFORM LOGOS */
+.platformsSection {
+    padding: 4rem 2rem;
+    background-color: #f9fafb;
+    text-align: center;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+}
+
+.platformsLabel {
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    margin-bottom: 2rem;
+    text-transform: uppercase;
+}
+
+.logos {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 4rem;
+    flex-wrap: wrap;
+}
+
+.logoItem {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #9ca3af;
+    font-weight: 700;
+    font-size: 1.5rem;
+    transition: color 0.2s ease;
+}
+
+.logoItem:hover {
+    color: var(--foreground);
+}
+
+/* HOW IT WORKS */
+.stepsSection {
+    padding: 6rem 2rem;
+    background-color: var(--background);
+    text-align: center;
+}
+
+.stepsHeader {
+    margin-bottom: 5rem;
+}
+
+.stepsTitle {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--foreground);
+    margin-bottom: 1rem;
+}
+
+.stepsSubtitle {
+    font-size: 1.1rem;
+    color: var(--text-muted);
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.stepsContainer {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    max-width: 1200px;
+    margin: 0 auto;
+    position: relative;
+}
+
+.stepsContainer::before {
+    content: '';
+    position: absolute;
+    top: 40px;
+    left: 5%;
+    right: 5%;
+    height: 2px;
+    background-color: #e5e7eb;
+    z-index: 0;
+}
+
+.step {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    z-index: 1;
+    padding: 0 1rem;
+}
+
+.stepIconWrapper {
+    width: 80px;
+    height: 80px;
+    background-color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+    margin-bottom: 1.5rem;
+    border: 2px solid white;
+}
+
+.stepIcon {
+    color: var(--primary);
+}
+
+.stepTitle {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--foreground);
+    margin-bottom: 0.5rem;
+}
+
+.stepDesc {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+}
+
+/* FEATURES BENTO GRID */
+.featuresSection {
+    padding: 4rem 2rem 8rem 2rem;
+    background-color: var(--background);
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.bentoGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+}
+
+.bentoCard {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    padding: 2.5rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    position: relative;
+    overflow: hidden;
+}
+
+.bentoCard:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    border-color: #d1d5db;
+}
+
+.cardLarge {
+    grid-column: span 2;
+}
+
+.cardHighlight {
+    background: linear-gradient(135deg, #10b981, #047857);
+    color: white;
+    border: none;
+    box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.3);
+}
+
+.cardHighlight:hover {
+    box-shadow: 0 20px 25px -5px rgba(16, 185, 129, 0.4);
+    transform: translateY(-5px);
+}
+
+.cardIcon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background-color: #f3f4f6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary);
+    margin-bottom: 1.5rem;
+}
+
+.cardHighlight .cardIcon {
+    background-color: rgba(255, 255, 255, 0.2);
+    color: white;
+}
+
+.cardTitle {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+    color: var(--foreground);
+}
+
+.cardLarge .cardTitle {
+    font-size: 1.5rem;
+}
+
+.cardHighlight .cardTitle {
+    color: white;
+}
+
+.cardDesc {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+}
+
+.cardHighlight .cardDesc {
+    color: rgba(255, 255, 255, 0.9);
+}
