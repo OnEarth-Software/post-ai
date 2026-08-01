@@ -1,0 +1,207 @@
+.sidebar {
+    width: 260px;
+    height: 100vh;
+    background-color: #f8fafc;
+    border-right: 1px solid #e2e8f0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 1.5rem 1rem;
+    position: fixed;
+    top: 0;
+    left: 0;
+    font-family: var(--font-inter), sans-serif;
+}
+
+.topSection {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.logoWrapper {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    text-decoration: none;
+    padding: 0 0.5rem;
+}
+
+.logoIcon {
+    background-color: #059669; /* Koyu yeşil */
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.logoText {
+    display: flex;
+    flex-direction: column;
+}
+
+.brandName {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #064e3b;
+    margin: 0;
+    line-height: 1.2;
+}
+
+.brandSubtitle {
+    font-size: 0.75rem;
+    color: #475569;
+    font-weight: 500;
+}
+
+.navMenu {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.navItem {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    color: #475569;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+}
+
+.navItem:hover {
+    background-color: #e2e8f0;
+    color: #0f172a;
+}
+
+.navItem.active {
+    background-color: #e0e7ff; /* Açık mavi/mor arkaplan (görseldeki gibi) */
+    color: #3730a3;
+}
+
+.navIcon {
+    flex-shrink: 0;
+}
+
+.bottomSection {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.divider {
+    height: 1px;
+    background-color: #cbd5e1;
+    margin: 0 0.5rem;
+}
+
+.newCampaignBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    background-color: #059669;
+    color: white;
+    border: none;
+    padding: 0.75rem;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    width: 100%;
+}
+
+.newCampaignBtn:hover {
+    background-color: #047857;
+}
+
+.footerLinks {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.footerItem {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    color: #475569;
+    background: none;
+    border: none;
+    font-family: inherit;
+    font-size: 0.95rem;
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+    border-radius: 8px;
+    text-align: left;
+    transition: all 0.2s ease;
+    width: 100%;
+}
+
+.footerItem:hover {
+    background-color: #e2e8f0;
+    color: #0f172a;
+}
+
+.footerIcon {
+    flex-shrink: 0;
+}
+
+/* User Profile Styles */
+.userProfile {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    background-color: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+}
+
+.userAvatar {
+    width: 36px;
+    height: 36px;
+    background-color: #059669;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+    text-transform: uppercase;
+}
+
+.userInfo {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.userName {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #0f172a;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.userEmail {
+    font-size: 0.75rem;
+    color: #64748b;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}

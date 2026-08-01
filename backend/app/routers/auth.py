@@ -10,6 +10,8 @@ from app.schemas.token import Token
 from app.controllers import auth_controller
 from app.core.security import create_access_token
 from app.core.config import settings
+from app.core.deps import get_current_user
+from app.models.user import User
 
 router = APIRouter()
 
@@ -45,3 +47,12 @@ def login_access_token(
         ),
         "token_type": "bearer",
     }
+
+@router.get("/me", response_model=UserResponse)
+def read_current_user(
+    current_user: User = Depends(get_current_user)
+) -> Any:
+    """
+    Get current user.
+    """
+    return current_user

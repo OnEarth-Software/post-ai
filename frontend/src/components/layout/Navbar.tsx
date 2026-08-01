@@ -1,11 +1,12 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import styles from './Navbar.module.css';
 
 export default function Navbar() {
     return (
         <header className={styles.header}>
-            <Link href="/" className={styles.logo} style={{ textDecoration: 'none' }}>
-                <span className={styles.logoAccent}>Ad</span>Vantage AI
+            <Link href="/" className={styles.logo} style={{ textDecoration: 'none', display: 'flex', alignItems: 'center' }}>
+                <Image src="/logo2.png" alt="AdDesign AI Logo" width={300} height={110} style={{ objectFit: 'contain' }} priority />
             </Link>
             <nav className={styles.nav}>
                 <Link href="/#features">Home</Link>
@@ -14,7 +15,7 @@ export default function Navbar() {
             </nav>
             <div className={styles.actions}>
                 <Link href="/login" className={styles.login}>Login</Link>
-                <Link href="/start" className={styles.cta}>Start Creating</Link>
+                <Link href="/register" className={styles.cta}>Start Creating</Link>
             </div>
         </header>
     );
