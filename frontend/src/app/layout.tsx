@@ -8,6 +8,9 @@ const inter = Inter({ subsets: ['latin'] });
 export const metadata: Metadata = {
   title: 'AdDesign AI',
   description: 'Turn Product Images Into AI-Powered Marketing Content',
+  icons: {
+    icon: '/logo1.png',
+  },
 };
 
 export default function RootLayout({
