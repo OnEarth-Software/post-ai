@@ -1,8 +1,6 @@
 from sqlalchemy.orm import Session
 from app.models.plan import Plan
 
-
-
 def get_all_plans(
     db: Session
 ):
