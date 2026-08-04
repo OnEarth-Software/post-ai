@@ -161,7 +161,7 @@ export default function DashboardPage() {
 
             {/* Action Cards */}
             <div className={styles.actionCards}>
-                <div className={styles.actionCard} onClick={() => router.push('/dashboard/products/new')}>
+                <div className={styles.actionCard} onClick={() => router.push('/dashboard/products/upload')}>
                     <div className={styles.actionIconWrapper}>
                         <UploadCloud size={32} />
                     </div>

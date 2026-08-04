@@ -63,4 +63,27 @@ def create_product_with_image(
 
 
 def get_products_by_user(db: Session, current_user: User):
-    return db.query(Product).filter(Product.user_id == current_user.id).order_by(Product.id.desc()).all()
+    products = db.query(Product).filter(Product.user_id == current_user.id).order_by(Product.id.desc()).all()
+
+    for p in products:
+        analysis = db.query(ProductAnalyze).filter(ProductAnalyze.product_id == p.id).first()
+        p.analysis = analysis # Pydantic şeması (ProductResponse) için bu alana atıyoruz
+        
+    return products
+
+
+def get_product_by_id(db: Session, product_id: uuid.UUID, current_user: User):
+    product = db.query(Product).filter(
+        Product.id == product_id, 
+        Product.user_id == current_user.id
+    ).first()
+    
+    if not product:
+        raise HTTPException(status_code=404, detail="Ürün bulunamadı veya yetkiniz yok.")
+        
+    analysis = db.query(ProductAnalyze).filter(ProductAnalyze.product_id == product.id).first()
+    
+    # Detayları ana ürüne bağla
+    product.analysis = analysis
+        
+    return product

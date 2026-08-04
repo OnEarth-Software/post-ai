@@ -8,6 +8,9 @@ from app.schemas.product_schema import ProductResponse, ProductCreate
 from app.models.user import User
 from app.core.deps import get_current_user
 
+import uuid
+
+
 router = APIRouter()
 
 @router.get("/", response_model=List[ProductResponse])
@@ -38,3 +41,15 @@ def upload_product_image(
         current_user=current_user
     )
     return new_product
+
+
+@router.get("/{product_id}", response_model=ProductResponse)
+def get_single_product(
+    product_id: uuid.UUID,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Belirli bir ürünün detaylarını ve analiz sonuçlarını product_id'ye göre getirir.
+    """
+    return product_controller.get_product_by_id(db=db, product_id=product_id, current_user=current_user)
