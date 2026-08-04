@@ -9,8 +9,8 @@
     flex: 1;
     margin-left: 260px;
     /* Sidebar width */
-    padding: 3rem 2rem;
-    max-width: 1200px;
+    padding: 3rem 3rem;
+    width: calc(100% - 260px);
 }
 
 
@@ -41,5 +41,324 @@
 
     100% {
         transform: rotate(360deg);
+    }
+}
+
+/* New Dashboard Styles */
+.dashboardWrapper {
+    width: 100%;
+}
+
+/* Top Bar */
+.topBar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+.searchBox {
+    display: flex;
+    align-items: center;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
+    width: 400px;
+    color: #94a3b8;
+}
+.searchInput {
+    border: none;
+    outline: none;
+    margin-left: 0.5rem;
+    width: 100%;
+    font-family: inherit;
+    font-size: 0.95rem;
+}
+.searchInput::placeholder {
+    color: #94a3b8;
+}
+.topBarRight {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+.creditsBadge {
+    background: #dcfce7;
+    color: #166534;
+    padding: 0.4rem 0.8rem;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.iconBtn {
+    background: none;
+    border: none;
+    color: #64748b;
+    cursor: pointer;
+    display: flex;
+}
+.userProfile {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+}
+.avatar {
+    width: 36px;
+    height: 36px;
+    background: #0f172a;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+/* Page Header */
+.pageHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 2rem;
+}
+.pageTitle {
+    font-size: 1.875rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 0.25rem;
+}
+.pageSubtitle {
+    color: #64748b;
+    font-size: 1rem;
+}
+.headerActions {
+    display: flex;
+    gap: 1rem;
+}
+.btnOutline {
+    background: white;
+    border: 1px solid #e2e8f0;
+    color: #334155;
+    padding: 0.6rem 1.25rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.2s;
+}
+.btnOutline:hover {
+    background: #f8fafc;
+}
+.btnPrimary {
+    background: #059669;
+    color: white;
+    border: none;
+    padding: 0.6rem 1.25rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.2s;
+}
+.btnPrimary:hover {
+    background: #047857;
+}
+
+/* Top Cards */
+.topCards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+.statCard {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+}
+.statTop {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1.5rem;
+}
+.statIconWrapper {
+    background: #f1f5f9;
+    padding: 0.75rem;
+    border-radius: 8px;
+    color: #64748b;
+    display: flex;
+}
+.statTrend {
+    color: #059669;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+.statLabel {
+    color: #64748b;
+    font-size: 0.875rem;
+    margin-bottom: 0.5rem;
+}
+.statValue {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #0f172a;
+}
+.progressBarContainer {
+    margin-top: 1.25rem;
+    height: 6px;
+    background: #e2e8f0;
+    border-radius: 999px;
+    overflow: hidden;
+}
+.progressBarFill {
+    height: 100%;
+    background: #059669;
+    border-radius: 999px;
+}
+
+/* Action Cards */
+.actionCards {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+.actionCard {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 2.5rem 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+}
+.actionCard:hover {
+    border-color: #059669;
+    box-shadow: 0 4px 12px rgba(5, 150, 105, 0.08);
+    transform: translateY(-2px);
+}
+.actionIconWrapper {
+    background: #f0fdf4;
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #059669;
+    margin-bottom: 1.5rem;
+}
+.actionTitle {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 0.5rem;
+}
+.actionDesc {
+    color: #64748b;
+    font-size: 0.95rem;
+}
+
+/* Chart Area */
+.chartsContainer {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+
+.chartSection {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+}
+.chartHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 3rem;
+}
+.chartTitle {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #334155;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.5rem;
+}
+.chartSubtitle {
+    color: #64748b;
+    font-size: 0.9rem;
+}
+.chartFilter {
+    padding: 0.5rem 1rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    color: #334155;
+    font-size: 0.875rem;
+    background: white;
+    outline: none;
+    font-weight: 500;
+}
+
+/* Responsive Styles for Dashboard */
+@media (max-width: 1024px) {
+    .mainContent {
+        margin-left: 80px;
+        width: calc(100% - 80px);
+        padding: 2rem;
+    }
+    
+    .topCards {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .mainContent {
+        margin-left: 0;
+        width: 100%;
+        padding: 1.5rem;
+    }
+    
+    .topBar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+    
+    .searchBox {
+        width: 100%;
+    }
+    
+    .pageHeader {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+    
+    .topCards {
+        grid-template-columns: 1fr;
+    }
+    
+    .actionCards {
+        grid-template-columns: 1fr;
+    }
+    
+    .chartsContainer {
+        grid-template-columns: 1fr;
     }
 }

@@ -3,17 +3,86 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from './dashboard.module.css';
+import { Search, Bell, Sparkles, Package, Image as ImageIcon, CheckCircle2, UploadCloud, PlusCircle } from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
+
+const campaignChartData = [
+    { name: 'Jan', campaigns: 4 },
+    { name: 'Feb', campaigns: 7 },
+    { name: 'Mar', campaigns: 5 },
+    { name: 'Apr', campaigns: 12 },
+    { name: 'May', campaigns: 8 },
+    { name: 'Jun', campaigns: 15 },
+];
 
 export default function DashboardPage() {
     const router = useRouter();
     const [loading, setLoading] = useState(true);
+    const [productCount, setProductCount] = useState(0);
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const currentMonthIndex = new Date().getMonth();
+    const initialProductChartData = [];
+    for (let i = 5; i >= 0; i--) {
+        let mIndex = currentMonthIndex - i;
+        if (mIndex < 0) mIndex += 12;
+        initialProductChartData.push({ name: months[mIndex], products: 0 });
+    }
+    const [productChartData, setProductChartData] = useState<any[]>(initialProductChartData);
 
     useEffect(() => {
         const token = localStorage.getItem('token');
         if (!token) {
             router.push('/login');
         } else {
-            setLoading(false);
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL
+            fetch(`${apiUrl}/products/`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            })
+                .then(res => res.json())
+                .then(data => {
+
+
+                    if (Array.isArray(data)) {
+                        setProductCount(data.length);
+
+                        // Ürünleri aya göre gruplayıp grafiğe uygun hale getiriyoruz
+                        const monthCounts: Record<string, number> = {};
+                        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+                        // Başlangıçta ekranda düzgün durması için geriye dönük 6 ayı 0 olarak başlatalım
+                        const currentMonthIdx = new Date().getMonth();
+                        const displayMonths: string[] = [];
+                        for (let i = 5; i >= 0; i--) {
+                            let mIdx = currentMonthIdx - i;
+                            if (mIdx < 0) mIdx += 12;
+                            displayMonths.push(months[mIdx]);
+                        }
+
+                        const counts: Record<string, number> = {};
+                        displayMonths.forEach(m => { counts[m] = 0; });
+
+                        data.forEach(product => {
+                            if (product.created_at) {
+                                const date = new Date(product.created_at);
+                                const monthName = months[date.getMonth()];
+                                counts[monthName] = (counts[monthName] || 0) + 1;
+                            }
+                        });
+
+                        const formattedChartData = displayMonths.map(m => ({
+                            name: m,
+                            products: counts[m] || 0
+                        }));
+                        setProductChartData([...formattedChartData]);
+                    }
+                    setLoading(false);
+                })
+                .catch(err => {
+                    console.error("Ürün sayısı alınırken hata:", err);
+                    setLoading(false);
+                });
         }
     }, [router]);
 
@@ -27,8 +96,134 @@ export default function DashboardPage() {
     }
 
     return (
-        <div>
-            {/* Boş sayfa */}
+        <div className={styles.dashboardWrapper}>
+            {/* Top Bar */}
+            <header className={styles.topBar}>
+                <div className={styles.searchBox}>
+                    <Search size={18} />
+                    <input type="text" placeholder="Search campaigns, assets, or products..." className={styles.searchInput} />
+                </div>
+                <div className={styles.topBarRight}>
+                    {/* Şimdilik boş bırakıldı */}
+                </div>
+            </header>
+
+            {/* Page Header */}
+            <div className={styles.pageHeader}>
+                <div>
+                    <h1 className={styles.pageTitle}>Dashboard Overview</h1>
+                    <p className={styles.pageSubtitle}>Welcome back. Here's what's happening today.</p>
+                </div>
+                <div className={styles.headerActions}>
+                    <button className={styles.btnOutline}>Download Report</button>
+                    <button className={styles.btnPrimary}>AI Insights</button>
+                </div>
+            </div>
+
+            {/* Top Cards */}
+            <div className={styles.topCards}>
+                <div className={styles.statCard}>
+                    <div className={styles.statTop}>
+                        <div className={styles.statIconWrapper}>
+                            <Package size={20} />
+                        </div>
+
+                    </div>
+                    <div className={styles.statLabel}>Total Products</div>
+                    <div className={styles.statValue}>{productCount}</div>
+                </div>
+
+                <div className={styles.statCard}>
+                    <div className={styles.statTop}>
+                        <div className={styles.statIconWrapper}>
+                            <ImageIcon size={20} />
+                        </div>
+                        <span className={styles.statTrend}>+12%</span>
+                    </div>
+                    <div className={styles.statLabel}>Generated Images</div>
+                    <div className={styles.statValue}>840</div>
+                </div>
+
+                <div className={styles.statCard}>
+                    <div className={styles.statTop}>
+                        <div className={styles.statIconWrapper} style={{ background: '#dcfce7', color: '#059669' }}>
+                            <CheckCircle2 size={20} />
+                        </div>
+                        <span className={styles.statTrend}>High</span>
+                    </div>
+                    <div className={styles.statLabel}>Credits Remaining</div>
+                    <div className={styles.statValue}>85%</div>
+                    <div className={styles.progressBarContainer}>
+                        <div className={styles.progressBarFill} style={{ width: '85%' }}></div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Action Cards */}
+            <div className={styles.actionCards}>
+                <div className={styles.actionCard} onClick={() => router.push('/dashboard/products/new')}>
+                    <div className={styles.actionIconWrapper}>
+                        <UploadCloud size={32} />
+                    </div>
+                    <h3 className={styles.actionTitle}>Upload Product</h3>
+                    <p className={styles.actionDesc}>Add new inventory for AI processing.</p>
+                </div>
+
+                <div className={styles.actionCard} onClick={() => router.push('/dashboard/campaigns/new')}>
+                    <div className={styles.actionIconWrapper}>
+                        <PlusCircle size={32} />
+                    </div>
+                    <h3 className={styles.actionTitle}>New Campaign</h3>
+                    <p className={styles.actionDesc}>Start a new marketing sequence.</p>
+                </div>
+            </div>
+
+            {/* Chart Area */}
+            <div className={styles.chartsContainer}>
+
+                {/* Products Bar Chart */}
+                <div className={styles.chartSection}>
+                    <div className={styles.chartHeader}>
+                        <div>
+                            <h3 className={styles.chartTitle}>PRODUCT GROWTH</h3>
+                            <p className={styles.chartSubtitle}>Monthly product uploads</p>
+                        </div>
+                    </div>
+                    <div style={{ width: '100%', height: 240 }}>
+                        <ResponsiveContainer>
+                            <BarChart data={productChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} dy={10} />
+                                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} />
+                                <Tooltip cursor={{ fill: '#f1f5f9' }} contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px rgba(0,0,0,0.05)' }} />
+                                <Bar dataKey="products" fill="#14b8a6" radius={[4, 4, 0, 0]} maxBarSize={40} />
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </div>
+                </div>
+
+                {/* Campaigns Line Chart */}
+                <div className={styles.chartSection}>
+                    <div className={styles.chartHeader}>
+                        <div>
+                            <h3 className={styles.chartTitle}>CAMPAIGN PERFORMANCE</h3>
+                            <p className={styles.chartSubtitle}>Active marketing campaigns</p>
+                        </div>
+                    </div>
+                    <div style={{ width: '100%', height: 240 }}>
+                        <ResponsiveContainer>
+                            <LineChart data={campaignChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} dy={10} />
+                                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} />
+                                <Tooltip contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px rgba(0,0,0,0.05)' }} />
+                                <Line type="monotone" dataKey="campaigns" stroke="#14b8a6" strokeWidth={3} dot={{ r: 4, fill: '#14b8a6', strokeWidth: 2, stroke: 'white' }} activeDot={{ r: 6 }} />
+                            </LineChart>
+                        </ResponsiveContainer>
+                    </div>
+                </div>
+
+            </div>
         </div>
     );
 }
