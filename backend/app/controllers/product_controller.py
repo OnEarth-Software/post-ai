@@ -6,6 +6,8 @@ from app.schemas.product_schema import ProductCreate
 from app.services.storage.supabase_client import get_supabase_client
 from app.models.user import User
 from app.core.deps import get_current_user
+from app.models.product_analyze import ProductAnalyze
+from app.services.ai.product_detail_ai import analyze_product_image_with_ai
 
 def create_product_with_image(
     db: Session,
@@ -14,21 +16,16 @@ def create_product_with_image(
     current_user: User
 ) -> Product:
     supabase = get_supabase_client()
-
     file_extension = file.filename.split(".")[-1]
     unique_filename = f"{uuid.uuid4()}.{file_extension}"
-
     file_bytes = file.file.read()
 
     try:
         supabase.storage.from_("product-images").upload(
             path=unique_filename,
             file=file_bytes,
-            file_options={
-                "content-type": file.content_type
-            }
+            file_options={"content-type": file.content_type}
         )
-
         public_url = supabase.storage.from_("product-images").get_public_url(unique_filename)
 
         new_product = Product(
@@ -40,9 +37,30 @@ def create_product_with_image(
         db.commit()
         db.refresh(new_product)
 
+        try:
+            ai_result = analyze_product_image_with_ai(public_url)
+            
+            new_analysis = ProductAnalyze(
+                product_id=new_product.id,
+                category=ai_result.get("category", "Bilinmiyor"),
+                style=ai_result.get("style", "Bilinmiyor"),
+                colors=ai_result.get("colors", []),
+                audience=ai_result.get("audience", "Bilinmiyor"),
+                marketing_style=ai_result.get("marketing_style", "Bilinmiyor")
+            )
+            db.add(new_analysis)
+            db.commit()
+            
+
+            new_product.analysis = new_analysis
+        except Exception as ai_err:
+            print(f"Yapay zeka analiz hatası: {ai_err}")
+
         return new_product
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Resim yüklenirken hata oluştu: {str(e)}")
+
 
 def get_products_by_user(db: Session, current_user: User):
     return db.query(Product).filter(Product.user_id == current_user.id).order_by(Product.id.desc()).all()

@@ -1,12 +1,16 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.routers import auth, plans, products 
+import os
 
 app = FastAPI(title="Post Generate AI API")
 
+cors_urls = os.getenv("CORS_URL", "http://localhost:3000")
+origins = [url.strip() for url in cors_urls.split(",")]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
