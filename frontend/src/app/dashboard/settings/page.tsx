@@ -26,7 +26,7 @@ export default function SettingsPage() {
     const [qrUri, setQrUri] = useState('');
     const [twoFactorCode, setTwoFactorCode] = useState('');
     const [is2faEnabled, setIs2faEnabled] = useState(false);
-    
+
     // Disable 2FA State
     const [isDisable2faModalOpen, setIsDisable2faModalOpen] = useState(false);
     const [disableTwoFactorCode, setDisableTwoFactorCode] = useState('');
@@ -108,7 +108,15 @@ export default function SettingsPage() {
                 showNotification("Bilgiler güncellendi!", "success");
             } else {
                 const err = await response.json();
-                showNotification(err.detail || "Güncelleme başarısız.", "error");
+                let errorMessage = "Güncelleme Başarısız!";
+
+                if (typeof err.detail === 'string') {
+                    errorMessage = err.detail;
+                }
+                else if (Array.isArray(err.detail) && err.detail.lenght > 0) {
+                    errorMessage = err.detail.map((e: any) => e.msg).join(', ');
+                }
+                showNotification(errorMessage, "error");
             }
         } catch (error) {
             console.error(error);
@@ -137,7 +145,15 @@ export default function SettingsPage() {
                 setPasswordData({ current: '', new: '', confirm: '' });
             } else {
                 const err = await res.json();
-                showNotification(err.detail || "Şifre değiştirilemedi.", "error");
+                let errorMessage = "Şifre değiştirilemedi.";
+
+                if (typeof err.detail === 'string') {
+                    errorMessage = err.detail;
+                } else if (Array.isArray(err.detail) && err.detail.length > 0) {
+                    errorMessage = err.detail.map((e: any) => e.msg).join(', ');
+                }
+
+                showNotification(errorMessage, "error");
             }
         } catch (e) {
             showNotification("Bir hata oluştu.", "error");
@@ -354,15 +370,15 @@ export default function SettingsPage() {
                         <div className={styles.modalBody}>
                             <div className={styles.formGroup}>
                                 <label className={styles.label}>Current Password</label>
-                                <input type="password" className={styles.input} placeholder="••••••••" value={passwordData.current} onChange={e => setPasswordData({...passwordData, current: e.target.value})} />
+                                <input type="password" className={styles.input} placeholder="••••••••" value={passwordData.current} onChange={e => setPasswordData({ ...passwordData, current: e.target.value })} />
                             </div>
                             <div className={styles.formGroup}>
                                 <label className={styles.label}>New Password</label>
-                                <input type="password" className={styles.input} placeholder="••••••••" value={passwordData.new} onChange={e => setPasswordData({...passwordData, new: e.target.value})} />
+                                <input type="password" className={styles.input} placeholder="••••••••" value={passwordData.new} onChange={e => setPasswordData({ ...passwordData, new: e.target.value })} />
                             </div>
                             <div className={styles.formGroup}>
                                 <label className={styles.label}>Confirm New Password</label>
-                                <input type="password" className={styles.input} placeholder="••••••••" value={passwordData.confirm} onChange={e => setPasswordData({...passwordData, confirm: e.target.value})} />
+                                <input type="password" className={styles.input} placeholder="••••••••" value={passwordData.confirm} onChange={e => setPasswordData({ ...passwordData, confirm: e.target.value })} />
                             </div>
                         </div>
                         <div className={styles.modalFooter}>
@@ -399,25 +415,25 @@ export default function SettingsPage() {
             {/* 2FA Setup Modal */}
             {is2faModalOpen && (
                 <div className={styles.modalOverlay} onClick={() => setIs2faModalOpen(false)}>
-                    <div className={styles.modalContent} onClick={(e) => e.stopPropagation()} style={{textAlign: 'center'}}>
+                    <div className={styles.modalContent} onClick={(e) => e.stopPropagation()} style={{ textAlign: 'center' }}>
                         <div className={styles.modalHeader}>
                             <h3 className={styles.modalTitle}>Setup Two-Factor Auth</h3>
                             <button className={styles.closeBtn} onClick={() => setIs2faModalOpen(false)}>&times;</button>
                         </div>
-                        <div className={styles.modalBody} style={{alignItems: 'center'}}>
-                            <p style={{marginBottom: '1rem', color: '#666'}}>Scan this QR code with Google Authenticator or Authy, then enter the 6-digit code below.</p>
+                        <div className={styles.modalBody} style={{ alignItems: 'center' }}>
+                            <p style={{ marginBottom: '1rem', color: '#666' }}>Scan this QR code with Google Authenticator or Authy, then enter the 6-digit code below.</p>
                             {qrUri && (
-                                <div style={{background: 'white', padding: '1rem', borderRadius: '12px', display: 'inline-block', border: '1px solid #e2e8f0'}}>
+                                <div style={{ background: 'white', padding: '1rem', borderRadius: '12px', display: 'inline-block', border: '1px solid #e2e8f0' }}>
                                     <QRCodeSVG value={qrUri} size={200} />
                                 </div>
                             )}
-                            <div className={styles.formGroup} style={{width: '100%', marginTop: '1rem', textAlign: 'left'}}>
+                            <div className={styles.formGroup} style={{ width: '100%', marginTop: '1rem', textAlign: 'left' }}>
                                 <label className={styles.label}>6-digit Code</label>
-                                <input type="text" className={styles.input} placeholder="123456" value={twoFactorCode} onChange={e => setTwoFactorCode(e.target.value)} maxLength={6} style={{textAlign: 'center', fontSize: '1.5rem', letterSpacing: '0.25rem'}} />
+                                <input type="text" className={styles.input} placeholder="123456" value={twoFactorCode} onChange={e => setTwoFactorCode(e.target.value)} maxLength={6} style={{ textAlign: 'center', fontSize: '1.5rem', letterSpacing: '0.25rem' }} />
                             </div>
                         </div>
-                        <div className={styles.modalFooter} style={{justifyContent: 'center'}}>
-                            <button className={styles.saveBtn} onClick={verify2fa} style={{width: '100%'}}>Verify & Enable</button>
+                        <div className={styles.modalFooter} style={{ justifyContent: 'center' }}>
+                            <button className={styles.saveBtn} onClick={verify2fa} style={{ width: '100%' }}>Verify & Enable</button>
                         </div>
                     </div>
                 </div>
@@ -426,21 +442,21 @@ export default function SettingsPage() {
             {/* Disable 2FA Modal */}
             {isDisable2faModalOpen && (
                 <div className={styles.modalOverlay} onClick={() => setIsDisable2faModalOpen(false)}>
-                    <div className={styles.modalContent} onClick={(e) => e.stopPropagation()} style={{textAlign: 'center'}}>
+                    <div className={styles.modalContent} onClick={(e) => e.stopPropagation()} style={{ textAlign: 'center' }}>
                         <div className={styles.modalHeader}>
                             <h3 className={styles.modalTitle}>Disable Two-Factor Auth</h3>
                             <button className={styles.closeBtn} onClick={() => setIsDisable2faModalOpen(false)}>&times;</button>
                         </div>
-                        <div className={styles.modalBody} style={{alignItems: 'center'}}>
-                            <p style={{marginBottom: '1rem', color: '#666'}}>Please enter the 6-digit code from your Authenticator app to disable 2FA.</p>
-                            
-                            <div className={styles.formGroup} style={{width: '100%', marginTop: '1rem', textAlign: 'left'}}>
+                        <div className={styles.modalBody} style={{ alignItems: 'center' }}>
+                            <p style={{ marginBottom: '1rem', color: '#666' }}>Please enter the 6-digit code from your Authenticator app to disable 2FA.</p>
+
+                            <div className={styles.formGroup} style={{ width: '100%', marginTop: '1rem', textAlign: 'left' }}>
                                 <label className={styles.label}>6-digit Code</label>
-                                <input type="text" className={styles.input} placeholder="123456" value={disableTwoFactorCode} onChange={e => setDisableTwoFactorCode(e.target.value)} maxLength={6} style={{textAlign: 'center', fontSize: '1.5rem', letterSpacing: '0.25rem'}} />
+                                <input type="text" className={styles.input} placeholder="123456" value={disableTwoFactorCode} onChange={e => setDisableTwoFactorCode(e.target.value)} maxLength={6} style={{ textAlign: 'center', fontSize: '1.5rem', letterSpacing: '0.25rem' }} />
                             </div>
                         </div>
-                        <div className={styles.modalFooter} style={{justifyContent: 'center'}}>
-                            <button className={styles.saveBtn} onClick={disable2fa} style={{width: '100%', background: '#ef4444'}}>Disable 2FA</button>
+                        <div className={styles.modalFooter} style={{ justifyContent: 'center' }}>
+                            <button className={styles.saveBtn} onClick={disable2fa} style={{ width: '100%', background: '#ef4444' }}>Disable 2FA</button>
                         </div>
                     </div>
                 </div>
