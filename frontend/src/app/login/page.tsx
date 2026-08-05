@@ -38,6 +38,9 @@ function LoginContent() {
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const [is2faStep, setIs2faStep] = useState(false);
+    const [tempToken, setTempToken] = useState('');
+    const [twoFactorCode, setTwoFactorCode] = useState('');
 
 
     useEffect(() => {
@@ -74,8 +77,43 @@ function LoginContent() {
             }
 
             const data = await response.json();
+            
+            if (data.requires_2fa) {
+                setTempToken(data.temp_token);
+                setIs2faStep(true);
+                return;
+            }
+
             localStorage.setItem('token', data.access_token);
             console.log("Giriş Başarılı");
+            router.push('/dashboard');
+        } catch (err: any) {
+            setError(err.message);
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    const handle2faSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setLoading(true);
+        setError('');
+
+        try {
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+            const response = await fetch(`${apiUrl}/auth/login/2fa`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ temp_token: tempToken, code: twoFactorCode })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.detail || '2FA doğrulaması başarısız oldu.');
+            }
+
+            const data = await response.json();
+            localStorage.setItem('token', data.access_token);
             router.push('/dashboard');
         } catch (err: any) {
             setError(err.message);
@@ -110,42 +148,70 @@ function LoginContent() {
                         </div>
                     )}
 
-                    <form onSubmit={handleLogin}>
-                        <div className={styles.formGroup}>
-                            <div className={styles.labelWrapper}>
-                                <label className={styles.label} htmlFor="email">Email Address</label>
+                    {is2faStep ? (
+                        <form onSubmit={handle2faSubmit}>
+                            <p style={{marginBottom: '1rem', color: '#64748b'}}>Please enter the 6-digit code from your Authenticator app.</p>
+                            <div className={styles.formGroup}>
+                                <div className={styles.labelWrapper}>
+                                    <label className={styles.label} htmlFor="twoFactorCode">Authentication Code</label>
+                                </div>
+                                <input
+                                    type="text"
+                                    id="twoFactorCode"
+                                    value={twoFactorCode}
+                                    onChange={(e) => setTwoFactorCode(e.target.value)}
+                                    className={styles.input}
+                                    placeholder="123456"
+                                    maxLength={6}
+                                    style={{textAlign: 'center', fontSize: '1.25rem', letterSpacing: '0.25rem'}}
+                                    required
+                                />
                             </div>
-                            <input
-                                type="email"
-                                id="email"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                className={styles.input}
-                                placeholder="name@company.com"
-                                required
-                            />
-                        </div>
-
-                        <div className={styles.formGroup}>
-                            <div className={styles.labelWrapper}>
-                                <label className={styles.label} htmlFor="password">Password</label>
-                                <Link href="#" className={styles.forgotPwd}>Forgot password?</Link>
+                            <button type="submit" className={styles.submitBtn} disabled={loading}>
+                                {loading ? 'Verifying...' : 'Verify Code'}
+                            </button>
+                            <button type="button" className={styles.submitBtn} onClick={() => setIs2faStep(false)} style={{background: 'transparent', border: '1px solid #cbd5e1', color: '#475569', marginTop: '1rem'}}>
+                                Back to Login
+                            </button>
+                        </form>
+                    ) : (
+                        <form onSubmit={handleLogin}>
+                            <div className={styles.formGroup}>
+                                <div className={styles.labelWrapper}>
+                                    <label className={styles.label} htmlFor="email">Email Address</label>
+                                </div>
+                                <input
+                                    type="email"
+                                    id="email"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    className={styles.input}
+                                    placeholder="name@company.com"
+                                    required
+                                />
                             </div>
-                            <input
-                                type="password"
-                                id="password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                className={styles.input}
-                                placeholder="••••••••"
-                                required
-                            />
-                        </div>
 
-                        <button type="submit" className={styles.submitBtn} disabled={loading}>
-                            {loading ? 'Logging in...' : 'Sign In'}
-                        </button>
-                    </form>
+                            <div className={styles.formGroup}>
+                                <div className={styles.labelWrapper}>
+                                    <label className={styles.label} htmlFor="password">Password</label>
+                                    <Link href="#" className={styles.forgotPwd}>Forgot password?</Link>
+                                </div>
+                                <input
+                                    type="password"
+                                    id="password"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    className={styles.input}
+                                    placeholder="••••••••"
+                                    required
+                                />
+                            </div>
+
+                            <button type="submit" className={styles.submitBtn} disabled={loading}>
+                                {loading ? 'Logging in...' : 'Sign In'}
+                            </button>
+                        </form>
+                    )}
 
                     <p className={styles.signUpText}>
                         Don't have an account? <Link href="/register" className={styles.signUpLink}>Join the beta</Link>
