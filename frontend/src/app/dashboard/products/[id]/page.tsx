@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { ChevronRight, Edit3, Sparkles, Box, Palette, Tags, Zap, Users, Loader2, X } from 'lucide-react';
+import { ChevronRight, Edit3, Sparkles, Box, Palette, Tags, Zap, Users, Loader2, X, Droplets } from 'lucide-react';
 import Link from 'next/link';
 import styles from './product-detail.module.css';
 
@@ -107,7 +107,7 @@ export default function ProductDetailPage() {
                         <ChevronRight size={14} />
                         <span>Visual Asset Analysis</span>
                     </div>
-                    <h1 className={styles.title}>{product.name}</h1>
+                    <h1 className={`${styles.title} ${styles.textGradient}`}>{product.name}</h1>
                 </div>
                 
                 <div className={styles.headerActions}>
@@ -141,6 +141,7 @@ export default function ProductDetailPage() {
                     <div className={styles.infoGrid}>
                         {/* 1. Category */}
                         <div className={styles.infoCard}>
+                            <Box size={100} className={styles.bgIcon} />
                             <div className={styles.cardHeader}>
                                 <div className={styles.iconBox}>
                                     <Box size={20} />
@@ -155,6 +156,7 @@ export default function ProductDetailPage() {
 
                         {/* 2. Color */}
                         <div className={styles.infoCard}>
+                            <Droplets size={100} className={styles.bgIcon} />
                             <div className={styles.cardHeader} style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                                 {product.analysis?.colors?.map((c, i) => (
                                     <div 
@@ -175,6 +177,7 @@ export default function ProductDetailPage() {
 
                         {/* 3. Style */}
                         <div className={styles.infoCard}>
+                            <Palette size={100} className={styles.bgIcon} />
                             <div className={styles.cardHeader}>
                                 <div className={styles.iconBox} style={{ background: '#f8fafc', color: '#64748b' }}>
                                     <Palette size={20} />
@@ -189,6 +192,7 @@ export default function ProductDetailPage() {
 
                         {/* 4. Marketing Style */}
                         <div className={styles.infoCard}>
+                            <Zap size={100} className={styles.bgIcon} />
                             <div className={styles.cardHeader}>
                                 <div className={styles.iconBox} style={{ background: '#fef3c7', color: '#d97706' }}>
                                     <Zap size={20} />

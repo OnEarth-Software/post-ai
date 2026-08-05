@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from './dashboard.module.css';
-import { Search, Bell, Sparkles, Package, Image as ImageIcon, CheckCircle2, UploadCloud, PlusCircle } from 'lucide-react';
+import { Search, Bell, Sparkles, Package, Image as ImageIcon, CheckCircle2, UploadCloud, PlusCircle, Palette, PenTool, Wand2 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
 
 const campaignChartData = [
@@ -89,8 +89,12 @@ export default function DashboardPage() {
     if (loading) {
         return (
             <div className={styles.loadingContainer}>
-                <div className={styles.loader}></div>
-                <p>Yükleniyor...</p>
+                <div className={styles.designLoader}>
+                    <Palette className={styles.designIcon} />
+                    <PenTool className={styles.designIcon} />
+                    <Wand2 className={styles.designIcon} />
+                </div>
+                <p>Crafting your dashboard...</p>
             </div>
         );
     }
@@ -111,7 +115,7 @@ export default function DashboardPage() {
             {/* Page Header */}
             <div className={styles.pageHeader}>
                 <div>
-                    <h1 className={styles.pageTitle}>Dashboard Overview</h1>
+                    <h1 className={`${styles.pageTitle} ${styles.textGradient}`}>Dashboard Overview</h1>
                     <p className={styles.pageSubtitle}>Welcome back. Here's what's happening today.</p>
                 </div>
                 <div className={styles.headerActions}>
@@ -195,8 +199,8 @@ export default function DashboardPage() {
                                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
                                 <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} dy={10} />
                                 <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} />
-                                <Tooltip cursor={{ fill: '#f1f5f9' }} contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px rgba(0,0,0,0.05)' }} />
-                                <Bar dataKey="products" fill="#14b8a6" radius={[4, 4, 0, 0]} maxBarSize={40} />
+                                <Tooltip cursor={{ fill: '#f8fafc' }} contentStyle={{ borderRadius: '12px', border: '1px solid #f1f5f9', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }} />
+                                <Bar dataKey="products" fill="#10b981" radius={[6, 6, 0, 0]} maxBarSize={40} />
                             </BarChart>
                         </ResponsiveContainer>
                     </div>
@@ -216,8 +220,8 @@ export default function DashboardPage() {
                                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
                                 <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} dy={10} />
                                 <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} />
-                                <Tooltip contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px rgba(0,0,0,0.05)' }} />
-                                <Line type="monotone" dataKey="campaigns" stroke="#14b8a6" strokeWidth={3} dot={{ r: 4, fill: '#14b8a6', strokeWidth: 2, stroke: 'white' }} activeDot={{ r: 6 }} />
+                                <Tooltip contentStyle={{ borderRadius: '12px', border: '1px solid #f1f5f9', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }} />
+                                <Line type="monotone" dataKey="campaigns" stroke="#10b981" strokeWidth={4} dot={{ r: 5, fill: '#10b981', strokeWidth: 3, stroke: 'white' }} activeDot={{ r: 8, fill: '#059669', strokeWidth: 0 }} />
                             </LineChart>
                         </ResponsiveContainer>
                     </div>

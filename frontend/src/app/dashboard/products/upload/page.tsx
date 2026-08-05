@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { CloudUpload, Camera, ArrowRight, Loader2 } from 'lucide-react';
+import { CloudUpload, Camera, ArrowRight, Loader2, Sparkles } from 'lucide-react';
 import styles from './upload.module.css';
 
 export default function UploadProductPage() {
@@ -97,7 +97,7 @@ export default function UploadProductPage() {
 
                 <div className={styles.glassPanel}>
                     <div className={styles.header}>
-                        <h1 className={styles.title}>Add New Product</h1>
+                        <h1 className={styles.title}>Add New <span className={styles.textGradient}>Product</span></h1>
                         <p className={styles.subtitle}>Bring your next great idea to life with AdDesign AI.</p>
                     </div>
 
@@ -146,10 +146,12 @@ export default function UploadProductPage() {
 
                                     {isSubmitting ? (
                                         <div className={styles.uploadingOverlay}>
-                                            <div className={styles.scannerLine}></div>
+                                            <div className={styles.magicSparkle1}></div>
+                                            <div className={styles.magicSparkle2}></div>
+                                            <div className={styles.magicSparkle3}></div>
                                             <div className={styles.uploadingText}>
-                                                <CloudUpload className={styles.uploadingIcon} size={32} />
-                                                <span>Analyzing with AdDesign AI...</span>
+                                                <Sparkles className={styles.uploadingIcon} size={40} />
+                                                <span>Working Magic...</span>
                                             </div>
                                         </div>
                                     ) : (

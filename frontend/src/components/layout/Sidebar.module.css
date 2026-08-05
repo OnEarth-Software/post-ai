@@ -40,6 +40,17 @@
     padding: 0 0.5rem;
 }
 
+.logoCollapsed {
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+
+.logoDesktop {
+    display: flex;
+    align-items: center;
+}
+
 .logoIcon {
     background-color: #059669; /* Koyu yeşil */
     width: 40px;
@@ -219,11 +230,73 @@
     text-overflow: ellipsis;
 }
 
-/* Responsive Styles for Sidebar */
+.logoRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.mobileToggleBtn {
+    display: none;
+    position: fixed;
+    top: 1.25rem;
+    left: 1.25rem;
+    z-index: 50;
+    background: white;
+    border: 1px solid #e2e8f0;
+    color: #0f172a;
+    padding: 0.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+}
+
+.mobileToggleBtn:hover {
+    background: #f8fafc;
+}
+
+.mobileCloseBtn {
+    display: none;
+    background: transparent;
+    border: none;
+    color: #64748b;
+    cursor: pointer;
+    padding: 0.25rem;
+    border-radius: 6px;
+}
+
+.mobileCloseBtn:hover {
+    background: #e2e8f0;
+    color: #0f172a;
+}
+
+.mobileOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(15, 23, 42, 0.4);
+    backdrop-filter: blur(4px);
+    z-index: 999;
+    animation: fadeIn 0.3s ease-out;
+}
+
 @media (max-width: 1024px) {
     .sidebar {
         width: 80px;
         padding: 1.5rem 0.5rem;
+    }
+    
+    .logoDesktop {
+        display: none;
+    }
+    
+    .logoCollapsed {
+        display: flex;
     }
     
     .logoText, .brandName, .brandSubtitle {
@@ -275,8 +348,78 @@
 }
 
 @media (max-width: 768px) {
+    .mobileToggleBtn {
+        display: flex;
+    }
+    
     .sidebar {
-        /* Mobil cihazlarda alt menü (bottom navigation) gibi davranabilir veya gizlenebilir. Şimdilik gizliyoruz. */
-        display: none;
+        transform: translateX(-100%);
+        width: 280px !important;
+        padding: 1.5rem 1rem !important;
+        z-index: 1000;
+        transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        display: flex !important;
+    }
+
+    .sidebar.mobileOpen {
+        transform: translateX(0);
+    }
+
+    .mobileCloseBtn {
+        display: flex;
+    }
+    
+    .logoText, .brandName, .brandSubtitle {
+        display: flex !important;
+    }
+    
+    .logoDesktop {
+        display: flex !important;
+    }
+    
+    .logoCollapsed {
+        display: none !important;
+    }
+    
+    .logoWrapper {
+        justify-content: flex-start !important;
+    }
+    
+    .navItem span {
+        display: inline !important;
+    }
+    
+    .navItem {
+        justify-content: flex-start !important;
+        padding: 0.5rem 0.75rem !important;
+    }
+    
+    .userInfo {
+        display: flex !important;
+    }
+    
+    .userProfile {
+        justify-content: flex-start !important;
+        padding: 0.75rem !important;
+        background-color: white !important;
+        border: 1px solid #e2e8f0 !important;
+    }
+    
+    .newCampaignBtn span {
+        display: inline !important;
+    }
+    
+    .newCampaignBtn {
+        justify-content: center !important;
+        padding: 0.5rem !important;
+    }
+    
+    .footerItem span {
+        display: inline !important;
+    }
+    
+    .footerItem {
+        justify-content: flex-start !important;
+        padding: 0.5rem 0.75rem !important;
     }
 }

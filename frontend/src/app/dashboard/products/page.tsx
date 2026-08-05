@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { PackageOpen, Plus, Tag, Palette, Users, Sparkles } from 'lucide-react';
+import { PackageOpen, Plus, Tag, Palette, Users, Sparkles, Search } from 'lucide-react';
 import styles from './products.module.css';
 
 interface ProductAnalysis {
@@ -26,6 +26,7 @@ export default function ProductsPage() {
     const [products, setProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [searchTerm, setSearchTerm] = useState("");
 
     useEffect(() => {
         fetchProducts();
@@ -81,20 +82,38 @@ export default function ProductsPage() {
         return colors[normalized] || '#cbd5e1';
     };
 
+    const filteredProducts = products.filter(p => 
+        p.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+        (p.analysis?.category || "").toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
     return (
         <div className={styles.pageWrapper}>
             <div className={styles.pageHeader}>
-                <div>
-                    <h1 className={styles.pageTitle}>Your Products</h1>
+                <div className={styles.headerText}>
+                    <h1 className={styles.pageTitle}>Your <span className={styles.textGradient}>Products</span></h1>
                     <p className={styles.pageSubtitle}>Manage and view your uploaded products and their AI analysis.</p>
                 </div>
-                <button 
-                    className={styles.uploadBtn}
-                    onClick={() => router.push('/dashboard/products/upload')}
-                >
-                    <Plus size={18} />
-                    Upload New
-                </button>
+                
+                <div className={styles.headerControls}>
+                    <div className={styles.searchWrapper}>
+                        <Search className={styles.searchIcon} size={18} />
+                        <input 
+                            type="text" 
+                            className={styles.searchInput}
+                            placeholder="Search products..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                    </div>
+                    <button 
+                        className={styles.uploadBtn}
+                        onClick={() => router.push('/dashboard/products/upload')}
+                    >
+                        <Plus size={18} />
+                        Upload New
+                    </button>
+                </div>
             </div>
 
             {loading ? (
@@ -135,9 +154,19 @@ export default function ProductsPage() {
                         Upload Product
                     </button>
                 </div>
+            ) : filteredProducts.length === 0 ? (
+                <div className={styles.emptyState}>
+                    <div className={styles.emptyIconWrapper}>
+                        <Search size={36} />
+                    </div>
+                    <div>
+                        <h2 className={styles.emptyTitle}>No matches found</h2>
+                        <p className={styles.emptyDesc}>We couldn't find any products matching "{searchTerm}".</p>
+                    </div>
+                </div>
             ) : (
                 <div className={styles.productsGrid}>
-                    {products.map((product) => (
+                    {filteredProducts.map((product) => (
                         <div 
                             key={product.id} 
                             className={styles.productCard}

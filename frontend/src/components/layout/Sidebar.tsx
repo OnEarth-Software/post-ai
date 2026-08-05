@@ -17,7 +17,9 @@ import {
     Plus,
     HelpCircle,
     LogOut,
-    Sparkles
+    Sparkles,
+    Menu,
+    X
 } from 'lucide-react';
 import styles from './Sidebar.module.css';
 
@@ -36,6 +38,12 @@ export default function Sidebar() {
     const pathname = usePathname();
     const router = useRouter();
     const [user, setUser] = useState<{ name: string; surname: string; email: string } | null>(null);
+    const [isMobileOpen, setIsMobileOpen] = useState(false);
+
+    // Close sidebar on route change on mobile
+    useEffect(() => {
+        setIsMobileOpen(false);
+    }, [pathname]);
 
     useEffect(() => {
         const fetchUser = async () => {
@@ -68,11 +76,43 @@ export default function Sidebar() {
     };
 
     return (
-        <aside className={styles.sidebar}>
-            <div className={styles.topSection}>
-                <Link href="/dashboard" className={styles.logoWrapper}>
-                    <Image src="/logo2.png" alt="AdDesign AI Logo" width={200} height={120} style={{ objectFit: 'contain' }} priority />
-                </Link>
+        <>
+            {/* Mobile Toggle Button */}
+            <button 
+                className={styles.mobileToggleBtn} 
+                onClick={() => setIsMobileOpen(true)}
+                aria-label="Open menu"
+            >
+                <Menu size={24} />
+            </button>
+
+            {/* Mobile Overlay */}
+            {isMobileOpen && (
+                <div 
+                    className={styles.mobileOverlay} 
+                    onClick={() => setIsMobileOpen(false)}
+                />
+            )}
+
+            <aside className={`${styles.sidebar} ${isMobileOpen ? styles.mobileOpen : ''}`}>
+                <div className={styles.topSection}>
+                    <div className={styles.logoRow}>
+                        <Link href="/dashboard" className={styles.logoWrapper}>
+                            <div className={styles.logoDesktop}>
+                                <Image src="/logo2.png" alt="AdDesign AI Logo" width={200} height={120} style={{ objectFit: 'contain' }} priority />
+                            </div>
+                            <div className={styles.logoCollapsed}>
+                                <Image src="/logo3.png" alt="AdDesign AI Logo" width={50} height={50} style={{ objectFit: 'contain' }} priority />
+                            </div>
+                        </Link>
+                        <button 
+                            className={styles.mobileCloseBtn} 
+                            onClick={() => setIsMobileOpen(false)}
+                            aria-label="Close menu"
+                        >
+                            <X size={24} />
+                        </button>
+                    </div>
 
                 <nav className={styles.navMenu}>
                     {menuItems.map((item) => {
@@ -125,5 +165,6 @@ export default function Sidebar() {
                 </div>
             </div>
         </aside>
+        </>
     );
 }
