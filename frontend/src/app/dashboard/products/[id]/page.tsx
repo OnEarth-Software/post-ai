@@ -380,7 +380,14 @@ export default function ProductDetailPage() {
                                             style={{ position: 'absolute', top: '-10px', left: '-10px', width: '60px', height: '60px', padding: '0', border: 'none', cursor: 'pointer' }}
                                         />
                                     </div>
-                                    <span style={{ fontSize: '0.875rem', color: '#64748b', flex: 1, fontFamily: 'monospace', fontWeight: 500 }}>{newColor.toUpperCase()}</span>
+                                    <input 
+                                        type="text" 
+                                        value={newColor} 
+                                        onChange={e => setNewColor(e.target.value)} 
+                                        style={{ fontSize: '0.875rem', color: '#64748b', flex: 1, fontFamily: 'monospace', fontWeight: 500, background: 'transparent', border: 'none', outline: 'none', textTransform: 'uppercase' }}
+                                        placeholder="#000000"
+                                        maxLength={7}
+                                    />
                                     <button 
                                         className={styles.btnPrimary} 
                                         style={{ padding: '0.35rem 0.75rem', fontSize: '0.875rem', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '0.25rem' }}
