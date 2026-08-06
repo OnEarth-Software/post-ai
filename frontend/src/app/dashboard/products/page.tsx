@@ -70,8 +70,10 @@ export default function ProductsPage() {
         });
     };
 
-    // Helper to map color names to hex for the dot
     const getColorHex = (colorName: string) => {
+        if (!colorName) return '#cbd5e1';
+        if (colorName.startsWith('#')) return colorName;
+        
         const colors: Record<string, string> = {
             'black': '#000000', 'white': '#ffffff', 'red': '#ef4444', 
             'blue': '#3b82f6', 'green': '#10b981', 'yellow': '#eab308',
