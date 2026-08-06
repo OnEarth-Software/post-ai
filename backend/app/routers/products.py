@@ -4,7 +4,7 @@ from typing import List
 
 from app.database.connection import get_db 
 from app.controllers import product_controller
-from app.schemas.product_schema import ProductResponse, ProductCreate
+from app.schemas.product_schema import ProductResponse, ProductCreate, ProductAnalysisUpdate
 from app.models.user import User
 from app.core.deps import get_current_user
 
@@ -53,3 +53,20 @@ def get_single_product(
     Belirli bir ürünün detaylarını ve analiz sonuçlarını product_id'ye göre getirir.
     """
     return product_controller.get_product_by_id(db=db, product_id=product_id, current_user=current_user)
+
+@router.patch("/{product_id}/analysis", response_model=ProductResponse)
+def update_product_analysis(
+    product_id: uuid.UUID,
+    update_data: ProductAnalysisUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Belirli bir ürünün yapay zeka analiz verilerini (kategori, stil, renkler vb.) günceller.
+    """
+    return product_controller.update_product_analysis(
+        db=db, 
+        product_id=product_id, 
+        update_data=update_data, 
+        current_user=current_user
+    )
