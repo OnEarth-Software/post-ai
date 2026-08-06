@@ -11,8 +11,15 @@
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .header {
@@ -33,7 +40,8 @@
 }
 
 .breadcrumbLink:hover {
-    color: #059669; /* System emerald green */
+    color: #059669;
+    /* System emerald green */
 }
 
 .title {
@@ -120,19 +128,27 @@
 
 /* Card Styling */
 .card {
-    background: white;
-    border: 1px solid #f1f5f9;
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(226, 232, 240, 0.6);
     border-radius: 24px;
     padding: 2.5rem;
-    box-shadow: 0 10px 30px -10px rgba(15, 23, 42, 0.05);
+    box-shadow: 0 4px 20px -5px rgba(0, 0, 0, 0.03), inset 0 0 0 1px rgba(255, 255, 255, 0.5);
     animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     position: relative;
     overflow: hidden;
 }
 
 @keyframes slideUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .cardTitle {
@@ -158,8 +174,8 @@
 }
 
 .optionCard {
-    background: white;
-    border: 2px solid #f1f5f9;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
     border-radius: 16px;
     padding: 2rem 1.5rem;
     cursor: pointer;
@@ -170,18 +186,19 @@
     text-align: center;
     gap: 1rem;
     position: relative;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.01);
 }
 
 .optionCard:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.05);
-    border-color: rgba(16, 185, 129, 0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px -5px rgba(0, 0, 0, 0.04);
+    border-color: rgba(16, 185, 129, 0.4);
 }
 
 .optionCard.selected {
     border-color: #10b981;
-    background: #ecfdf5;
-    box-shadow: 0 12px 20px -5px rgba(16, 185, 129, 0.1);
+    background: #f0fdf4;
+    box-shadow: 0 0 0 1px #10b981, 0 4px 15px -3px rgba(16, 185, 129, 0.1);
 }
 
 .optionIcon {
@@ -225,7 +242,7 @@
 .inputField {
     width: 100%;
     padding: 1rem 1.25rem;
-    border: 2px solid #e2e8f0;
+    border: 1px solid #cbd5e1;
     border-radius: 12px;
     font-size: 1rem;
     outline: none;
@@ -234,18 +251,19 @@
     background: #f8fafc;
     color: #0f172a;
     margin-top: 1rem;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.01);
 }
 
 .inputField:focus {
     border-color: #10b981;
     background: white;
-    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
 }
 
 .textareaField {
     width: 100%;
     padding: 1rem 1.25rem;
-    border: 2px solid #e2e8f0;
+    border: 1px solid #cbd5e1;
     border-radius: 12px;
     font-size: 1rem;
     outline: none;
@@ -255,12 +273,13 @@
     resize: vertical;
     background: #f8fafc;
     color: #0f172a;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.01);
 }
 
 .textareaField:focus {
     border-color: #10b981;
     background: white;
-    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
 }
 
 /* Actions */
@@ -322,49 +341,99 @@
     transform: translateY(-2px);
 }
 
-/* Summary Items */
-.summaryContainer {
+/* Minimal & Elegant Text Box (Step 4) */
+.premiumTextBox {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 250, 252, 0.7) 100%);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    border-radius: 20px;
+    padding: 3rem 2.5rem;
+    margin-top: 2rem;
+    font-size: 1.35rem;
+    font-weight: 500;
+    color: #334155;
+    line-height: 1.8;
+    text-align: center;
+    position: relative;
+    box-shadow: 0 8px 30px -10px rgba(16, 185, 129, 0.1), inset 0 2px 10px rgba(255, 255, 255, 0.8);
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+/* Subtle top border gradient accent */
+.premiumTextBox::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(90deg, #059669, #10b981, #34d399);
+}
+
+.loaderContainer {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem 0;
+    gap: 1.5rem;
 }
 
-.summaryItem {
-    background: #f8fafc;
-    padding: 1.25rem 1.5rem;
-    border-radius: 16px;
-    border: 1px solid #e2e8f0;
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+.premiumLoader {
+    width: 60px;
+    height: 60px;
+    position: relative;
 }
 
-.summaryLabel {
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    font-weight: 700;
-    color: #94a3b8;
-    letter-spacing: 0.05em;
+.premiumLoader::before,
+.premiumLoader::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    border-radius: 50%;
+    width: 100%;
+    height: 100%;
+    animation: pulseLoader 2s linear infinite;
 }
 
-.summaryValue {
+.premiumLoader::before {
+    background: rgba(16, 185, 129, 0.2);
+    animation-delay: 0s;
+}
+
+.premiumLoader::after {
+    background: rgba(16, 185, 129, 0.4);
+    animation-delay: -1s;
+}
+
+@keyframes pulseLoader {
+    0% { transform: scale(0); opacity: 1; }
+    100% { transform: scale(1.5); opacity: 0; }
+}
+
+.loaderText {
     font-weight: 600;
-    color: #0f172a;
-    font-size: 1.1rem;
+    font-size: 1.15rem;
+    background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: pulseText 2s ease-in-out infinite;
+    letter-spacing: 0.02em;
 }
 
-.summarySystemPrompt {
-    border-left: 4px solid #10b981;
-    background: #ecfdf5;
-    border-color: #a7f3d0;
+@keyframes pulseText {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; }
 }
 
-.summarySystemPrompt .summaryLabel {
-    color: #059669;
-}
-
-.summarySystemPrompt .summaryValue {
-    color: #064e3b;
-    font-size: 0.95rem;
-    font-family: monospace;
+.nextStepBox {
+    margin-top: 3.5rem;
+    background: transparent;
+    border: 1px dashed rgba(16, 185, 129, 0.4);
+    border-radius: 20px;
+    padding: 2.5rem;
+    text-align: center;
+    animation: slideUp 0.5s ease-out;
 }

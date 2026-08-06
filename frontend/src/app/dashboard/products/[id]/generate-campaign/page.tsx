@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { ChevronRight, ArrowRight, Target, PenTool, Image as ImageIcon, Camera, Smartphone, CheckCircle, Sparkles } from 'lucide-react';
+import { ChevronRight, ArrowRight, Target, PenTool, Image as ImageIcon, Camera, Smartphone, CheckCircle, Sparkles, Megaphone, Heart, ShoppingCart } from 'lucide-react';
 import Link from 'next/link';
 import styles from './generate-campaign.module.css';
 
@@ -11,6 +11,7 @@ export default function GenerateCampaignPage() {
     const params = useParams();
     const { id } = params;
 
+    // Form Step State
     const [step, setStep] = useState(1);
 
     // Form States
@@ -25,6 +26,10 @@ export default function GenerateCampaignPage() {
         "json içindeki goal kısmındaki amaca göre içerik yazıları olucak. Logo, Sosyal medya vb. gibi içerikleri kullanma"
     );
 
+    // AI Generation States
+    const [isGeneratingText, setIsGeneratingText] = useState(false);
+    const [generatedText, setGeneratedText] = useState<string>('');
+
     const handleNext = () => {
         if (step < 4) setStep(step + 1);
     };
@@ -34,18 +39,19 @@ export default function GenerateCampaignPage() {
         else router.push(`/dashboard/products/${id}`);
     };
 
-    const handleGenerate = () => {
-        // Here you would normally send the data to the backend
-        const payload = {
-            goal: goal === 'custom' ? customGoal : goal,
-            platform,
-            type,
-            user_prompt: userPrompt,
-            system_prompt: systemPrompt
-        };
-        console.log("Generating campaign with:", payload);
-        alert("Kampanya oluşturma işlemi başlatıldı! (Console'u kontrol edin)");
-        // router.push(`/dashboard/campaigns`); // Example redirect
+    const handleGenerateText = async () => {
+        setIsGeneratingText(true);
+        
+        // Gerekli bilgiler alındı, backend bağlanana kadar mock data gösteriyoruz.
+        setTimeout(() => {
+            setGeneratedText("Zamanın ötesinde şıklık! Doğa ile iç içe, dinamik tarzını yansıt.");
+            setIsGeneratingText(false);
+        }, 2500);
+    };
+
+    const handleGenerateImage = () => {
+        alert("Görsel oluşturma işlemi başlatıldı! (Backend eklenecek)");
+        // router.push(`/dashboard/campaigns`);
     };
 
     const isStepValid = () => {
@@ -80,7 +86,7 @@ export default function GenerateCampaignPage() {
                                 {s === 1 && 'Hedef'}
                                 {s === 2 && 'Platform'}
                                 {s === 3 && 'İçerik'}
-                                {s === 4 && 'Özet'}
+                                {s === 4 && 'Üretim'}
                             </span>
                         </div>
                         {index < 3 && (
@@ -96,15 +102,15 @@ export default function GenerateCampaignPage() {
                     <h2 className={styles.cardTitle}>Kampanya Hedefiniz Nedir?</h2>
                     <div className={styles.optionsGrid}>
                         <div className={`${styles.optionCard} ${goal === 'Marka Tanınırlığı' ? styles.selected : ''}`} onClick={() => setGoal('Marka Tanınırlığı')}>
-                            <Target size={32} className={styles.optionIcon} />
+                            <Megaphone size={32} className={styles.optionIcon} />
                             <div className={styles.optionTitle}>Marka Tanınırlığı</div>
                         </div>
                         <div className={`${styles.optionCard} ${goal === 'Etkileşim' ? styles.selected : ''}`} onClick={() => setGoal('Etkileşim')}>
-                            <Target size={32} className={styles.optionIcon} />
+                            <Heart size={32} className={styles.optionIcon} />
                             <div className={styles.optionTitle}>Etkileşim Artırma</div>
                         </div>
                         <div className={`${styles.optionCard} ${goal === 'Satış' ? styles.selected : ''}`} onClick={() => setGoal('Satış')}>
-                            <Target size={32} className={styles.optionIcon} />
+                            <ShoppingCart size={32} className={styles.optionIcon} />
                             <div className={styles.optionTitle}>Satış / Dönüşüm</div>
                         </div>
                         <div className={`${styles.optionCard} ${goal === 'custom' ? styles.selected : ''}`} onClick={() => setGoal('custom')}>
@@ -170,35 +176,46 @@ export default function GenerateCampaignPage() {
                 </div>
             )}
 
-            {/* Step 4: Summary */}
+            {/* Step 4: Text Generation & Final */}
             {step === 4 && (
                 <div className={styles.card}>
-                    <h2 className={styles.cardTitle}>Kampanya Özeti</h2>
+                    <h2 className={styles.cardTitle}>1. Kampanya Sloganı Üretimi</h2>
                     <p className={styles.cardSubtitle}>
-                        Her şey hazır! Üretimi başlatmadan önce bilgileri kontrol edin.
+                        Seçimlerinize göre yapay zeka ürününüzü analiz edip harika bir pazarlama metni hazırlayacak.
                     </p>
 
-                    <div className={styles.summaryContainer}>
-                        <div className={styles.summaryItem}>
-                            <div className={styles.summaryLabel}>Seçilen Hedef</div>
-                            <div className={styles.summaryValue}>{goal === 'custom' ? customGoal : goal}</div>
+                    {!generatedText ? (
+                        <div className={styles.loaderContainer}>
+                            {isGeneratingText ? (
+                                <>
+                                    <div className={styles.premiumLoader}></div>
+                                    <p className={styles.loaderText}>
+                                        Yapay zeka ürününüzü inceliyor ve slogan üretiyor...
+                                    </p>
+                                </>
+                            ) : (
+                                <button className={styles.btnPrimary} onClick={handleGenerateText}>
+                                    <PenTool size={18} /> Kampanya Yazısı Oluştur
+                                </button>
+                            )}
                         </div>
-
-                        <div className={styles.summaryItem}>
-                            <div className={styles.summaryLabel}>Platform & Format</div>
-                            <div className={styles.summaryValue} style={{ textTransform: 'capitalize' }}>{platform} - {type}</div>
+                    ) : (
+                        <div>
+                            <div className={styles.premiumTextBox}>
+                                {generatedText}
+                            </div>
+                            
+                            <div className={styles.nextStepBox}>
+                                <h2 className={styles.cardTitle} style={{ fontSize: '1.25rem', color: '#047857' }}>2. Görsel Üretimi</h2>
+                                <p className={styles.cardSubtitle} style={{ marginBottom: '1.5rem', color: '#334155' }}>
+                                    Sloganınız hazır! Artık bu efsane sloganla birleştirilmiş harika bir kampanya görseli üretebiliriz.
+                                </p>
+                                <button className={styles.btnPrimary} style={{ margin: '0 auto' }} onClick={handleGenerateImage}>
+                                    <Sparkles size={18} /> Görsel Oluştur
+                                </button>
+                            </div>
                         </div>
-
-                        <div className={styles.summaryItem}>
-                            <div className={styles.summaryLabel}>Kullanıcı Komutu (Prompt)</div>
-                            <div className={styles.summaryValue}>{userPrompt}</div>
-                        </div>
-
-                        <div className={`${styles.summaryItem} ${styles.summarySystemPrompt}`}>
-                            <div className={styles.summaryLabel}>Sistem Komutu (Hidden/Backend)</div>
-                            <div className={styles.summaryValue}>{systemPrompt}</div>
-                        </div>
-                    </div>
+                    )}
                 </div>
             )}
 
@@ -208,13 +225,9 @@ export default function GenerateCampaignPage() {
                     {step === 1 ? 'İptal' : 'Geri'}
                 </button>
 
-                {step < 4 ? (
+                {step < 4 && (
                     <button className={styles.btnPrimary} onClick={handleNext} disabled={!isStepValid()}>
                         İleri <ArrowRight size={18} />
-                    </button>
-                ) : (
-                    <button className={styles.btnPrimary} onClick={handleGenerate}>
-                        <Sparkles size={18} /> Üretimi Başlat
                     </button>
                 )}
             </div>

@@ -18,6 +18,7 @@ class Campaign(Base):
     type = Column(String, nullable=False)
     user_prompt = Column(String, nullable=True)
     system_prompt = Column(String, nullable=False)
+    generated_text = Column(String, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     product = relationship("Product")
