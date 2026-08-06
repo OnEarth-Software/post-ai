@@ -256,7 +256,7 @@ export default function ProductDetailPage() {
                         className={styles.audienceCard}
                         style={
                             product.analysis?.colors?.[0] 
-                            ? { backgroundColor: getColorHex(product.analysis.colors[0]) } 
+                            ? { background: getColorHex(product.analysis.colors[0]) } 
                             : {}
                         }
                     >
