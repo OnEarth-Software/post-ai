@@ -252,7 +252,14 @@ export default function ProductDetailPage() {
                     </div>
 
                     {/* Target Audience Dark Card */}
-                    <div className={styles.audienceCard}>
+                    <div 
+                        className={styles.audienceCard}
+                        style={
+                            product.analysis?.colors?.[0] 
+                            ? { backgroundColor: getColorHex(product.analysis.colors[0]) } 
+                            : {}
+                        }
+                    >
                         <div className={styles.audienceLabel}>Target Audience</div>
                         <div className={styles.audienceValue}>
                             {product.analysis?.audience || 'General Audience'}
