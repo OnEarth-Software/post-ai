@@ -252,32 +252,7 @@ export default function ProductDetailPage() {
                     </div>
 
                     {/* Target Audience Dark Card */}
-                    <div 
-                        className={styles.audienceCard}
-                        style={(() => {
-                            const colors = product.analysis?.colors;
-                            if (!colors || colors.length === 0) return {};
-                            
-                            const getBrightness = (hex: string) => {
-                                hex = hex.replace('#', '');
-                                if (hex.length === 3) hex = hex.split('').map(c => c + c).join('');
-                                const r = parseInt(hex.substring(0, 2), 16) || 0;
-                                const g = parseInt(hex.substring(2, 4), 16) || 0;
-                                const b = parseInt(hex.substring(4, 6), 16) || 0;
-                                return (r * 299 + g * 587 + b * 114) / 1000;
-                            };
-
-                            if (colors.length === 1) {
-                                return { background: `linear-gradient(135deg, ${getColorHex(colors[0])} 0%, #0f172a 100%)` };
-                            }
-                            
-                            const hexColors = colors.map(c => getColorHex(c));
-                            // Sort from dark to light
-                            hexColors.sort((a, b) => getBrightness(a) - getBrightness(b));
-                            
-                            return { background: `linear-gradient(135deg, ${hexColors.join(', ')})` };
-                        })()}
-                    >
+                    <div className={styles.audienceCard}>
                         <div className={styles.audienceLabel}>Target Audience</div>
                         <div className={styles.audienceValue}>
                             {product.analysis?.audience || 'General Audience'}

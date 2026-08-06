@@ -309,7 +309,7 @@
 
 /* Target Audience Dark Card */
 .audienceCard {
-    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    background: linear-gradient(135deg, #0f172a 0%, #64748b 100%);
     color: white;
     border-radius: 24px;
     padding: 2rem;
