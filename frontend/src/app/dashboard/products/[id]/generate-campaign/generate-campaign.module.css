@@ -1,0 +1,370 @@
+/* Premium Generate Campaign Layout - Matching System Aesthetic */
+
+.pageWrapper {
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2rem;
+    min-height: 100vh;
+    animation: fadeIn 0.4s ease-out;
+    font-family: 'Inter', sans-serif;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.header {
+    margin-bottom: 3rem;
+    text-align: center;
+}
+
+.breadcrumbLink {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #64748b;
+    font-size: 0.95rem;
+    text-decoration: none;
+    font-weight: 500;
+    margin-bottom: 1.5rem;
+    transition: color 0.2s;
+}
+
+.breadcrumbLink:hover {
+    color: #059669; /* System emerald green */
+}
+
+.title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin: 0 0 0.5rem 0;
+    letter-spacing: -0.02em;
+    background: linear-gradient(135deg, #047857 0%, #10b981 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.subtitle {
+    color: #64748b;
+    font-size: 1.1rem;
+    margin: 0;
+}
+
+/* Step Indicator */
+.stepIndicator {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 3rem;
+    padding: 0 2rem;
+}
+
+.step {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: #94a3b8;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    font-size: 0.95rem;
+}
+
+.step.active {
+    color: #059669;
+}
+
+.step.completed {
+    color: #10b981;
+}
+
+.stepNumber {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background-color: #f1f5f9;
+    font-size: 1rem;
+    font-weight: 700;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.step.active .stepNumber {
+    background-color: #ecfdf5;
+    color: #059669;
+    border-color: #10b981;
+    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+}
+
+.step.completed .stepNumber {
+    background-color: #10b981;
+    color: white;
+}
+
+.stepDivider {
+    flex: 1;
+    height: 3px;
+    background-color: #f1f5f9;
+    border-radius: 2px;
+    transition: background-color 0.3s ease;
+}
+
+.stepDivider.completed {
+    background-color: #10b981;
+}
+
+/* Card Styling */
+.card {
+    background: white;
+    border: 1px solid #f1f5f9;
+    border-radius: 24px;
+    padding: 2.5rem;
+    box-shadow: 0 10px 30px -10px rgba(15, 23, 42, 0.05);
+    animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.cardTitle {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0 0 0.5rem 0;
+    color: #0f172a;
+    letter-spacing: -0.01em;
+}
+
+.cardSubtitle {
+    color: #64748b;
+    margin-bottom: 2rem;
+    font-size: 1rem;
+}
+
+/* Options Grid */
+.optionsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.25rem;
+    margin-bottom: 1.5rem;
+}
+
+.optionCard {
+    background: white;
+    border: 2px solid #f1f5f9;
+    border-radius: 16px;
+    padding: 2rem 1.5rem;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 1rem;
+    position: relative;
+}
+
+.optionCard:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.05);
+    border-color: rgba(16, 185, 129, 0.3);
+}
+
+.optionCard.selected {
+    border-color: #10b981;
+    background: #ecfdf5;
+    box-shadow: 0 12px 20px -5px rgba(16, 185, 129, 0.1);
+}
+
+.optionIcon {
+    color: #94a3b8;
+    transition: color 0.3s ease;
+}
+
+.optionCard:hover .optionIcon {
+    color: #059669;
+}
+
+.optionCard.selected .optionIcon {
+    color: #047857;
+}
+
+.optionTitle {
+    font-weight: 700;
+    color: #334155;
+    font-size: 1.05rem;
+    transition: color 0.3s ease;
+}
+
+.optionCard.selected .optionTitle {
+    color: #064e3b;
+}
+
+.sectionLabel {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: #94a3b8;
+    letter-spacing: 0.05em;
+    margin: 2rem 0 1rem 0;
+}
+
+.sectionLabel:first-of-type {
+    margin-top: 0;
+}
+
+/* Inputs */
+.inputField {
+    width: 100%;
+    padding: 1rem 1.25rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 1rem;
+    outline: none;
+    transition: all 0.2s ease;
+    font-family: inherit;
+    background: #f8fafc;
+    color: #0f172a;
+    margin-top: 1rem;
+}
+
+.inputField:focus {
+    border-color: #10b981;
+    background: white;
+    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+}
+
+.textareaField {
+    width: 100%;
+    padding: 1rem 1.25rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 1rem;
+    outline: none;
+    transition: all 0.2s ease;
+    font-family: inherit;
+    min-height: 150px;
+    resize: vertical;
+    background: #f8fafc;
+    color: #0f172a;
+}
+
+.textareaField:focus {
+    border-color: #10b981;
+    background: white;
+    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+}
+
+/* Actions */
+.actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid #f1f5f9;
+}
+
+.btnPrimary {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    color: white;
+    border: none;
+    padding: 0.875rem 2rem;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    box-shadow: 0 4px 12px rgba(5, 150, 105, 0.2);
+}
+
+.btnPrimary:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(5, 150, 105, 0.4);
+}
+
+.btnPrimary:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.btnPrimary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: #cbd5e1;
+    box-shadow: none;
+}
+
+.btnSecondary {
+    background: white;
+    color: #0f172a;
+    border: 1px solid #cbd5e1;
+    padding: 0.875rem 2rem;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btnSecondary:hover {
+    background: #f8fafc;
+    border-color: #94a3b8;
+    transform: translateY(-2px);
+}
+
+/* Summary Items */
+.summaryContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.summaryItem {
+    background: #f8fafc;
+    padding: 1.25rem 1.5rem;
+    border-radius: 16px;
+    border: 1px solid #e2e8f0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.summaryLabel {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: #94a3b8;
+    letter-spacing: 0.05em;
+}
+
+.summaryValue {
+    font-weight: 600;
+    color: #0f172a;
+    font-size: 1.1rem;
+}
+
+.summarySystemPrompt {
+    border-left: 4px solid #10b981;
+    background: #ecfdf5;
+    border-color: #a7f3d0;
+}
+
+.summarySystemPrompt .summaryLabel {
+    color: #059669;
+}
+
+.summarySystemPrompt .summaryValue {
+    color: #064e3b;
+    font-size: 0.95rem;
+    font-family: monospace;
+}

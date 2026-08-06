@@ -160,7 +160,7 @@ export default function ProductDetailPage() {
                         <Edit3 size={16} />
                         Update Analysis
                     </button>
-                    <button className={styles.btnPrimary}>
+                    <button className={styles.btnPrimary} onClick={() => router.push(`/dashboard/products/${id}/generate-campaign`)}>
                         <Sparkles size={16} />
                         Generate Campaign
                     </button>
