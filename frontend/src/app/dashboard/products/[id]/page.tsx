@@ -254,11 +254,17 @@ export default function ProductDetailPage() {
                     {/* Target Audience Dark Card */}
                     <div 
                         className={styles.audienceCard}
-                        style={
-                            product.analysis?.colors?.[0] 
-                            ? { background: getColorHex(product.analysis.colors[0]) } 
-                            : {}
-                        }
+                        style={(() => {
+                            const colors = product.analysis?.colors;
+                            if (!colors || colors.length === 0) return {};
+                            
+                            if (colors.length === 1) {
+                                return { background: `linear-gradient(135deg, ${getColorHex(colors[0])} 0%, #0f172a 100%)` };
+                            }
+                            
+                            const hexColors = colors.map(c => getColorHex(c));
+                            return { background: `linear-gradient(135deg, ${hexColors.join(', ')})` };
+                        })()}
                     >
                         <div className={styles.audienceLabel}>Target Audience</div>
                         <div className={styles.audienceValue}>
