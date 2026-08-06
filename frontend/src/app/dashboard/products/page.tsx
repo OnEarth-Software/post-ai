@@ -195,28 +195,65 @@ export default function ProductsPage() {
                                             AI Analysis
                                         </div>
                                         <div className={styles.tagsContainer}>
-                                            <span className={`${styles.badge} ${styles.badgeCategory}`} title="Category">
-                                                <Tag size={12} style={{marginRight: '4px'}} />
-                                                {product.analysis.category}
-                                            </span>
-                                            <span className={`${styles.badge} ${styles.badgeStyle}`} title="Style">
-                                                <Palette size={12} style={{marginRight: '4px'}} />
-                                                {product.analysis.style}
-                                            </span>
-                                            <span className={`${styles.badge} ${styles.badgeAudience}`} title="Target Audience">
-                                                <Users size={12} style={{marginRight: '4px'}} />
-                                                {product.analysis.audience}
-                                            </span>
-                                            
-                                            {product.analysis.colors && product.analysis.colors.map((color, idx) => (
-                                                <span key={idx} className={`${styles.badge} ${styles.badgeColor}`} title="Color">
-                                                    <span 
-                                                        className={styles.colorDot} 
-                                                        style={{ backgroundColor: getColorHex(color) }}
-                                                    ></span>
-                                                    {color}
-                                                </span>
-                                            ))}
+                                            {(() => {
+                                                const allTags = [];
+                                                
+                                                if (product.analysis.category) {
+                                                    allTags.push(
+                                                        <span key="cat" className={`${styles.badge} ${styles.badgeCategory}`} title="Category">
+                                                            <Tag size={12} style={{marginRight: '4px'}} />
+                                                            {product.analysis.category}
+                                                        </span>
+                                                    );
+                                                }
+                                                
+                                                if (product.analysis.style) {
+                                                    allTags.push(
+                                                        <span key="style" className={`${styles.badge} ${styles.badgeStyle}`} title="Style">
+                                                            <Palette size={12} style={{marginRight: '4px'}} />
+                                                            {product.analysis.style}
+                                                        </span>
+                                                    );
+                                                }
+                                                
+                                                if (product.analysis.audience) {
+                                                    allTags.push(
+                                                        <span key="aud" className={`${styles.badge} ${styles.badgeAudience}`} title="Target Audience">
+                                                            <Users size={12} style={{marginRight: '4px'}} />
+                                                            {product.analysis.audience}
+                                                        </span>
+                                                    );
+                                                }
+                                                
+                                                if (product.analysis.colors) {
+                                                    product.analysis.colors.forEach((color, idx) => {
+                                                        allTags.push(
+                                                            <span key={`col-${idx}`} className={`${styles.badge} ${styles.badgeColor}`} title="Color">
+                                                                <span 
+                                                                    className={styles.colorDot} 
+                                                                    style={{ backgroundColor: getColorHex(color) }}
+                                                                ></span>
+                                                                {color}
+                                                            </span>
+                                                        );
+                                                    });
+                                                }
+                                                
+                                                const MAX_TAGS = 4;
+                                                const displayTags = allTags.slice(0, MAX_TAGS);
+                                                const remainingCount = allTags.length - MAX_TAGS;
+                                                
+                                                return (
+                                                    <>
+                                                        {displayTags}
+                                                        {remainingCount > 0 && (
+                                                            <span className={`${styles.badge}`} style={{ background: '#f1f5f9', color: '#64748b', fontWeight: 600, border: '1px solid #e2e8f0' }}>
+                                                                +{remainingCount}
+                                                            </span>
+                                                        )}
+                                                    </>
+                                                );
+                                            })()}
                                         </div>
                                     </div>
                                 )}
