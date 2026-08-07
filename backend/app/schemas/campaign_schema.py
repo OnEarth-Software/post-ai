@@ -1,3 +1,4 @@
+import uuid
 from pydantic import BaseModel
 
 class CampaignInfo(BaseModel):
@@ -7,6 +8,7 @@ class CampaignInfo(BaseModel):
     user_prompt: str
 
 class CampaignTextGenerateRequest(BaseModel):
+    product_id: uuid.UUID
     analysis_result: dict
     campaign_info: CampaignInfo
     image_url: str

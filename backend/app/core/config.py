@@ -9,6 +9,7 @@ class Settings(BaseSettings):
 
     SUPABASE_URL:str
     SUPABASE_KEY: str
+    SYSTEM_PROMPT: str = "json içindeki goal kısmındaki amaca göre içerik yazıları olucak. Logo, Sosyal medya vb. gibi içerikleri kullanma"
     
     class Config:
         env_file = ".env"

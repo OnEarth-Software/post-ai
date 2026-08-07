@@ -81,6 +81,7 @@ export default function GenerateCampaignPage() {
             const productData = await productResponse.json();
 
             const payloadToBackend = {
+                product_id: id,
                 analysis_result: productData.analysis || {},
                 campaign_info: {
                     goal: goal === 'custom' ? customGoal : goal,
@@ -298,23 +299,20 @@ export default function GenerateCampaignPage() {
                                 <>
                                     <div className={styles.premiumLoader}></div>
                                     <p className={styles.loaderText}>
-                                        Yapay zeka ürününüzü inceliyor ve slogan üretiyor...
+                                        Yapay zeka ürününüzü inceliyor ve içerik üretiyor...
                                     </p>
                                 </>
                             ) : (
                                 <button className={styles.btnPrimary} onClick={handleGenerateText}>
-                                    <PenTool size={18} /> Kampanya Yazısını Oluştur
+                                    <PenTool size={18} /> Oluştur
                                 </button>
                             )}
                         </div>
                     ) : (
                         <div className={styles.generatedTextContainer}>
-                            <div className={styles.premiumTextBox}>
-                                {generatedText}
-                            </div>
                             <div style={{ marginTop: '2rem', display: 'flex', justifyContent: 'center' }}>
                                 <button className={styles.btnPrimary} onClick={handleGenerateImage} style={{ padding: '1rem 3rem', fontSize: '1.1rem' }}>
-                                    <Sparkles size={20} /> Kampanyayı Oluştur
+                                    <Sparkles size={20} /> Tasarım Oluştur
                                 </button>
                             </div>
                         </div>
