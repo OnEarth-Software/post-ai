@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { PackageOpen, Plus, Tag, Palette, Users, Sparkles, Search } from 'lucide-react';
+import { PackageOpen, Plus, Tag, Palette, Users, Sparkles, Search, Trash2 } from 'lucide-react';
 import styles from './products.module.css';
 
 interface ProductAnalysis {
@@ -27,6 +27,8 @@ export default function ProductsPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [searchTerm, setSearchTerm] = useState("");
+    const [productToDelete, setProductToDelete] = useState<string | null>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     useEffect(() => {
         fetchProducts();
@@ -59,6 +61,39 @@ export default function ProductsPage() {
             console.error(err);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleDeleteProduct = (e: React.MouseEvent, productId: string) => {
+        e.stopPropagation();
+        setProductToDelete(productId);
+    };
+
+    const confirmDelete = async () => {
+        if (!productToDelete) return;
+        setIsDeleting(true);
+        
+        try {
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+            const token = localStorage.getItem('token');
+            const response = await fetch(`${apiUrl}/products/${productToDelete}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            
+            if (response.ok) {
+                setProducts(products.filter(p => p.id !== productToDelete));
+                setProductToDelete(null);
+            } else {
+                alert("An error occurred while deleting the product.");
+            }
+        } catch (error) {
+            console.error("Delete error:", error);
+            alert("A network error occurred.");
+        } finally {
+            setIsDeleting(false);
         }
     };
 
@@ -177,7 +212,15 @@ export default function ProductsPage() {
                         >
                             <div className={styles.imageContainer}>
                                 <img src={product.image_url} alt={product.name} className={styles.productImage} />
-                                <div className={styles.overlay}></div>
+                                <div className={styles.overlay}>
+                                    <button 
+                                        className={styles.deleteButton} 
+                                        onClick={(e) => handleDeleteProduct(e, product.id)}
+                                        title="Ürünü Sil"
+                                    >
+                                        <Trash2 size={18} />
+                                    </button>
+                                </div>
                             </div>
                             
                             <div className={styles.cardContent}>
@@ -260,6 +303,40 @@ export default function ProductsPage() {
                             </div>
                         </div>
                     ))}
+                </div>
+            )}
+
+            {/* Delete Confirmation Modal */}
+            {productToDelete && (
+                <div className={styles.modalOverlay} onClick={() => !isDeleting && setProductToDelete(null)}>
+                    <div className={styles.modalContent} onClick={e => e.stopPropagation()}>
+                        <div className={styles.modalHeader}>
+                            <div className={styles.modalIconWrapper}>
+                                <Trash2 size={24} className={styles.modalIcon} />
+                            </div>
+                            <h3>Delete Product</h3>
+                        </div>
+                        <div className={styles.modalBody}>
+                            <p>Are you sure you want to delete this product?</p>
+                            <p className={styles.modalWarning}>This action cannot be undone. All associated AI analysis and generated campaign visuals will also be permanently deleted.</p>
+                        </div>
+                        <div className={styles.modalFooter}>
+                            <button 
+                                className={styles.cancelButton} 
+                                onClick={() => setProductToDelete(null)}
+                                disabled={isDeleting}
+                            >
+                                Cancel
+                            </button>
+                            <button 
+                                className={styles.confirmDeleteButton} 
+                                onClick={confirmDelete}
+                                disabled={isDeleting}
+                            >
+                                {isDeleting ? 'Deleting...' : 'Delete Product'}
+                            </button>
+                        </div>
+                    </div>
                 </div>
             )}
         </div>

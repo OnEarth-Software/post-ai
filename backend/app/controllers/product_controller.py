@@ -8,6 +8,8 @@ from app.models.user import User
 from app.core.deps import get_current_user
 from app.models.product_analyze import ProductAnalyze
 from app.services.ai.product_detail_ai import analyze_product_image_with_ai
+from app.models.campaign import Campaign
+from app.models.campaign_result import CampaignResult
 
 
 
@@ -132,3 +134,51 @@ def update_product_analysis(db: Session, product_id: uuid.UUID, update_data: Pro
     
     product.analysis = analysis
     return product
+
+def delete_product(db: Session, product_id: uuid.UUID, current_user: User):
+    product = db.query(Product).filter(
+        Product.id == product_id, 
+        Product.user_id == current_user.id
+    ).first()
+    
+    if not product:
+        raise HTTPException(status_code=404, detail="Ürün bulunamadı veya yetkiniz yok.")
+    
+    supabase = get_supabase_client()
+    
+    files_to_remove = []
+
+    # 1. İlişkili Kampanyaları ve Kampanya Sonuçlarını (Resimler dahil) sil
+    campaigns = db.query(Campaign).filter(Campaign.product_id == product.id).all()
+    for campaign in campaigns:
+        results = db.query(CampaignResult).filter(CampaignResult.campaign_id == campaign.id).all()
+        for res in results:
+            if res.image_url:
+                res_filename = res.image_url.split("/")[-1].split("?")[0]
+                files_to_remove.append(res_filename)
+            db.delete(res)
+        db.delete(campaign)
+        
+    # 2. İlişkili Ürün Analizini sil
+    product_analyze = db.query(ProductAnalyze).filter(ProductAnalyze.product_id == product.id).first()
+    if product_analyze:
+        db.delete(product_analyze)
+
+    # 3. Ürünün Kendi Resmini sil
+    if product.image_url:
+        filename = product.image_url.split("/")[-1].split("?")[0]
+        files_to_remove.append(filename)
+
+    # Toplu olarak storage'dan dosyaları sil
+    if files_to_remove:
+        try:
+            res = supabase.storage.from_("product-images").remove(files_to_remove)
+            print("Storage silme sonucu:", res)
+        except Exception as e:
+            print(f"Supabase storage silme hatası: {e}")
+
+    # 4. Ürünü DB'den sil
+    db.delete(product)
+    db.commit()
+    
+    return {"message": "Ürün başarıyla silindi"}
