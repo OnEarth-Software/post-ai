@@ -12,6 +12,8 @@ from app.services.ai.product_detail_ai import analyze_product_image_with_ai
 
 
 
+
+
 def create_product_with_image(
     db: Session,
     product_in: ProductCreate,

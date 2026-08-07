@@ -30,6 +30,9 @@ export default function GenerateCampaignPage() {
     const [isGeneratingText, setIsGeneratingText] = useState(false);
     const [generatedText, setGeneratedText] = useState<string>('');
     const [productData, setProductData] = useState<any>(null);
+    const [campaignId, setCampaignId] = useState<string | null>(null);
+    const [isGeneratingImage, setIsGeneratingImage] = useState(false);
+    const [imageGenStatus, setImageGenStatus] = useState<string>('Yapay Zeka Tasarımı Hazırlıyor...');
 
     useEffect(() => {
         const fetchProductData = async () => {
@@ -59,27 +62,37 @@ export default function GenerateCampaignPage() {
         else router.push(`/dashboard/products/${id}`);
     };
 
-    const handleGenerateText = async () => {
+    const handleGenerateCampaign = async () => {
         setIsGeneratingText(true);
+        
+        const statuses = [
+            'Hedef kitle ve kampanya amacı analiz ediliyor...',
+            'Yaratıcı metinler ve sloganlar yazılıyor...',
+            'Ürün görseline uygun arka plan tasarlanıyor...',
+            'Renkler ve ışık ayarlanıyor...',
+            'Son dokunuşlar yapılıyor...'
+        ];
+        let statusIndex = 0;
+        const statusInterval = setInterval(() => {
+            statusIndex = (statusIndex + 1) % statuses.length;
+            setImageGenStatus(statuses[statusIndex]);
+        }, 3500);
 
         try {
-            const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
             const token = localStorage.getItem('token');
 
+            // 1. Ürün bilgilerini al
             const productResponse = await fetch(`${apiUrl}/products/${id}`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
+                headers: { 'Authorization': `Bearer ${token}` }
             });
 
             if (!productResponse.ok) {
-                console.log("Ürün detayları alınamadı.");
-                setIsGeneratingText(false);
-                return;
+                throw new Error("Ürün detayları alınamadı.");
             }
-
             const productData = await productResponse.json();
 
+            // 2. Metin Üret
             const payloadToBackend = {
                 product_id: id,
                 analysis_result: productData.analysis || {},
@@ -92,7 +105,6 @@ export default function GenerateCampaignPage() {
                 image_url: productData.image_url
             };
 
-
             const generateResponse = await fetch(`${apiUrl}/campaigns/generate-text`, {
                 method: 'POST',
                 headers: {
@@ -102,50 +114,61 @@ export default function GenerateCampaignPage() {
                 body: JSON.stringify(payloadToBackend)
             });
 
-            if (generateResponse.ok) {
-                const generateData = await generateResponse.json();
-                
-                // Üretilen metni aldıktan sonra veritabanına kaydetmek için create endpointine istek at
-                const createPayload = {
-                    product_id: id,
-                    goal: goal === 'custom' ? customGoal : goal,
-                    platform: platform,
-                    type: type,
-                    user_prompt: userPrompt,
-                    generated_text: generateData.generated_text
-                };
-
-                const createResponse = await fetch(`${apiUrl}/campaigns/create`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify(createPayload)
-                });
-
-                if (createResponse.ok) {
-                    setGeneratedText(generateData.generated_text);
-                } else {
-                    console.error("Kampanya kaydedilemedi.");
-                    setGeneratedText("Kampanya üretildi fakat veritabanına kaydedilemedi.");
-                }
+            if (!generateResponse.ok) {
+                throw new Error("Metin üretilemedi.");
             }
-            else {
-                console.error("Yapay zeka metni üretemedi.");
-                setGeneratedText("Bir hata oluştu, lütfen tekrar deneyin.");
+            const generateData = await generateResponse.json();
+
+            // 3. Veritabanına kaydet
+            const createPayload = {
+                product_id: id,
+                goal: goal === 'custom' ? customGoal : goal,
+                platform: platform,
+                type: type,
+                user_prompt: userPrompt,
+                slogan: generateData.slogan,
+                subtext: generateData.subtext
+            };
+
+            const createResponse = await fetch(`${apiUrl}/campaigns/create`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(createPayload)
+            });
+
+            if (!createResponse.ok) {
+                throw new Error("Kampanya kaydedilemedi.");
             }
-        } catch (error) {
-            console.error("İşlem sırasında hata oluştu:", error);
-            setGeneratedText("Bağlantı hatası oluştu.");
-        } finally {
+            const createdCampaign = await createResponse.json();
+            const newCampaignId = createdCampaign.id;
+
+            // 4. Görsel Üret
+            const imgResponse = await fetch(`${apiUrl}/campaign-results/generate-image`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ campaign_id: newCampaignId })
+            });
+
+            if (!imgResponse.ok) {
+                throw new Error("Görsel oluşturulamadı.");
+            }
+
+            // 5. AI Studio'ya yönlendir
+            router.push(`/dashboard/ai_studio/${newCampaignId}`);
+
+        } catch (error: any) {
+            console.error("Hata:", error);
+            alert("İşlem sırasında bir hata oluştu: " + error.message);
             setIsGeneratingText(false);
+        } finally {
+            clearInterval(statusInterval);
         }
-    };
-
-    const handleGenerateImage = () => {
-        alert("Görsel oluşturma işlemi başlatıldı! (Backend eklenecek)");
-        // router.push(`/dashboard/campaigns`);
     };
 
     const isStepValid = () => {
@@ -273,90 +296,96 @@ export default function GenerateCampaignPage() {
             {/* Step 4: Text Generation & Final */}
             {step === 4 && (
                 <div className={styles.card}>
-                    <h2 className={styles.cardTitle}>Kampanya Özeti ve Üretim</h2>
-                    <p className={styles.cardSubtitle}>
-                        Seçimlerinizi son kez inceleyin ve yapay zeka ile harika bir pazarlama metni oluşturun.
-                    </p>
-
-                    <div className={styles.step4Grid}>
-                        {/* Sol Taraf: Ürün Detayları */}
-                        <div className={styles.productSummaryCol}>
-                            {productData?.image_url ? (
-                                <img src={productData.image_url} alt="Ürün" className={styles.productSummaryImage} />
-                            ) : (
-                                <div className={styles.productSummaryImagePlaceholder}>Resim Yükleniyor...</div>
-                            )}
+                    {isGeneratingText ? (
+                        <div className={styles.generationTemplateContainer}>
+                            <h2 className={styles.cardTitle} style={{ textAlign: 'center', fontSize: '1.5rem', marginBottom: '0.5rem' }}>
+                                <Sparkles size={24} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '8px', color: '#059669' }} />
+                                Kampanya Oluşturuluyor
+                            </h2>
+                            <p className={styles.cardSubtitle} style={{ textAlign: 'center', marginBottom: '2rem' }}>
+                                {imageGenStatus}
+                            </p>
                             
-                            <div className={styles.productAnalysisTags}>
-                                {productData?.analysis?.category && <span className={styles.analysisTag}>{productData.analysis.category}</span>}
-                                {productData?.analysis?.style && <span className={styles.analysisTag}>{productData.analysis.style}</span>}
-                                {productData?.analysis?.audience && <span className={styles.analysisTag}>{productData.analysis.audience}</span>}
-                                {productData?.analysis?.marketing_style && <span className={styles.analysisTag}>{productData.analysis.marketing_style}</span>}
-                            </div>
-                        </div>
-
-                        {/* Sağ Taraf: Kampanya Özeti */}
-                        <div className={styles.campaignSummaryCol}>
-                            <div className={styles.summaryBox} style={{ marginBottom: 0, height: '100%', justifyContent: 'center' }}>
-                                <div className={styles.summaryItem}>
-                                    <span className={styles.summaryLabel}>Hedef:</span>
-                                    <span className={styles.summaryValue}>{goal === 'custom' ? customGoal : goal}</span>
-                                </div>
-                                <div className={styles.summaryItem}>
-                                    <span className={styles.summaryLabel}>Platform:</span>
-                                    <span className={styles.summaryValue} style={{ textTransform: 'capitalize' }}>{platform}</span>
-                                </div>
-                                <div className={styles.summaryItem}>
-                                    <span className={styles.summaryLabel}>Format:</span>
-                                    <span className={styles.summaryValue} style={{ textTransform: 'capitalize' }}>{type}</span>
-                                </div>
-                                <div className={styles.summaryItem}>
-                                    <span className={styles.summaryLabel}>Talimatınız:</span>
-                                    <span className={styles.summaryValue}>{userPrompt || "Yaratıcılık yapay zekaya bırakıldı"}</span>
+                            <div 
+                                className={styles.skeletonTemplate} 
+                                style={{ aspectRatio: type === 'story' ? '9/16' : '1/1' }}
+                            >
+                                <div className={styles.magicLoaderWrapper}>
+                                    <div className={styles.magicLoaderGlow}></div>
+                                    <Sparkles size={48} className={styles.magicLoaderIcon} />
                                 </div>
                             </div>
-                        </div>
-                    </div>
-
-                    {!generatedText ? (
-                        <div className={styles.loaderContainer}>
-                            {isGeneratingText ? (
-                                <>
-                                    <div className={styles.premiumLoader}></div>
-                                    <p className={styles.loaderText}>
-                                        Yapay zeka ürününüzü inceliyor ve içerik üretiyor...
-                                    </p>
-                                </>
-                            ) : (
-                                <button className={styles.btnPrimary} onClick={handleGenerateText}>
-                                    <PenTool size={18} /> Oluştur
-                                </button>
-                            )}
                         </div>
                     ) : (
-                        <div className={styles.generatedTextContainer}>
-                            <div style={{ marginTop: '2rem', display: 'flex', justifyContent: 'center' }}>
-                                <button className={styles.btnPrimary} onClick={handleGenerateImage} style={{ padding: '1rem 3rem', fontSize: '1.1rem' }}>
-                                    <Sparkles size={20} /> Tasarım Oluştur
+                        <>
+                            <h2 className={styles.cardTitle}>Kampanya Özeti ve Üretim</h2>
+                            <p className={styles.cardSubtitle}>
+                                Seçimlerinizi son kez inceleyin ve yapay zeka ile harika bir pazarlama metni oluşturun.
+                            </p>
+
+                            <div className={styles.step4Grid}>
+                                {/* Sol Taraf: Ürün Detayları */}
+                                <div className={styles.productSummaryCol}>
+                                    {productData?.image_url ? (
+                                        <img src={productData.image_url} alt="Ürün" className={styles.productSummaryImage} />
+                                    ) : (
+                                        <div className={styles.productSummaryImagePlaceholder}>Resim Yükleniyor...</div>
+                                    )}
+                                    
+                                    <div className={styles.productAnalysisTags}>
+                                        {productData?.analysis?.category && <span className={styles.analysisTag}>{productData.analysis.category}</span>}
+                                        {productData?.analysis?.style && <span className={styles.analysisTag}>{productData.analysis.style}</span>}
+                                        {productData?.analysis?.audience && <span className={styles.analysisTag}>{productData.analysis.audience}</span>}
+                                        {productData?.analysis?.marketing_style && <span className={styles.analysisTag}>{productData.analysis.marketing_style}</span>}
+                                    </div>
+                                </div>
+
+                                {/* Sağ Taraf: Kampanya Özeti */}
+                                <div className={styles.campaignSummaryCol}>
+                                    <div className={styles.summaryBox} style={{ marginBottom: 0, height: '100%', justifyContent: 'center' }}>
+                                        <div className={styles.summaryItem}>
+                                            <span className={styles.summaryLabel}>Hedef:</span>
+                                            <span className={styles.summaryValue}>{goal === 'custom' ? customGoal : goal}</span>
+                                        </div>
+                                        <div className={styles.summaryItem}>
+                                            <span className={styles.summaryLabel}>Platform:</span>
+                                            <span className={styles.summaryValue} style={{ textTransform: 'capitalize' }}>{platform}</span>
+                                        </div>
+                                        <div className={styles.summaryItem}>
+                                            <span className={styles.summaryLabel}>Format:</span>
+                                            <span className={styles.summaryValue} style={{ textTransform: 'capitalize' }}>{type}</span>
+                                        </div>
+                                        <div className={styles.summaryItem}>
+                                            <span className={styles.summaryLabel}>Talimatınız:</span>
+                                            <span className={styles.summaryValue}>{userPrompt || "Yaratıcılık yapay zekaya bırakıldı"}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div style={{ marginTop: '3rem', display: 'flex', justifyContent: 'center' }}>
+                                <button className={styles.btnPrimary} onClick={handleGenerateCampaign} style={{ padding: '1rem 3rem', fontSize: '1.1rem' }}>
+                                    <Sparkles size={20} /> Oluştur
                                 </button>
                             </div>
-                        </div>
+                        </>
                     )}
                 </div>
             )}
 
-            {/* Navigation Actions */}
-            <div className={styles.actions}>
-                <button className={styles.btnSecondary} onClick={handleBack}>
-                    {step === 1 ? 'İptal' : 'Geri'}
-                </button>
-
-                {step < 4 && (
-                    <button className={styles.btnPrimary} onClick={handleNext} disabled={!isStepValid()}>
-                        İleri <ArrowRight size={18} />
+            {!isGeneratingText && (
+                <div className={styles.actions}>
+                    <button className={styles.btnSecondary} onClick={handleBack}>
+                        {step === 1 ? 'İptal' : 'Geri'}
                     </button>
-                )}
-            </div>
+
+                    {step < 4 && (
+                        <button className={styles.btnPrimary} onClick={handleNext} disabled={!isStepValid()}>
+                            İleri <ArrowRight size={18} />
+                        </button>
+                    )}
+                </div>
+            )}
         </div>
     );
 }

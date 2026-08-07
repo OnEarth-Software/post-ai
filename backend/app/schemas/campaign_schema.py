@@ -1,5 +1,5 @@
 import uuid
-from typing import Optional
+from typing import Optional, List
 from pydantic import BaseModel
 
 class CampaignInfo(BaseModel):
@@ -15,8 +15,8 @@ class CampaignTextGenerateRequest(BaseModel):
     image_url: str
 
 class CampaignTextGenerateResponse(BaseModel):
-    generated_text: str
     slogan: str
+    subtext: str
 
 class CampaignCreateRequest(BaseModel):
     product_id: uuid.UUID
@@ -24,7 +24,9 @@ class CampaignCreateRequest(BaseModel):
     platform: str
     type: str
     user_prompt: str
-    generated_text: str
+    slogan: str
+    subtext: str
+    
 
 class CampaignResponse(BaseModel):
     id: uuid.UUID
@@ -35,7 +37,42 @@ class CampaignResponse(BaseModel):
     type: str
     user_prompt: Optional[str] = None
     system_prompt: str
-    generated_text: Optional[str] = None
+    slogan: Optional[str] = None
+    subtext: Optional[str] = None
 
     class Config:
         from_attributes = True
+
+from datetime import datetime
+
+class CampaignResultBase(BaseModel):
+    id: uuid.UUID
+    image_url: str
+    created_at: datetime
+    class Config:
+        from_attributes = True
+
+class CampaignProductBase(BaseModel):
+    id: uuid.UUID
+    name: str
+    image_url: str
+    class Config:
+        from_attributes = True
+
+class CampaignListResponse(BaseModel):
+    id: uuid.UUID
+    goal: str
+    platform: str
+    type: str
+    slogan: Optional[str] = None
+    subtext: Optional[str] = None
+    created_at: datetime
+    product: CampaignProductBase
+    results: List[CampaignResultBase] = []
+
+    class Config:
+        from_attributes = True
+
+class CampaignDetailResponse(CampaignListResponse):
+    user_prompt: Optional[str] = None
+    system_prompt: str

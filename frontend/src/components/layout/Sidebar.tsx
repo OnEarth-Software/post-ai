@@ -27,7 +27,6 @@ const menuItems = [
     { name: 'Dashboard', path: '/dashboard', icon: LayoutGrid },
     { name: 'Products', path: '/dashboard/products', icon: Package },
     { name: 'Campaigns', path: '/dashboard/campaigns', icon: Megaphone },
-    { name: 'AI Studio', path: '/dashboard/ai-studio', icon: BrainCircuit },
     { name: 'Assets', path: '/dashboard/assets', icon: Folder },
     { name: 'Analytics', path: '/dashboard/analytics', icon: BarChart3 },
     { name: 'Billing', path: '/dashboard/billing', icon: CreditCard },

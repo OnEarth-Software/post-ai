@@ -17,9 +17,13 @@ class Campaign(Base):
     platform = Column(String, nullable=False)
     type = Column(String, nullable=False)
     user_prompt = Column(String, nullable=True)
-    system_prompt = Column(String, nullable=False)
-    generated_text = Column(String, nullable=True)
+    system_prompt = Column(String, nullable=True)
+    
+    slogan = Column(String, nullable=True)
+    subtext = Column(String, nullable=True)
+    
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     product = relationship("Product")
     product_analyze = relationship("ProductAnalyze")
+    results = relationship("CampaignResult", back_populates="campaign", cascade="all, delete-orphan")

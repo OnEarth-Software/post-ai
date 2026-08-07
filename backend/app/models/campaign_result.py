@@ -15,4 +15,4 @@ class CampaignResult(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     # İlişki
-    campaign = relationship("Campaign")
+    campaign = relationship("Campaign", back_populates="results")

@@ -1,0 +1,328 @@
+/* Light/Emerald Theme for Campaigns */
+.container {
+    padding: 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
+    font-family: 'Inter', sans-serif;
+    animation: fadeIn 0.4s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.loadingContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 50vh;
+    color: #64748b;
+    gap: 1rem;
+}
+
+.loadingIcon {
+    animation: spin 1s linear infinite;
+    color: #059669; /* Emerald */
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.pageHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 2.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.headerText {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.pageTitle {
+    font-size: 2.25rem;
+    font-weight: 800;
+    color: #0f172a;
+    margin: 0;
+    letter-spacing: -0.02em;
+}
+
+.textGradient {
+    background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.pageSubtitle {
+    color: #64748b;
+    margin: 0;
+    font-size: 1.05rem;
+}
+
+.headerControls {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-top: 0.5rem;
+}
+
+.searchWrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.searchIcon {
+    position: absolute;
+    left: 1rem;
+    color: #94a3b8;
+    transition: color 0.2s ease;
+}
+
+.searchInput {
+    padding: 0.75rem 1rem 0.75rem 2.75rem;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    background: #f8fafc;
+    font-size: 0.95rem;
+    width: 280px;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    outline: none;
+    color: #1e293b;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+}
+
+.searchInput:focus {
+    width: 320px;
+    border-color: #059669;
+    background: white;
+    box-shadow: 0 0 0 4px rgba(5, 150, 105, 0.1);
+}
+
+.searchInput:focus + .searchIcon {
+    color: #059669;
+}
+
+.searchInput::placeholder {
+    color: #94a3b8;
+}
+
+.emptyState {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: #ffffff;
+    border: 1px dashed #cbd5e1;
+    border-radius: 24px;
+    padding: 4rem 2rem;
+    text-align: center;
+    margin-top: 2rem;
+    box-shadow: 0 4px 20px -5px rgba(0, 0, 0, 0.02);
+}
+
+.emptyIconWrapper {
+    color: #059669;
+    background: #ecfdf5;
+    padding: 1.5rem;
+    border-radius: 50%;
+    margin-bottom: 1.5rem;
+    border: 1px solid #d1fae5;
+}
+
+.emptyState h2 {
+    color: #0f172a;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0 0 0.5rem 0;
+}
+
+.emptyState p {
+    color: #64748b;
+    margin: 0 0 1.5rem 0;
+    max-width: 400px;
+    line-height: 1.5;
+}
+
+.primaryButton {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    color: white;
+    border: none;
+    padding: 0.875rem 2rem;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(5, 150, 105, 0.2);
+}
+
+.primaryButton:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(5, 150, 105, 0.3);
+}
+
+.campaignGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1.5rem;
+}
+
+.campaignCard {
+    background: #ffffff;
+    border-radius: 20px;
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 4px 15px -5px rgba(0, 0, 0, 0.05);
+}
+
+.campaignCard:hover {
+    transform: translateY(-6px);
+    border-color: #10b981;
+    box-shadow: 0 12px 30px -10px rgba(16, 185, 129, 0.2);
+}
+
+.cardImageContainer {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    background: #f8fafc;
+    overflow: hidden;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.placeholderImage {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #94a3b8;
+    gap: 0.5rem;
+    font-weight: 500;
+}
+
+.cardOverlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    backdrop-filter: blur(4px);
+}
+
+.campaignCard:hover .cardOverlay {
+    opacity: 1;
+}
+
+.viewText {
+    color: #059669;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: 24px;
+    background: #ecfdf5;
+    border: 1px solid #10b981;
+    transform: translateY(15px);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 4px 10px rgba(16, 185, 129, 0.15);
+}
+
+.campaignCard:hover .viewText {
+    transform: translateY(0);
+}
+
+.cardContent {
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.cardBadges {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.badge {
+    background: #f1f5f9;
+    color: #475569;
+    padding: 0.35rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.badgeOutline {
+    border: 1px solid #e2e8f0;
+    color: #64748b;
+    padding: 0.35rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    background: #ffffff;
+}
+
+.cardTitle {
+    color: #0f172a;
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin: 0 0 0.5rem 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.cardGoal {
+    color: #64748b;
+    font-size: 0.85rem;
+    margin: 0 0 1rem 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    line-height: 1.5;
+    flex: 1;
+}
+
+.cardFooter {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid #f1f5f9;
+    padding-top: 1.25rem;
+    margin-top: auto;
+}
+
+.dateInfo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #94a3b8;
+    font-size: 0.85rem;
+    font-weight: 500;
+}

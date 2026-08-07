@@ -19,21 +19,36 @@ def generate_product_campaing_text(
     image_url = data.get("image_url")
 
     prompt_text = f"""
-        Sen yaratıcı bir dijital pazarlama uzmanısın.
-        Aşağıda ürünün yapay zeka analiz sonuçları, kullanıcının kampanya bilgileri ve ÜRÜNÜN FOTOĞRAFI yer alıyor.
-        Lütfen fotoğrafa detaylıca bakarak ve analiz verilerini kullanarak harika bir pazarlama metni oluştur.
-        
-        Senden beklentim JSON formatında dönmen:
-        1) "slogan": Çok vurucu, kısa bir ANA SLOGAN. (Görselin üzerine yazılacak olan budur)
-        2) "description": Bu sloganı destekleyen, ürünü öne çıkaran 2-3 cümlelik akıcı bir AÇIKLAMA. İstersen ufak 2 3 madde'de verebilirsin.
-        
-        Lütfen metinde herhangi bir emoji, indirim, fiyat veya kampanya oranı KULLANMA.
-        Eğer renklerden bahsedeceksen, KESİNLİKLE HEX kodu (#10b981 gibi) kullanma; bunun yerine rengin adını (örn: zümrüt yeşili, beyaz vb.) betimleyerek kullan.
-        Sadece JSON objesi döndür. Ekstra hiçbir giriş/çıkış cümlesi kullanma.
-        
+        Sen deneyimli bir pazarlama metin yazarı ve marka iletişimi uzmanısın.
+
+        Aşağıda ürünün yapay zeka analiz sonuçları, kampanya bilgileri ve ürünün görseli bulunuyor.
+        Ürünün görselini dikkatlice incele ve analiz verilerini birlikte değerlendirerek profesyonel bir pazarlama metni oluştur.
+
+        Kurallar:
+        - Ürünün öne çıkan özelliklerini ve sunduğu değeri vurgula.
+        - Metin doğal, akıcı ve sosyal medyada etkileşim alacak tarzda olsun.
+        - Gerekiyorsa ürünün tasarımını, malzemesini, kullanım alanını ve hedef kitlesini görselden çıkarım yaparak metne yansıt.
+        - Fiyat, indirim, kampanya oranı veya "hemen satın al" gibi agresif satış ifadeleri kullanma.
+        - Renklerden bahsederken HEX kodu kullanma; yalnızca doğal renk isimleri kullan.
+        - Görselde kesin olarak görülmeyen özellikleri uydurma.
+        - Marka adı analiz bilgilerinde veya görselde yer almıyorsa marka ismi üretme.
+
+        ÖNEMLİ KURALLAR (Görsel Tasarımı İçin):
+        - `slogan`: Görselin en dikkat çekici yerine büyük puntoyla yazılacak, maksimum 3-4 kelimelik çok vurucu bir başlık. (Örn: "ENERJİNİ ZAMANA YANSIT!")
+        - `subtext`: Görselde sloganın altına daha küçük yazılacak, 1-2 cümlelik estetik ve tamamlayıcı bir tasarım yazısı. (Örn: "Sporun dinamizmi, tarzının imzası. Her anına eşlik eder.")
+
+        Aşağıdaki JSON formatında cevap ver:
+
+        {{
+        "slogan": "Çok kısa ve vurucu slogan",
+        "subtext": "1-2 cümlelik kısa tasarım yazısı"
+        }}
+
+        Sadece JSON döndür. Açıklama veya başka metin ekleme.
+
         Ürün Analizi:
         {json.dumps(analysis_result, ensure_ascii=False)}
-        
+
         Kampanya Bilgileri:
         {json.dumps(campaign_info, ensure_ascii=False)}
     """
@@ -69,15 +84,16 @@ def generate_product_campaing_text(
         parsed_json = json.loads(raw_content)
         
         slogan = parsed_json.get("slogan", "Şıklığı Keşfet!")
-        
-        # Yapay zeka bazen 'description' yerine 'generated_text' anahtarını kullanabilir
-        description = parsed_json.get("description", parsed_json.get("generated_text", ""))
+        subtext = parsed_json.get("subtext", "")
         
         return {
             "slogan": slogan,
-            "generated_text": f"{slogan}\n\n{description}"
+            "subtext": subtext
         }
-
+        
     except Exception as e:
         print(f"Pazarlama metni üretimi sırasında hata: {e}")
-        return "Şıklığı Keşfet!"
+        return {
+            "slogan": "Şıklığı Keşfet!",
+            "subtext": ""
+        }
