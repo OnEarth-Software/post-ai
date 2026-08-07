@@ -41,25 +41,29 @@ def generate_product_campaign_image(
 
     size = "1024x1792" if campaign_type.lower() == "story" else "1024x1024"
 
-   
-    prompt_text = f"""
-    Create a highly aesthetic marketing image for {platform}. 
-    The product is a {category}. 
-    Style: {style}. 
-    Marketing vibe: {marketing_style}. 
-    Incorporate the following text EXACTLY as written in an artistic, bold, and readable typography integrated into the design: 
-    "{slogan}"
-    "{subtext}"
-    The image should look like a high-end commercial advertisement.
-    Reference Image URL to base the design on: {image_url}
-    """
-    
-    
-    if user_prompt:
-        prompt_text += f"\n\nAdditional User Instruction:\n{user_prompt}"
+    prompt_data = {
+        "category": category,
+        "style": style,
+        "colors": colors,
+        "audience": audience,
+        "marketing_style": marketing_style,
+        "goal": goal,
+        "platform": platform,
+        "type": campaign_type,
+        "user_prompt": user_prompt,
+        "system_prompt": system_prompt,
+        "slogan": slogan,
+        "subtext": subtext,
+        "reference_image_url": image_url
+    }
 
-    if system_prompt:
-        prompt_text += f"\n\nSystem Constraints / Rules:\n{system_prompt}"
+    prompt_text = f"""
+    Create a highly aesthetic marketing image based on the following configuration.
+    Incorporate the 'slogan' and 'subtext' EXACTLY as written in an artistic, bold, and readable typography integrated into the design.
+    The image should look like a high-end commercial advertisement.
+    
+    {json.dumps(prompt_data, indent=2, ensure_ascii=False)}
+    """
 
     try:
         r = requests.get(image_url)
