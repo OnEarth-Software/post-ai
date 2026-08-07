@@ -104,7 +104,32 @@ export default function GenerateCampaignPage() {
 
             if (generateResponse.ok) {
                 const generateData = await generateResponse.json();
-                setGeneratedText(generateData.generated_text);
+                
+                // Üretilen metni aldıktan sonra veritabanına kaydetmek için create endpointine istek at
+                const createPayload = {
+                    product_id: id,
+                    goal: goal === 'custom' ? customGoal : goal,
+                    platform: platform,
+                    type: type,
+                    user_prompt: userPrompt,
+                    generated_text: generateData.generated_text
+                };
+
+                const createResponse = await fetch(`${apiUrl}/campaigns/create`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(createPayload)
+                });
+
+                if (createResponse.ok) {
+                    setGeneratedText(generateData.generated_text);
+                } else {
+                    console.error("Kampanya kaydedilemedi.");
+                    setGeneratedText("Kampanya üretildi fakat veritabanına kaydedilemedi.");
+                }
             }
             else {
                 console.error("Yapay zeka metni üretemedi.");
