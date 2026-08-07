@@ -16,6 +16,9 @@ def generate_campaign_text_endpoint(
     Veritabanına kayıt işlemi yapmaz (Ekip arkadaşı tarafından eklenecek).
     """
     # Gelen pydantic modelini dictionary'e çevirip yapay zeka servisine yolluyoruz
-    generated_text = generate_product_campaing_text(request.model_dump())
+    ai_result = generate_product_campaing_text(request.model_dump())
     
-    return CampaignTextGenerateResponse(generated_text=generated_text)
+    return CampaignTextGenerateResponse(
+        slogan=ai_result["slogan"],
+        generated_text=ai_result["generated_text"]
+    )

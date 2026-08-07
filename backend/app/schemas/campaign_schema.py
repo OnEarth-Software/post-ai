@@ -13,3 +13,4 @@ class CampaignTextGenerateRequest(BaseModel):
 
 class CampaignTextGenerateResponse(BaseModel):
     generated_text: str
+    slogan: str

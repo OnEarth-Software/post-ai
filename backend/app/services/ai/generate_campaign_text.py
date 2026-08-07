@@ -21,10 +21,15 @@ def generate_product_campaing_text(
     prompt_text = f"""
         Sen yaratıcı bir dijital pazarlama uzmanısın.
         Aşağıda ürünün yapay zeka analiz sonuçları, kullanıcının kampanya bilgileri ve ÜRÜNÜN FOTOĞRAFI yer alıyor.
-        Lütfen fotoğrafa detaylıca bakarak ve analiz verilerini kullanarak; görsel üzerinde yer alacak kısa, vurucu ve dikkat çekici bir pazarlama yazısı (slogan/başlık) üret.
+        Lütfen fotoğrafa detaylıca bakarak ve analiz verilerini kullanarak harika bir pazarlama metni oluştur.
         
-        Lütfen metinde herhangi bir indirim, fiyat veya kampanya oranı KULLANMA.
-        Sadece pazarlama metnini döndür, ekstra hiçbir açıklama, başlık veya tırnak işareti kullanma.
+        Senden beklentim JSON formatında dönmen:
+        1) "slogan": Çok vurucu, kısa bir ANA SLOGAN. (Görselin üzerine yazılacak olan budur)
+        2) "description": Bu sloganı destekleyen, ürünü öne çıkaran 2-3 cümlelik akıcı bir AÇIKLAMA. İstersen ufak 2 3 madde'de verebilirsin.
+        
+        Lütfen metinde herhangi bir emoji, indirim, fiyat veya kampanya oranı KULLANMA.
+        Eğer renklerden bahsedeceksen, KESİNLİKLE HEX kodu (#10b981 gibi) kullanma; bunun yerine rengin adını (örn: zümrüt yeşili, beyaz vb.) betimleyerek kullan.
+        Sadece JSON objesi döndür. Ekstra hiçbir giriş/çıkış cümlesi kullanma.
         
         Ürün Analizi:
         {json.dumps(analysis_result, ensure_ascii=False)}
@@ -55,11 +60,23 @@ def generate_product_campaing_text(
                     "content": message_content
                 }
             ],
-            max_tokens=150,
-            temperature=0.7 
+            max_tokens=300,
+            temperature=0.7,
+            response_format={ "type": "json_object" }
         )
-        marketing_copy = response.choices[0].message.content.strip().strip('"')
-        return marketing_copy
+        
+        raw_content = response.choices[0].message.content.strip()
+        parsed_json = json.loads(raw_content)
+        
+        slogan = parsed_json.get("slogan", "Şıklığı Keşfet!")
+        
+        # Yapay zeka bazen 'description' yerine 'generated_text' anahtarını kullanabilir
+        description = parsed_json.get("description", parsed_json.get("generated_text", ""))
+        
+        return {
+            "slogan": slogan,
+            "generated_text": f"{slogan}\n\n{description}"
+        }
 
     except Exception as e:
         print(f"Pazarlama metni üretimi sırasında hata: {e}")
