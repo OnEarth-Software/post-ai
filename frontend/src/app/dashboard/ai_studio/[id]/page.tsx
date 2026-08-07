@@ -56,7 +56,8 @@ export default function AIStudioPage({ params }: { params: { id: string } }) {
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `campaign_${campaign.id}.png`;
+            const productName = campaign.product?.name ? campaign.product.name.replace(/\s+/g, '_').toLowerCase() : campaign.id;
+            a.download = `campaign_${productName}.png`;
             document.body.appendChild(a);
             a.click();
             window.URL.revokeObjectURL(url);
