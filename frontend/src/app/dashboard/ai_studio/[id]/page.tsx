@@ -6,6 +6,13 @@ import Image from 'next/image';
 import { Download, ArrowLeft, Loader2, Sparkles, Image as ImageIcon, Zap, Type, Crosshair, Layers } from 'lucide-react';
 import styles from './ai_studio.module.css';
 
+const formatCapitalize = (text: string) => {
+    if (!text) return '';
+    const firstChar = text.charAt(0);
+    const upperFirst = firstChar === 'i' ? 'I' : firstChar.toUpperCase();
+    return upperFirst + text.slice(1).toLowerCase();
+};
+
 export default function AIStudioPage({ params }: { params: { id: string } }) {
     const router = useRouter();
     const { id } = params;
@@ -153,15 +160,15 @@ export default function AIStudioPage({ params }: { params: { id: string } }) {
                         <div className={styles.detailsGrid}>
                             <div className={styles.detailItem}>
                                 <span className={styles.detailLabel}>Platform</span>
-                                <span className={styles.detailValue}>{campaign.platform}</span>
+                                <span className={styles.detailValue}>{formatCapitalize(campaign.platform)}</span>
                             </div>
                             <div className={styles.detailItem}>
                                 <span className={styles.detailLabel}>Format</span>
-                                <span className={styles.detailValue}>{campaign.type}</span>
+                                <span className={styles.detailValue}>{formatCapitalize(campaign.type)}</span>
                             </div>
                             <div className={styles.detailItem}>
                                 <span className={styles.detailLabel}>Hedef</span>
-                                <span className={styles.detailValue}>{campaign.goal}</span>
+                                <span className={styles.detailValue}>{formatCapitalize(campaign.goal)}</span>
                             </div>
                             {campaign.user_prompt && (
                                 <div className={styles.detailItemFull}>
