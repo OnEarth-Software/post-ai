@@ -74,6 +74,32 @@ export default function AIStudioPage({ params }: { params: { id: string } }) {
         }
     };
 
+    const handleToggleSocial = async (resultId: string, currentStatus: boolean) => {
+        try {
+            const token = localStorage.getItem('token');
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+            const response = await fetch(`${apiUrl}/campaign-results/${resultId}/social`, {
+                method: 'PATCH',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ is_public: !currentStatus })
+            });
+
+            if (response.ok) {
+                setCampaign((prev: any) => ({
+                    ...prev,
+                    results: prev.results.map((r: any) => 
+                        r.id === resultId ? { ...r, is_public: !currentStatus } : r
+                    )
+                }));
+            }
+        } catch (error) {
+            console.error('Paylaşım durumu değiştirilemedi:', error);
+        }
+    };
+
     if (loading) {
         return (
             <div className={styles.loadingContainer}>
@@ -132,6 +158,30 @@ export default function AIStudioPage({ params }: { params: { id: string } }) {
                             <div className={styles.resultBadge}>
                                 <Zap size={14} /> AI Tarafından Üretildi
                             </div>
+                            {hasResult && (
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    <span style={{ fontSize: '12px', color: '#888' }}>Sosyalde Paylaş</span>
+                                    <label style={{ position: 'relative', display: 'inline-block', width: '40px', height: '20px' }}>
+                                        <input 
+                                            type="checkbox" 
+                                            checked={campaign.results[0].is_public || false}
+                                            onChange={() => handleToggleSocial(campaign.results[0].id, campaign.results[0].is_public)}
+                                            style={{ opacity: 0, width: 0, height: 0 }}
+                                        />
+                                        <span style={{
+                                            position: 'absolute', cursor: 'pointer', top: 0, left: 0, right: 0, bottom: 0,
+                                            backgroundColor: campaign.results[0].is_public ? '#4ade80' : '#333',
+                                            transition: '.4s', borderRadius: '34px'
+                                        }}>
+                                            <span style={{
+                                                position: 'absolute', content: '""', height: '16px', width: '16px', left: '2px', bottom: '2px',
+                                                backgroundColor: 'white', transition: '.4s', borderRadius: '50%',
+                                                transform: campaign.results[0].is_public ? 'translateX(20px)' : 'translateX(0)'
+                                            }} />
+                                        </span>
+                                    </label>
+                                </div>
+                            )}
                         </div>
 
                         <div className={styles.resultImageWrapper}>
