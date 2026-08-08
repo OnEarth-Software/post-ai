@@ -55,7 +55,7 @@ export default function AIStudioPage({ params }: { params: { id: string } }) {
 
     const handleDownload = async () => {
         if (!campaign || !campaign.results || campaign.results.length === 0) return;
-        
+
         try {
             const imageUrl = campaign.results[0].image_url;
             const response = await fetch(imageUrl);
@@ -64,7 +64,7 @@ export default function AIStudioPage({ params }: { params: { id: string } }) {
             const a = document.createElement('a');
             a.href = url;
             const productName = campaign.product?.name ? campaign.product.name.replace(/\s+/g, '_').toLowerCase() : campaign.id;
-            a.download = `campaign_${productName}.png`;
+            a.download = `AdDesignAI_${productName}.png`;
             document.body.appendChild(a);
             a.click();
             window.URL.revokeObjectURL(url);
@@ -115,7 +115,7 @@ export default function AIStudioPage({ params }: { params: { id: string } }) {
                         <p className={styles.subtitle}>{campaign.product?.name || 'Ürün'} için oluşturulan kampanya sonuçları.</p>
                     </div>
                 </div>
-                
+
                 {hasResult && (
                     <button onClick={handleDownload} className={styles.primaryButton}>
                         <Download size={18} />
@@ -133,12 +133,12 @@ export default function AIStudioPage({ params }: { params: { id: string } }) {
                                 <Zap size={14} /> AI Tarafından Üretildi
                             </div>
                         </div>
-                        
+
                         <div className={styles.resultImageWrapper}>
                             {hasResult ? (
-                                <Image 
-                                    src={campaign.results[0].image_url} 
-                                    alt="AI Generated Campaign" 
+                                <Image
+                                    src={campaign.results[0].image_url}
+                                    alt="AI Generated Campaign"
                                     fill
                                     style={{ objectFit: 'contain' }}
                                     className={styles.resultImage}
@@ -182,11 +182,11 @@ export default function AIStudioPage({ params }: { params: { id: string } }) {
                     <div className={styles.glassCard}>
                         <h3 className={styles.cardTitle}><Type size={18} /> Yapay Zeka Metinleri</h3>
                         <div className={styles.sloganBox}>
-                            <strong>Slogan:</strong><br/> "{campaign.slogan || 'Slogan bulunamadı'}"
+                            <strong>Slogan:</strong><br /> "{campaign.slogan || 'Slogan bulunamadı'}"
                             {campaign.subtext && (
                                 <>
-                                    <br/><br/>
-                                    <strong>Alt Başlık:</strong><br/> "{campaign.subtext}"
+                                    <br /><br />
+                                    <strong>Alt Başlık:</strong><br /> "{campaign.subtext}"
                                 </>
                             )}
                         </div>
@@ -196,9 +196,9 @@ export default function AIStudioPage({ params }: { params: { id: string } }) {
                         <h3 className={styles.cardTitle}><ImageIcon size={18} /> Orijinal Ürün Görseli</h3>
                         <div className={styles.originalImageSmallWrapper}>
                             {campaign.product?.image_url ? (
-                                <Image 
-                                    src={campaign.product.image_url} 
-                                    alt="Original Product" 
+                                <Image
+                                    src={campaign.product.image_url}
+                                    alt="Original Product"
                                     fill
                                     style={{ objectFit: 'contain' }}
                                 />

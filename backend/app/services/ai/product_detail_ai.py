@@ -23,7 +23,7 @@ def analyze_product_image_with_ai(
 
 
     response = client.chat.completions.create(
-            model="gpt-4o", # Vision (görsel) destekli model
+            model="gpt-4o-mini", # Vision (görsel) destekli model
             messages=[
                 {
                     "role": "user",
@@ -33,6 +33,7 @@ def analyze_product_image_with_ai(
                             "type": "image_url",
                             "image_url": {
                                 "url": image_url,
+                                "detail":"low"
                             },
                         },
                     ],

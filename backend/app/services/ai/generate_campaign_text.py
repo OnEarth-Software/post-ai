@@ -63,12 +63,15 @@ def generate_product_campaing_text(
     if image_url:
         message_content.append({
             "type": "image_url",
-            "image_url": {"url": image_url}
+            "image_url": {
+                "url": image_url,
+                "detail" : "low"
+            }
         })
 
     try:
         response = client.chat.completions.create(
-            model="gpt-4o", 
+            model="gpt-4o-mini", 
             messages=[
                 {
                     "role": "user",

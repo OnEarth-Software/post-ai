@@ -59,7 +59,8 @@ def generate_product_campaign_image(
 
     prompt_text = f"""
     Create a highly aesthetic marketing image based on the following configuration.
-    Incorporate the 'slogan' and 'subtext' EXACTLY as written in an artistic, bold, and readable typography integrated into the design.
+    Incorporate the 'slogan' and 'subtext' EXACTLY as written in an artistic, bold, and readable typography 
+    integrated into the design.
     The image should look like a high-end commercial advertisement.
     
     {json.dumps(prompt_data, indent=2, ensure_ascii=False)}
