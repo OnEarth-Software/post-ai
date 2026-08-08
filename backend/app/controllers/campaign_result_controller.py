@@ -57,12 +57,12 @@ def generate_and_save_campaign_image(
         unique_filename = f"campaign_{campaign.id}_{uuid.uuid4()}.png"
 
         # Mevcut product-images bucket'ına (veya campaigns-images varsa oraya) yüklüyoruz
-        supabase.storage.from_("product-images").upload(
+        supabase.storage.from_("campaign-images").upload(
             path=unique_filename,
             file=img_bytes,
             file_options={"content-type": "image/png"}
         )
-        final_url = supabase.storage.from_("product-images").get_public_url(unique_filename)
+        final_url = supabase.storage.from_("campaign-images").get_public_url(unique_filename)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Supabase'e görsel yüklenirken hata oluştu: {e}")
 
