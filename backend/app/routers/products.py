@@ -72,4 +72,19 @@ def update_product_analysis(
         update_data=update_data, 
         current_user=current_user
     )
+
+@router.delete("/{product_id}")
+def delete_product(
+    product_id: uuid.UUID,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Belirli bir ürünü (ve bağlı yapay zeka analizlerini, supabase storage resmini) siler.
+    """
+    return product_controller.delete_product(
+        db=db, 
+        product_id=product_id, 
+        current_user=current_user
+    )
     
