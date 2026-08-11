@@ -74,3 +74,16 @@ def mark_notification_as_read(db: Session, notification_id: str, current_user: U
     notification.is_read = True
     db.commit()
     return {"message": "Okundu işaretlendi"}
+
+def delete_notification(db: Session, notification_id: str, current_user: User):
+    notification = db.query(Notification).filter(
+        Notification.id == notification_id,
+        Notification.user_id == current_user.id
+    ).first()
+    
+    if not notification:
+        raise HTTPException(status_code=404, detail="Bildirim bulunamadı.")
+        
+    db.delete(notification)
+    db.commit()
+    return {"message": "Bildirim silindi"}

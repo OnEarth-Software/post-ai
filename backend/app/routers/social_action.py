@@ -31,3 +31,12 @@ def read_notification_endpoint(
     current_user: User = Depends(get_current_user)
 ):
     return mark_notification_as_read(db=db, notification_id=notification_id, current_user=current_user)
+
+@router.delete("/notifications/{notification_id}")
+def delete_notification_endpoint(
+    notification_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    from app.controllers.social_action_controller import delete_notification
+    return delete_notification(db=db, notification_id=notification_id, current_user=current_user)

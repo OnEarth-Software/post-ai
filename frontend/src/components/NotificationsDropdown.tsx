@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from 'react';
-import { Bell } from 'lucide-react';
+import { Bell, X } from 'lucide-react';
 import styles from './NotificationsDropdown.module.css';
 
 export default function NotificationsDropdown() {
@@ -67,6 +67,26 @@ export default function NotificationsDropdown() {
         }
     };
 
+    const handleDeleteNotification = async (e: React.MouseEvent, id: string) => {
+        e.stopPropagation();
+        try {
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+            const token = localStorage.getItem('token');
+            const response = await fetch(`${apiUrl}/notifications/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            
+            if (response.ok) {
+                setNotifications(prev => prev.filter(n => n.id !== id));
+            }
+        } catch (error) {
+            console.error('Bildirim silinemedi:', error);
+        }
+    };
+
     return (
         <div className={styles.container} ref={dropdownRef}>
             <button 
@@ -101,6 +121,13 @@ export default function NotificationsDropdown() {
                                             {new Date(notif.created_at).toLocaleDateString()}
                                         </span>
                                     </div>
+                                    <button 
+                                        className={styles.deleteBtn}
+                                        onClick={(e) => handleDeleteNotification(e, notif.id)}
+                                        title="Sil"
+                                    >
+                                        <X size={14} />
+                                    </button>
                                 </div>
                             ))
                         )}
