@@ -18,5 +18,6 @@ class User(Base):
 
     plan_id = Column(UUID(as_uuid=True), ForeignKey("plans.id"), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
-
     plan = relationship("Plan")
+    likes = relationship("Like", back_populates="user", cascade="all, delete-orphan")
+    notifications = relationship("Notification", foreign_keys="[Notification.user_id]", back_populates="user", cascade="all, delete-orphan")

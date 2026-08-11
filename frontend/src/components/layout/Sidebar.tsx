@@ -22,6 +22,7 @@ import {
     X,
     Globe
 } from 'lucide-react';
+import NotificationsDropdown from '../NotificationsDropdown';
 import styles from './Sidebar.module.css';
 
 const menuItems = [
@@ -143,6 +144,9 @@ export default function Sidebar() {
                         <div className={styles.userInfo}>
                             <span className={styles.userName}>{user.name} {user.surname}</span>
                             <span className={styles.userEmail}>{user.email}</span>
+                        </div>
+                        <div style={{ marginLeft: 'auto' }}>
+                            <NotificationsDropdown />
                         </div>
                     </div>
                 )}

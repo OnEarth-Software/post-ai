@@ -22,3 +22,5 @@ class SocialFeedItemResponse(BaseModel):
     created_at: datetime
     campaign_goal: Optional[str] = None
     campaign_type: Optional[str] = None
+    likes_count: int = 0
+    is_liked_by_me: bool = False
