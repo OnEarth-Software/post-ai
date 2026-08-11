@@ -318,7 +318,7 @@ export default function ProductsPage() {
                         </div>
                         <div className={styles.modalBody}>
                             <p>Are you sure you want to delete this product?</p>
-                            <p className={styles.modalWarning}>This action cannot be undone. All associated AI analysis and generated campaign visuals will also be permanently deleted.</p>
+                            <p className={styles.modalWarning}>This action cannot be undone. Associated AI analysis will be deleted, but generated campaign visuals (Assets) will be kept safely.</p>
                         </div>
                         <div className={styles.modalFooter}>
                             <button 

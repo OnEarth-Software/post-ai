@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers import auth, plans, products, campaign, campaign_result, social_action
+from app.routers import auth, plans, products, campaign, campaign_result, social_action, assets
 import os
 
 app = FastAPI(title="Post Generate AI API")
@@ -22,6 +22,7 @@ app.include_router(products.router, prefix="/products", tags=["products"])
 app.include_router(campaign.router, prefix="/campaigns", tags=["campaigns"])
 app.include_router(campaign_result.router, prefix="/campaign-results", tags=["campaign-results"])
 app.include_router(social_action.router, tags=["social-action"])
+app.include_router(assets.router, prefix="/assets", tags=["assets"])
 
 @app.get("/")
 def read_root():

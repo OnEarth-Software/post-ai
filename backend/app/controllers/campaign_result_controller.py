@@ -79,6 +79,15 @@ def generate_and_save_campaign_image(
     )
     
     db.add(new_result)
+    
+    # Yeni Asset (Kalıcı görsel) oluştur
+    from app.models.asset import Asset
+    new_asset = Asset(
+        user_id=current_user.id,
+        image_url=final_url
+    )
+    db.add(new_asset)
+    
     db.commit()
     db.refresh(new_result)
     

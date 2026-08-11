@@ -148,14 +148,11 @@ def delete_product(db: Session, product_id: uuid.UUID, current_user: User):
     
     files_to_remove = []
 
-    # 1. İlişkili Kampanyaları ve Kampanya Sonuçlarını (Resimler dahil) sil
+    # 1. İlişkili Kampanyaları ve Kampanya Sonuçlarını sil (Resimler Storage'da kalacak)
     campaigns = db.query(Campaign).filter(Campaign.product_id == product.id).all()
     for campaign in campaigns:
         results = db.query(CampaignResult).filter(CampaignResult.campaign_id == campaign.id).all()
         for res in results:
-            if res.image_url:
-                res_filename = res.image_url.split("/")[-1].split("?")[0]
-                files_to_remove.append(res_filename)
             db.delete(res)
         db.delete(campaign)
         
