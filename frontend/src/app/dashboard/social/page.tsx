@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { Globe, Package } from 'lucide-react';
+import { Globe, Package, Heart } from 'lucide-react';
 import styles from './social.module.css';
 
 export default function SocialFeedPage() {
@@ -37,6 +37,31 @@ export default function SocialFeedPage() {
         fetchFeed();
     }, []);
 
+    const handleToggleLike = async (e: any, resultId: string, index: number) => {
+        e.stopPropagation();
+        try {
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+            const token = localStorage.getItem('token');
+            const response = await fetch(`${apiUrl}/campaign-results/${resultId}/like`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            if (response.ok) {
+                const data = await response.json();
+                setFeed((prev) => {
+                    const newFeed = [...prev];
+                    newFeed[index] = { ...newFeed[index], is_liked_by_me: data.is_liked, likes_count: data.likes_count };
+                    return newFeed;
+                });
+            }
+        } catch (error) {
+            console.error("Beğeni işlemi başarısız", error);
+        }
+    };
+
+
     if (loading) {
         return (
             <div className={styles.loadingContainer}>
@@ -63,7 +88,7 @@ export default function SocialFeedPage() {
                 </div>
             ) : (
                 <div className={styles.grid}>
-                    {feed.map((item) => (
+                    {feed.map((item, index) => (
                         <div
                             key={item.id}
                             className={styles.card}
@@ -93,6 +118,13 @@ export default function SocialFeedPage() {
                                             </span>
                                         </div>
                                     </div>
+                                    <button 
+                                        className={`${styles.likeButton} ${item.is_liked_by_me ? styles.liked : ''}`}
+                                        onClick={(e) => handleToggleLike(e, item.id, index)}
+                                    >
+                                        <Heart size={20} fill={item.is_liked_by_me ? "currentColor" : "none"} />
+                                        <span className={styles.likeCount}>{item.likes_count || 0}</span>
+                                    </button>
                                 </div>
                             </div>
                         </div>

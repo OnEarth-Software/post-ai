@@ -11,7 +11,7 @@
     top: 0;
     left: 0;
     font-family: var(--font-inter), sans-serif;
-    /* overflow-y kaldırıldı, her şey sığacak */
+    z-index: 100;
 }
 
 /* Scrollbar özelleştirmesi (Sidebar için) */

@@ -29,11 +29,14 @@ def generate_campaign_image_endpoint(
 
 
 @router.get("/social/feed")
-def get_social_feed_endpoint(db: Session = Depends(get_db)):
+def get_social_feed_endpoint(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
     """
     Herkese açık (is_public=True) olan sosyal akışı getirir.
     """
-    return get_social_feed(db=db)
+    return get_social_feed(db=db, current_user=current_user)
 
     
 @router.patch("/{result_id}/social")

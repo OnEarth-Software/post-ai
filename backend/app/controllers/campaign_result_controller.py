@@ -113,21 +113,36 @@ def toggle_social_status(
     }
 
 def get_social_feed(
-    db: Session
+    db: Session,
+    current_user: User
 ):
+    from sqlalchemy import func
+    from app.models.like import Like
 
+    # Left outer join with Like to get counts and check user's like
     results = (
-        db.query(CampaignResult, Campaign, User)
+        db.query(
+            CampaignResult, 
+            Campaign, 
+            User,
+            func.count(Like.id).label('likes_count')
+        )
         .join(Campaign, CampaignResult.campaign_id == Campaign.id)
         .join(Product, Campaign.product_id == Product.id)
         .join(User, Product.user_id == User.id)
+        .outerjoin(Like, CampaignResult.id == Like.campaign_result_id)
         .filter(CampaignResult.is_public == True)
+        .group_by(CampaignResult.id, Campaign.id, User.id)
         .order_by(CampaignResult.created_at.desc())
         .all()
     )
     
+    # Check which ones the current user liked
+    user_likes = db.query(Like.campaign_result_id).filter(Like.user_id == current_user.id).all()
+    user_liked_ids = {like[0] for like in user_likes}
+    
     feed = []
-    for cam_res, cam, user in results:
+    for cam_res, cam, user, likes_count in results:
         feed.append(SocialFeedItemResponse(
             id=cam_res.id,
             image_url=cam_res.image_url,
@@ -135,7 +150,9 @@ def get_social_feed(
             product_name=cam.product.name if cam.product else "İsimsiz Ürün",
             created_at=cam_res.created_at,
             campaign_goal=cam.goal,
-            campaign_type=cam.type
+            campaign_type=cam.type,
+            likes_count=likes_count,
+            is_liked_by_me=cam_res.id in user_liked_ids
         ))
         
     return feed

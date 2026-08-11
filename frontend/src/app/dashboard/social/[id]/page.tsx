@@ -3,19 +3,13 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { ArrowLeft, Sparkles, X, Package, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft, Heart } from 'lucide-react';
 import styles from './detail.module.css';
 
 export default function SocialDetailPage({ params }: { params: { id: string } }) {
     const router = useRouter();
     const [item, setItem] = useState<any>(null);
     const [loading, setLoading] = useState(true);
-    
-    // Modal states
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [selectedProduct, setSelectedProduct] = useState<string | null>(null);
-    const [userProducts, setUserProducts] = useState<any[]>([]);
-    const [loadingProducts, setLoadingProducts] = useState(false);
 
     useEffect(() => {
         const fetchDetail = async () => {
@@ -43,29 +37,29 @@ export default function SocialDetailPage({ params }: { params: { id: string } })
         fetchDetail();
     }, [params.id]);
 
-    useEffect(() => {
-        if (isModalOpen && userProducts.length === 0) {
-            const fetchProducts = async () => {
-                setLoadingProducts(true);
-                try {
-                    const token = localStorage.getItem('token');
-                    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-                    const response = await fetch(`${apiUrl}/products/`, {
-                        headers: { 'Authorization': `Bearer ${token}` }
-                    });
-                    if (response.ok) {
-                        const data = await response.json();
-                        setUserProducts(data);
-                    }
-                } catch (error) {
-                    console.error('Ürünler yüklenirken hata:', error);
-                } finally {
-                    setLoadingProducts(false);
+    const handleToggleLike = async () => {
+        try {
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+            const token = localStorage.getItem('token');
+            const response = await fetch(`${apiUrl}/campaign-results/${item.id}/like`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`
                 }
-            };
-            fetchProducts();
+            });
+            if (response.ok) {
+                const data = await response.json();
+                setItem((prev: any) => ({
+                    ...prev,
+                    is_liked_by_me: data.is_liked,
+                    likes_count: data.likes_count
+                }));
+            }
+        } catch (error) {
+            console.error("Beğeni işlemi başarısız", error);
         }
-    }, [isModalOpen, userProducts.length]);
+    };
+
 
     if (loading) {
         return <div style={{ padding: '40px', textAlign: 'center', color: '#64748b' }}>Yükleniyor...</div>;
@@ -81,18 +75,6 @@ export default function SocialDetailPage({ params }: { params: { id: string } })
             </div>
         );
     }
-
-    const handleUseTemplate = () => {
-        setIsModalOpen(true);
-    };
-
-    const handleConfirmTemplate = () => {
-        if (!selectedProduct) return;
-        // The user requested NO BACKEND connection here, so we just log and close
-        console.log("Şablon seçilen ürünle kullanılacak:", selectedProduct);
-        setIsModalOpen(false);
-        alert("Şablon başarıyla seçilen ürüne uygulandı! (Demo Modu)");
-    };
 
     return (
         <div className={styles.container}>
@@ -130,78 +112,19 @@ export default function SocialDetailPage({ params }: { params: { id: string } })
                             </span>
                         </div>
                     </div>
-
-                    <div className={styles.actionSection}>
-                        <h3 className={styles.actionTitle}>Bu tasarımı beğendin mi?</h3>
-                        <p className={styles.actionDesc}>
-                            Bu görselin arka plan tarzını, renk paletini ve kompozisyonunu kendi ürünlerine tek tıkla uygulayabilirsin.
-                        </p>
-                        <button onClick={handleUseTemplate} className={styles.primaryButton}>
-                            <Sparkles size={20} /> Bu Şablonu Kullan
+                    
+                    <div className={styles.actionContainer}>
+                        <button 
+                            className={`${styles.likeButton} ${item.is_liked_by_me ? styles.liked : ''}`}
+                            onClick={handleToggleLike}
+                        >
+                            <Heart size={24} fill={item.is_liked_by_me ? "currentColor" : "none"} />
+                            <span className={styles.likeCount}>{item.likes_count || 0} Beğeni</span>
                         </button>
                     </div>
+
                 </div>
             </div>
-
-            {/* Template Selection Modal */}
-            {isModalOpen && (
-                <div className={styles.modalOverlay} onClick={() => setIsModalOpen(false)}>
-                    <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-                        <div className={styles.modalHeader}>
-                            <h2 className={styles.modalTitle}>Ürün Seçin</h2>
-                            <button onClick={() => setIsModalOpen(false)} className={styles.closeButton}>
-                                <X size={20} />
-                            </button>
-                        </div>
-
-                        <p style={{ color: '#64748b', marginBottom: '1.5rem' }}>
-                            Bu tasarım şablonunu hangi ürününüze uygulamak istiyorsunuz?
-                        </p>
-
-                        <div className={styles.productList}>
-                            {loadingProducts ? (
-                                <div style={{ padding: '20px', textAlign: 'center', color: '#64748b' }}>Ürünleriniz yükleniyor...</div>
-                            ) : userProducts.length === 0 ? (
-                                <div style={{ padding: '20px', textAlign: 'center', color: '#64748b' }}>Henüz kayıtlı bir ürününüz yok.</div>
-                            ) : (
-                                userProducts.map((prod) => (
-                                    <div 
-                                        key={prod.id} 
-                                        className={`${styles.productItem} ${selectedProduct === prod.id ? styles.selected : ''}`}
-                                        onClick={() => setSelectedProduct(prod.id)}
-                                    >
-                                        <div className={styles.productItemLeft}>
-                                            <div className={styles.productIcon}>
-                                                {prod.image_url ? (
-                                                    <Image src={prod.image_url} alt={prod.name} fill style={{ objectFit: 'cover', borderRadius: '12px' }} />
-                                                ) : (
-                                                    <Package size={20} />
-                                                )}
-                                            </div>
-                                            <div>
-                                                <p className={styles.productName}>{prod.name}</p>
-                                                <p className={styles.productDesc}>{prod.description || 'Açıklama bulunmuyor'}</p>
-                                            </div>
-                                        </div>
-                                        <CheckCircle2 size={24} className={styles.checkIcon} />
-                                    </div>
-                                ))
-                            )}
-                        </div>
-
-                        <div className={styles.modalAction}>
-                            <button 
-                                onClick={handleConfirmTemplate} 
-                                className={styles.primaryButton}
-                                style={{ width: 'auto', opacity: selectedProduct ? 1 : 0.5 }}
-                                disabled={!selectedProduct}
-                            >
-                                Seçimi Onayla
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
         </div>
     );
 }

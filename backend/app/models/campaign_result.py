@@ -17,3 +17,4 @@ class CampaignResult(Base):
 
     # İlişki
     campaign = relationship("Campaign", back_populates="results")
+    likes = relationship("Like", back_populates="campaign_result", cascade="all, delete-orphan")
