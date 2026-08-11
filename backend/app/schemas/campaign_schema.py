@@ -48,6 +48,7 @@ from datetime import datetime
 class CampaignResultBase(BaseModel):
     id: uuid.UUID
     image_url: str
+    is_public: bool = False
     created_at: datetime
     class Config:
         from_attributes = True

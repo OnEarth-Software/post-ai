@@ -19,7 +19,8 @@ import {
     LogOut,
     Sparkles,
     Menu,
-    X
+    X,
+    Globe
 } from 'lucide-react';
 import styles from './Sidebar.module.css';
 
@@ -28,6 +29,7 @@ const menuItems = [
     { name: 'Products', path: '/dashboard/products', icon: Package },
     { name: 'Campaigns', path: '/dashboard/campaigns', icon: Megaphone },
     { name: 'Assets', path: '/dashboard/assets', icon: Folder },
+    { name: 'Social', path: '/dashboard/social', icon: Globe },
     { name: 'Analytics', path: '/dashboard/analytics', icon: BarChart3 },
     { name: 'Billing', path: '/dashboard/billing', icon: CreditCard },
     { name: 'Settings', path: '/dashboard/settings', icon: Settings },
