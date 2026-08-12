@@ -13,6 +13,7 @@ class User(Base):
     surname = Column(String, nullable=False)
     password_hash = Column(String, nullable=False)
     email = Column(String, unique=True, index=True, nullable=False)
+    role = Column(String, default="user", nullable=False)
     is_2fa_enabled = Column(Boolean, default=False)
     two_factor_secret = Column(String, nullable=True)
 
