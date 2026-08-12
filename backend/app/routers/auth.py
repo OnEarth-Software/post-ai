@@ -42,7 +42,7 @@ def login_access_token(
         raise HTTPException(status_code=400, detail="Incorrect email or password")
     
     if user.is_2fa_enabled:
-        temp_token = create_access_token(user.id, expires_delta=timedelta(minutes=5))
+        temp_token = create_access_token(user.id, role=user.role, expires_delta=timedelta(minutes=5))
         return {
             "requires_2fa": True,
             "temp_token": temp_token
@@ -51,7 +51,7 @@ def login_access_token(
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     return {
         "access_token": create_access_token(
-            user.id, expires_delta=access_token_expires
+            user.id, role=user.role, expires_delta=access_token_expires
         ),
         "token_type": "bearer",
     }
@@ -75,7 +75,7 @@ def login_with_2fa(
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     return {
         "access_token": create_access_token(
-            user.id, expires_delta=access_token_expires
+            user.id, role=user.role, expires_delta=access_token_expires
         ),
         "token_type": "bearer",
     }

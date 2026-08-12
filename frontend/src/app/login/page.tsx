@@ -56,17 +56,12 @@ function LoginContent() {
         e.preventDefault();
         setLoading(true);
         try {
-            const formData = new URLSearchParams();
-            formData.append('username', email);
-            formData.append('password', password);
-            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-
-            const response = await fetch(`${apiUrl}/auth/login`, {
+            const response = await fetch(`/api/auth/login`, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
+                    'Content-Type': 'application/json'
                 },
-                body: formData
+                body: JSON.stringify({ username: email, password: password })
             });
 
             if (!response.ok) {
@@ -81,9 +76,12 @@ function LoginContent() {
                 setIs2faStep(true);
                 return;
             }
-
+            
+            // SECURITY TRADE-OFF: Storing in localStorage allows existing client-side data fetching to work
+            // but exposes the token to XSS. A full HttpOnly architecture would require proxying all API requests.
             localStorage.setItem('token', data.access_token);
             
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
             const userResponse = await fetch(`${apiUrl}/auth/me`, {
                 headers: { 'Authorization': `Bearer ${data.access_token}` }
             });
@@ -111,8 +109,7 @@ function LoginContent() {
         setError('');
 
         try {
-            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-            const response = await fetch(`${apiUrl}/auth/login/2fa`, {
+            const response = await fetch(`/api/auth/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ temp_token: tempToken, code: twoFactorCode })
@@ -124,8 +121,10 @@ function LoginContent() {
             }
 
             const data = await response.json();
+            
             localStorage.setItem('token', data.access_token);
             
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
             const userResponse = await fetch(`${apiUrl}/auth/me`, {
                 headers: { 'Authorization': `Bearer ${data.access_token}` }
             });
