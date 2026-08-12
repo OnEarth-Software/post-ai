@@ -1,8 +1,40 @@
 import React from 'react';
+import { cookies } from 'next/headers';
 import { Calendar, Download, Users, Megaphone, DollarSign, Sparkles, MoreVertical, Zap } from 'lucide-react';
 import styles from './dashboard.module.css';
 
-export default function AdminDashboardPage() {
+export default async function AdminDashboardPage() {
+    const cookieStore = cookies();
+    const token = cookieStore.get('token')?.value;
+
+    let stats: any = {
+        total_users: 1248, // mock fallback
+        total_campaigns: 8420,
+        users_change_percentage: 14.2,
+        campaigns_change_percentage: 5.8,
+        active_users: [],
+        daily_campaigns: []
+    };
+
+    if (token) {
+        try {
+            let apiUrl = process.env.API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+            if (apiUrl.includes('localhost') || apiUrl.includes('127.0.0.1')) {
+                apiUrl = 'http://backend:8000';
+            }
+            const response = await fetch(`${apiUrl}/admin/dashboard-stats`, {
+                headers: { 'Authorization': `Bearer ${token}` },
+                cache: 'no-store'
+            });
+
+            if (response.ok) {
+                stats = await response.json();
+            }
+        } catch (err) {
+            console.error("Failed to fetch dashboard stats", err);
+        }
+    }
+
     return (
         <div className={styles.container}>
             <div className={styles.header}>
@@ -31,9 +63,13 @@ export default function AdminDashboardPage() {
                             <Users size={16} className={styles.iconColorBlue} />
                         </div>
                     </div>
-                    <div className={styles.statValue}>1,248</div>
+                    <div className={styles.statValue}>{stats.total_users.toLocaleString()}</div>
                     <div className={styles.statChange}>
-                        <span className={styles.positive}>↗ +14.2%</span> geçen aya göre
+                        {stats.users_change_percentage >= 0 ? (
+                            <span className={styles.positive}>↗ +{stats.users_change_percentage}%</span>
+                        ) : (
+                            <span className={styles.negative}>↘ {stats.users_change_percentage}%</span>
+                        )} geçen aya göre
                     </div>
                 </div>
 
@@ -45,9 +81,13 @@ export default function AdminDashboardPage() {
                             <Sparkles size={16} className={styles.iconColorPurple} />
                         </div>
                     </div>
-                    <div className={styles.statValue}>8,420</div>
+                    <div className={styles.statValue}>{stats.total_campaigns.toLocaleString()}</div>
                     <div className={styles.statChange}>
-                        <span className={styles.positive}>↗ +5.8%</span> geçen aya göre
+                        {stats.campaigns_change_percentage >= 0 ? (
+                            <span className={styles.positive}>↗ +{stats.campaigns_change_percentage}%</span>
+                        ) : (
+                            <span className={styles.negative}>↘ {stats.campaigns_change_percentage}%</span>
+                        )} geçen aya göre
                     </div>
                 </div>
 
@@ -88,43 +128,50 @@ export default function AdminDashboardPage() {
                         <button className={styles.iconBtn}><MoreVertical size={16} /></button>
                     </div>
                     <div className={styles.chartPlaceholder}>
-                        <div className={styles.yAxis}>
-                            <span>10k</span>
-                            <span>7.5k</span>
-                            <span>5k</span>
-                            <span>2.5k</span>
-                            <span>0</span>
-                        </div>
-                        <div className={styles.barsContainer}>
-                            <div className={styles.barColumn}>
-                                <div className={styles.bar} style={{ height: '30%', backgroundColor: '#bbf7d0' }}></div>
-                                <span className={styles.xLabel}>Pzt</span>
-                            </div>
-                            <div className={styles.barColumn}>
-                                <div className={styles.bar} style={{ height: '40%', backgroundColor: '#86efac' }}></div>
-                                <span className={styles.xLabel}>Sal</span>
-                            </div>
-                            <div className={styles.barColumn}>
-                                <div className={styles.bar} style={{ height: '35%', backgroundColor: '#4ade80' }}></div>
-                                <span className={styles.xLabel}>Çar</span>
-                            </div>
-                            <div className={styles.barColumn}>
-                                <div className={styles.bar} style={{ height: '55%', backgroundColor: '#22c55e' }}></div>
-                                <span className={styles.xLabel}>Per</span>
-                            </div>
-                            <div className={styles.barColumn}>
-                                <div className={styles.bar} style={{ height: '50%', backgroundColor: '#16a34a' }}></div>
-                                <span className={styles.xLabel}>Cum</span>
-                            </div>
-                            <div className={styles.barColumn}>
-                                <div className={styles.bar} style={{ height: '70%', backgroundColor: '#15803d' }}></div>
-                                <span className={styles.xLabel}>Cmt</span>
-                            </div>
-                            <div className={styles.barColumn}>
-                                <div className={styles.bar} style={{ height: '80%', backgroundColor: '#166534' }}></div>
-                                <span className={styles.xLabel}>Paz</span>
-                            </div>
-                        </div>
+                        {(() => {
+                            const daily = stats.daily_campaigns || [];
+                            if (daily.length === 0) {
+                                return <div style={{padding: '40px', textAlign: 'center', color: '#64748b'}}>Veri bulunamadı.</div>;
+                            }
+                            
+                            const maxCount = Math.max(...daily.map((d: any) => d.count), 10);
+                            // Generate y-axis labels based on maxCount
+                            const yLabels = [maxCount, maxCount * 0.75, maxCount * 0.5, maxCount * 0.25, 0].map(val => 
+                                val > 1000 ? (val / 1000).toFixed(1).replace('.0', '') + 'k' : Math.round(val).toString()
+                            );
+                            
+                            // Map English day names to Turkish short names
+                            const daysMap: Record<number, string> = { 0: 'Paz', 1: 'Pzt', 2: 'Sal', 3: 'Çar', 4: 'Per', 5: 'Cum', 6: 'Cmt' };
+                            
+                            return (
+                                <>
+                                    <div className={styles.yAxis}>
+                                        {yLabels.map((lbl, idx) => <span key={idx}>{lbl}</span>)}
+                                    </div>
+                                    <div className={styles.barsContainer}>
+                                        {daily.map((day: any, idx: number) => {
+                                            const dateObj = new Date(day.date);
+                                            const dayName = daysMap[dateObj.getDay()];
+                                            const heightPercent = Math.max((day.count / maxCount) * 100, 5); // min height 5% for visibility
+                                            
+                                            // Optional: color intensity based on height
+                                            let bgColor = '#bbf7d0';
+                                            if (heightPercent > 80) bgColor = '#15803d';
+                                            else if (heightPercent > 60) bgColor = '#16a34a';
+                                            else if (heightPercent > 40) bgColor = '#22c55e';
+                                            else if (heightPercent > 20) bgColor = '#4ade80';
+
+                                            return (
+                                                <div className={styles.barColumn} key={idx}>
+                                                    <div className={styles.bar} style={{ height: `${heightPercent}%`, backgroundColor: bgColor }} title={`${day.count} Tasarım`}></div>
+                                                    <span className={styles.xLabel}>{dayName}</span>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </>
+                            );
+                        })()}
                     </div>
                 </div>
 
@@ -136,60 +183,28 @@ export default function AdminDashboardPage() {
                     </div>
                     
                     <div className={styles.actionList}>
-                        <div className={styles.actionItem}>
-                            <div className={styles.userAvatar}>
-                                <img src="https://i.pravatar.cc/150?u=a042581f4e29026704d" alt="Acme Corp" />
+                        {stats.active_users && stats.active_users.length > 0 ? (
+                            stats.active_users.map((user: any, index: number) => (
+                                <div className={styles.actionItem} key={index}>
+                                    <div className={styles.userAvatar}>
+                                        <img src={`https://ui-avatars.com/api/?name=${user.name}+${user.surname}&background=random`} alt={`${user.name} ${user.surname}`} />
+                                    </div>
+                                    <div className={styles.actionDetails}>
+                                        <p className={styles.actionText} style={{fontWeight: 600, color: '#0f172a'}}>
+                                            {user.name} {user.surname}
+                                        </p>
+                                        <span className={styles.actionTime}>{user.campaign_count} Tasarım</span>
+                                    </div>
+                                    <div style={{color: index === 0 ? '#059669' : '#475569', fontWeight: 'bold', fontSize: '0.95rem'}}>
+                                        #{index + 1}
+                                    </div>
+                                </div>
+                            ))
+                        ) : (
+                            <div style={{padding: '20px', textAlign: 'center', color: '#64748b'}}>
+                                Henüz aktif müşteri bulunmuyor.
                             </div>
-                            <div className={styles.actionDetails}>
-                                <p className={styles.actionText} style={{fontWeight: 600, color: '#0f172a'}}>Acme Corp. (Ahmet Y.)</p>
-                                <span className={styles.actionTime}>245 Tasarım • 12K Token</span>
-                            </div>
-                            <div style={{color: '#059669', fontWeight: 'bold', fontSize: '0.95rem'}}>#1</div>
-                        </div>
-
-                        <div className={styles.actionItem}>
-                            <div className={styles.userAvatar}>
-                                <img src="https://i.pravatar.cc/150?u=a042581f4e29026704c" alt="TechFlow" />
-                            </div>
-                            <div className={styles.actionDetails}>
-                                <p className={styles.actionText} style={{fontWeight: 600, color: '#0f172a'}}>TechFlow (Selin K.)</p>
-                                <span className={styles.actionTime}>180 Tasarım • 9.5K Token</span>
-                            </div>
-                            <div style={{color: '#475569', fontWeight: 'bold', fontSize: '0.95rem'}}>#2</div>
-                        </div>
-
-                        <div className={styles.actionItem}>
-                            <div className={styles.userAvatar}>
-                                <img src="https://i.pravatar.cc/150?u=a042581f4e29026704e" alt="Lumina Studio" />
-                            </div>
-                            <div className={styles.actionDetails}>
-                                <p className={styles.actionText} style={{fontWeight: 600, color: '#0f172a'}}>Lumina Studio</p>
-                                <span className={styles.actionTime}>156 Tasarım • 8.2K Token</span>
-                            </div>
-                            <div style={{color: '#475569', fontWeight: 'bold', fontSize: '0.95rem'}}>#3</div>
-                        </div>
-
-                        <div className={styles.actionItem}>
-                            <div className={styles.userAvatar}>
-                                <img src="https://i.pravatar.cc/150?u=a042581f4e29026704f" alt="Boutique Design" />
-                            </div>
-                            <div className={styles.actionDetails}>
-                                <p className={styles.actionText} style={{fontWeight: 600, color: '#0f172a'}}>Boutique Design</p>
-                                <span className={styles.actionTime}>142 Tasarım • 7.8K Token</span>
-                            </div>
-                            <div style={{color: '#475569', fontWeight: 'bold', fontSize: '0.95rem'}}>#4</div>
-                        </div>
-
-                        <div className={styles.actionItem}>
-                            <div className={styles.userAvatar}>
-                                <img src="https://i.pravatar.cc/150?u=a042581f4e29026704b" alt="Global Market" />
-                            </div>
-                            <div className={styles.actionDetails}>
-                                <p className={styles.actionText} style={{fontWeight: 600, color: '#0f172a'}}>Global Market (Can B.)</p>
-                                <span className={styles.actionTime}>112 Tasarım • 5.1K Token</span>
-                            </div>
-                            <div style={{color: '#475569', fontWeight: 'bold', fontSize: '0.95rem'}}>#5</div>
-                        </div>
+                        )}
                     </div>
                 </div>
             </div>
