@@ -10,8 +10,11 @@ from app.models.product_analyze import ProductAnalyze
 from app.services.ai.product_detail_ai import analyze_product_image_with_ai
 from app.models.campaign import Campaign
 from app.models.campaign_result import CampaignResult
+from app.models.api_expense import ApiExpense
 
 
+INPUT_PRICE_PER_1M = 0.15
+OUTPUT_PRICE_PER_1M = 0.60
 
 
 
@@ -56,6 +59,35 @@ def create_product_with_image(
                 marketing_style=ai_result.get("marketing_style", "Bilinmiyor")
             )
             db.add(new_analysis)
+
+            p_tokens = ai_result.get("prompt_tokens", 0)
+            c_tokens = ai_result.get("completion_tokens", 0)
+            t_tokens = ai_result.get("total_tokens", 0)
+
+            input_cost = (
+                p_tokens / 1_000_000
+            ) * INPUT_PRICE_PER_1M
+
+            output_cost = (
+                c_tokens / 1_000_000
+            ) * OUTPUT_PRICE_PER_1M
+
+            total_cost = input_cost + output_cost
+
+
+            new_spending = ApiExpense(
+                user_id = current_user.id,
+                service_type="VISION_DETAIL",
+                tokens_used=t_tokens,         
+                prompt_tokens=p_tokens,       
+                completion_tokens=c_tokens,   
+                cost=total_cost,          
+                related_entity_id=new_product.id
+            )
+            db.add(new_spending)
+            
+
+
             db.commit()
             
 

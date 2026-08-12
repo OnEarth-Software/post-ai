@@ -23,7 +23,7 @@ def generate_product_campaign_image(
     system_prompt: str,
     slogan: str,
     subtext: str
-) -> bytes:
+) -> dict:
     """
     Ürün analizi ve kampanya parametrelerini alıp orijinal görseli 
     referans kullanarak gpt-image-2 ile yeni bir görsel üretir.
@@ -39,8 +39,7 @@ def generate_product_campaign_image(
     if len(slogan_words) > 5:
         slogan = " ".join(slogan_words[:4])
 
-    size = "1024x1792" if campaign_type.lower() == "story" else "1024x1024"
-
+    size = "1024x1536" if campaign_type.lower() == "story" else "1024x1024"
     prompt_data = {
         "category": category,
         "style": style,
@@ -85,11 +84,11 @@ def generate_product_campaign_image(
         
         if image_data.url:
             img_bytes = requests.get(image_data.url).content
-            return img_bytes
+            return {"image_bytes": img_bytes, "size": size}
         elif hasattr(image_data, 'b64_json') and image_data.b64_json:
             import base64
             img_bytes = base64.b64decode(image_data.b64_json)
-            return img_bytes
+            return {"image_bytes": img_bytes, "size": size}
         else:
             raise Exception("API geçerli bir URL veya base64 verisi döndürmedi!")
 

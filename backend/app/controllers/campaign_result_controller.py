@@ -9,6 +9,7 @@ from app.schemas.campaign_result_schema import CampaignImageGenerateRequest, Cam
 from app.services.ai.generate_campaign_image import generate_product_campaign_image
 from app.services.storage.supabase_client import get_supabase_client
 from app.models.product import Product
+from app.models.api_expense import ApiExpense
 
 def generate_and_save_campaign_image(
     db: Session, 
@@ -36,7 +37,7 @@ def generate_and_save_campaign_image(
         raise HTTPException(status_code=404, detail="Ürün bulunamadı.")
 
     try:
-        img_bytes = generate_product_campaign_image(
+        ai_response = generate_product_campaign_image(
             category=analyze.category,
             style=analyze.style,
             colors=analyze.colors,
@@ -52,6 +53,8 @@ def generate_and_save_campaign_image(
             slogan=campaign.slogan,
             subtext=campaign.subtext
         )
+        img_bytes = ai_response["image_bytes"]
+        img_size = ai_response["size"]
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
         
@@ -87,6 +90,26 @@ def generate_and_save_campaign_image(
         image_url=final_url
     )
     db.add(new_asset)
+
+    quality = "medium"  # API'ye özel kalite yollamadığımız için varsayılan Medium kabul ediyoruz
+    
+    if quality == "high":
+        image_cost = 0.165 if img_size in ["1024x1536", "1536x1024"] else 0.211
+    elif quality == "medium":
+        image_cost = 0.041 if img_size in ["1024x1536", "1536x1024"] else 0.053
+    else:
+        image_cost = 0.006
+        
+    img_cost = ApiExpense(
+        user_id=current_user.id,
+        service_type="IMAGE_GENERATION",
+        tokens_used=1,              
+        prompt_tokens=0,            
+        completion_tokens=0,
+        cost=image_cost,            
+        related_entity_id=campaign.id
+    )
+    db.add(img_cost)
     
     db.commit()
     db.refresh(new_result)

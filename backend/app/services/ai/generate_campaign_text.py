@@ -91,7 +91,10 @@ def generate_product_campaing_text(
         
         return {
             "slogan": slogan,
-            "subtext": subtext
+            "subtext": subtext,
+            "prompt_tokens": response.usage.prompt_tokens,
+            "completion_tokens": response.usage.completion_tokens,
+            "total_tokens": response.usage.total_tokens
         }
         
     except Exception as e:

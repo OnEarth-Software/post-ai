@@ -44,4 +44,8 @@ def analyze_product_image_with_ai(
         )
 
     result_text = response.choices[0].message.content
-    return json.loads(result_text)
+    parsed = json.loads(result_text)
+    parsed["prompt_tokens"] = response.usage.prompt_tokens
+    parsed["completion_tokens"] = response.usage.completion_tokens
+    parsed["total_tokens"] = response.usage.total_tokens
+    return parsed

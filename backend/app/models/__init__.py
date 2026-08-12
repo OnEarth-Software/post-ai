@@ -8,3 +8,4 @@ from app.models.campaign_result import CampaignResult
 from app.models.like import Like
 from app.models.notification import Notification
 from app.models.asset import Asset
+from app.models.api_expense import ApiExpense

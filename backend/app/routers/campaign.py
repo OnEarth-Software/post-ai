@@ -12,13 +12,14 @@ router = APIRouter()
 @router.post("/generate-text", response_model=CampaignTextGenerateResponse)
 def generate_campaign_text_endpoint(
     request: CampaignTextGenerateRequest,
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
 ):
     """
     Sadece gelen JSON verisine göre AI ile kampanya metni üretir ve geri döner.
     Veritabanına kayıt işlemi yapmaz.
     """
-    return generate_campaign_text(request=request)
+    return generate_campaign_text(db=db, request=request, current_user=current_user)
 
 
 @router.post("/create", response_model=CampaignResponse)

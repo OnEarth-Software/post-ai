@@ -6,12 +6,40 @@ from app.models.user import User
 from app.schemas.campaign_schema import CampaignTextGenerateRequest, CampaignTextGenerateResponse, CampaignCreateRequest, CampaignResponse
 from app.services.ai.generate_campaign_text import generate_product_campaing_text
 from app.core.config import settings
+from app.models.api_expense import ApiExpense
 
+INPUT_PRICE_PER_1M = 0.15
+OUTPUT_PRICE_PER_1M = 0.60
+def generate_campaign_text(
+    db: Session,
+    request: CampaignTextGenerateRequest,
+    current_user: User
+) -> CampaignTextGenerateResponse:
 
-def generate_campaign_text(request: CampaignTextGenerateRequest) -> CampaignTextGenerateResponse:
     # Sadece AI'den metin üret
     ai_result = generate_product_campaing_text(request.model_dump())
     
+    p_tokens = ai_result.get("prompt_tokens", 0)
+    c_tokens = ai_result.get("completion_tokens", 0)
+    t_tokens = ai_result.get("total_tokens", 0)
+    
+    input_cost = (p_tokens / 1_000_000) * INPUT_PRICE_PER_1M
+    output_cost = (c_tokens / 1_000_000) * OUTPUT_PRICE_PER_1M
+    total_cost = input_cost + output_cost
+
+    text_generate_cost = ApiExpense(
+        user_id= current_user.id,
+        service_type= "TEXT_GENERATION",
+        tokens_used=t_tokens,
+        prompt_tokens=p_tokens,
+        completion_tokens=c_tokens,
+        cost=total_cost
+    )
+    db.add(text_generate_cost)
+    db.commit()
+
+
+
     return CampaignTextGenerateResponse(
         slogan=ai_result.get("slogan", ""),
         subtext=ai_result.get("subtext", "")
