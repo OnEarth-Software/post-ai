@@ -41,6 +41,9 @@ def login_access_token(
     if not user:
         raise HTTPException(status_code=400, detail="Incorrect email or password")
     
+    if not user.is_active:
+        raise HTTPException(status_code=403, detail="Your account has been deactivated. Please contact the administrator.")
+    
     if user.is_2fa_enabled:
         temp_token = create_access_token(user.id, role=user.role, expires_delta=timedelta(minutes=5))
         return {

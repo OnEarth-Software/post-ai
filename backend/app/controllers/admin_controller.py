@@ -2,9 +2,12 @@ from typing import Any
 from datetime import datetime, timedelta, timezone
 from sqlalchemy.orm import Session
 from sqlalchemy import func, desc, cast, Date
+from fastapi import HTTPException
 from app.models.user import User
 from app.models.campaign import Campaign
 from app.models.product import Product
+from app.models.plan import Plan
+from app.schemas.admin_schema import UserAdminUpdateRequest
 
 def check_access(current_admin: User) -> Any:
     """
@@ -101,3 +104,98 @@ def get_dashboard_stats(db: Session) -> dict:
         "active_users": active_users,
         "daily_campaigns": daily_campaigns
     }
+
+def get_users_paginated(db: Session, page: int = 1, limit: int = 5) -> dict:
+    offset = (page - 1) * limit
+    total_users = db.query(User).count()
+    
+    users = db.query(User).order_by(desc(User.created_at)).offset(offset).limit(limit).all()
+    
+    items = []
+    for user in users:
+        design_usage = db.query(Campaign).join(Product).filter(Product.user_id == user.id).count()
+        product_usage = db.query(Product).filter(Product.user_id == user.id).count()
+        
+        plan_name = "Free"
+        if user.plan_id:
+            plan = db.query(Plan).filter(Plan.id == user.plan_id).first()
+            if plan:
+                plan_name = plan.name
+                
+        items.append({
+            "id": str(user.id),
+            "name": f"{user.name} {user.surname}".strip(),
+            "email": user.email,
+            "role": user.role,
+            "plan": plan_name,
+            "designUsage": design_usage,
+            "designLimit": user.design_limit,
+            "productUsage": product_usage,
+            "productLimit": user.product_limit,
+            "status": "Active" if user.is_active else "Inactive"
+        })
+        
+    return {
+        "items": items,
+        "total": total_users,
+        "page": page,
+        "limit": limit
+    }
+
+def update_user_profile(db: Session, user_id: str, update_data: UserAdminUpdateRequest) -> dict:
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+        
+    if update_data.name is not None:
+        parts = update_data.name.split(" ", 1)
+        user.name = parts[0]
+        if len(parts) > 1:
+            user.surname = parts[1]
+            
+    if update_data.email is not None:
+        user.email = update_data.email
+    if update_data.role is not None:
+        user.role = update_data.role
+    if update_data.status is not None:
+        user.is_active = update_data.status == "Active"
+    if update_data.designLimit is not None:
+        user.design_limit = update_data.designLimit
+    if update_data.productLimit is not None:
+        user.product_limit = update_data.productLimit
+        
+    # Handling plan changes
+    if update_data.plan is not None:
+        new_plan = None
+        if update_data.plan != "Free":
+            new_plan = db.query(Plan).filter(Plan.name == update_data.plan).first()
+        
+        # Check if plan actually changed
+        current_plan_name = user.plan.name if user.plan else "Free"
+        if current_plan_name != update_data.plan:
+            if new_plan:
+                user.plan_id = new_plan.id
+                # Only sync limits if the admin didn't manually change them in this request
+                # A heuristic: if the incoming limits are identical to the old user limits, it means they didn't touch the inputs.
+                if update_data.designLimit == user.design_limit:
+                    user.design_limit = new_plan.design_limit
+                if update_data.productLimit == user.product_limit:
+                    user.product_limit = new_plan.product_limit
+            elif update_data.plan == "Free":
+                user.plan_id = None
+                if update_data.designLimit == user.design_limit:
+                    user.design_limit = 5
+                if update_data.productLimit == user.product_limit:
+                    user.product_limit = 5
+            
+    db.commit()
+    return {"message": "User updated successfully"}
+
+def delete_user(db: Session, user_id: str) -> dict:
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+        
+    db.delete(user)
+    db.commit()
+    return {"message": "User deleted successfully"}

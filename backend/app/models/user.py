@@ -1,5 +1,5 @@
 import uuid
-from sqlalchemy import Column, String, Boolean, DateTime, JSON, ForeignKey
+from sqlalchemy import Column, String, Boolean, DateTime, JSON, ForeignKey, Integer
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.sql import func
@@ -14,6 +14,9 @@ class User(Base):
     password_hash = Column(String, nullable=False)
     email = Column(String, unique=True, index=True, nullable=False)
     role = Column(String, default="user", nullable=False)
+    is_active = Column(Boolean, default=True, nullable=False)
+    design_limit = Column(Integer, default=5, nullable=False)
+    product_limit = Column(Integer, default=5, nullable=False)
     is_2fa_enabled = Column(Boolean, default=False)
     two_factor_secret = Column(String, nullable=True)
 
