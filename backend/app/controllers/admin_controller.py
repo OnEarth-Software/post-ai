@@ -7,6 +7,7 @@ from app.models.user import User
 from app.models.campaign import Campaign
 from app.models.product import Product
 from app.models.plan import Plan
+from app.models.campaign_result import CampaignResult
 from app.schemas.admin_schema import UserAdminUpdateRequest
 
 def check_access(current_admin: User) -> Any:
@@ -199,3 +200,103 @@ def delete_user(db: Session, user_id: str) -> dict:
     db.delete(user)
     db.commit()
     return {"message": "User deleted successfully"}
+
+def get_campaigns_paginated(
+    db: Session, 
+    page: int = 1, 
+    limit: int = 5, 
+    search: str = None,
+    platform: str = None,
+    type_filter: str = None,
+    sort: str = "desc",
+    date_range: str = "all"
+) -> dict:
+    offset = (page - 1) * limit
+    
+    query = db.query(Campaign).join(Product, Campaign.product_id == Product.id).join(User, Product.user_id == User.id)
+    
+    if search:
+        search_term = f"%{search}%"
+        from sqlalchemy import or_
+        query = query.filter(or_(
+            Campaign.goal.ilike(search_term),
+            Campaign.slogan.ilike(search_term),
+            User.name.ilike(search_term),
+            User.surname.ilike(search_term)
+        ))
+
+    if platform and platform != "all":
+        query = query.filter(Campaign.platform.ilike(platform))
+        
+    if type_filter and type_filter != "all":
+        query = query.filter(Campaign.type.ilike(type_filter))
+        
+    if date_range and date_range != "all":
+        now = datetime.now(timezone.utc)
+        if date_range == "7d":
+            query = query.filter(Campaign.created_at >= now - timedelta(days=7))
+        elif date_range == "1m":
+            query = query.filter(Campaign.created_at >= now - timedelta(days=30))
+        elif date_range == "6m":
+            query = query.filter(Campaign.created_at >= now - timedelta(days=180))
+        elif date_range == "1y":
+            query = query.filter(Campaign.created_at >= now - timedelta(days=365))
+
+    total_campaigns = query.count()
+    
+    if sort == "asc":
+        query = query.order_by(Campaign.created_at.asc())
+    else:
+        query = query.order_by(desc(Campaign.created_at))
+        
+    campaigns = query.offset(offset).limit(limit).all()
+
+    items = []
+    for campaign in campaigns:
+        image_url = ""
+        if campaign.results and len(campaign.results) > 0:
+            image_url = campaign.results[0].image_url
+        elif campaign.product:
+            image_url = campaign.product.image_url
+            
+        user_name = "Bilinmeyen"
+        user_avatar = "U"
+        if campaign.product and campaign.product.user:
+            user = campaign.product.user
+            user_name = f"{user.name} {user.surname}".strip()
+            user_avatar = user.name[0].upper() if user.name else "U"
+
+        items.append({
+            "id": str(campaign.id),
+            "imageUrl": image_url,
+            "platform": campaign.platform,
+            "type": campaign.type,
+            "goal": campaign.goal,
+            "slogan": campaign.slogan or "",
+            "tokensSpent": 45,
+            "cost": "0.12",
+            "user": {
+                "name": user_name,
+                "avatar": user_avatar
+            },
+            "createdAt": campaign.created_at.isoformat() if campaign.created_at else "",
+            "user_prompt": campaign.user_prompt,
+            "system_prompt": campaign.system_prompt,
+            "subtext": campaign.subtext
+        })
+        
+    return {
+        "items": items,
+        "total": total_campaigns,
+        "page": page,
+        "limit": limit
+    }
+
+def delete_campaign(db: Session, campaign_id: str) -> dict:
+    campaign = db.query(Campaign).filter(Campaign.id == campaign_id).first()
+    if not campaign:
+        raise HTTPException(status_code=404, detail="Campaign not found")
+        
+    db.delete(campaign)
+    db.commit()
+    return {"message": "Campaign deleted successfully"}

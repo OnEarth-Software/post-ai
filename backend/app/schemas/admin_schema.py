@@ -44,3 +44,28 @@ class UserAdminUpdateRequest(BaseModel):
     plan: Optional[str] = None
     designLimit: Optional[int] = None
     productLimit: Optional[int] = None
+
+class CampaignUserSchema(BaseModel):
+    name: str
+    avatar: str
+
+class CampaignAdminResponse(BaseModel):
+    id: str
+    imageUrl: str
+    platform: str
+    type: str
+    goal: str
+    slogan: str
+    tokensSpent: int
+    cost: str
+    user: CampaignUserSchema
+    createdAt: str
+    user_prompt: Optional[str] = None
+    system_prompt: Optional[str] = None
+    subtext: Optional[str] = None
+
+class PaginatedCampaignAdminResponse(BaseModel):
+    items: List[CampaignAdminResponse]
+    total: int
+    page: int
+    limit: int

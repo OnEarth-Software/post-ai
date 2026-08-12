@@ -6,7 +6,7 @@ from app.database.connection import get_db
 from app.models.user import User
 from app.core.deps import get_current_admin
 from app.controllers import admin_controller
-from app.schemas.admin_schema import DashboardStatsResponse, PaginatedUserResponse, UserAdminUpdateRequest
+from app.schemas.admin_schema import DashboardStatsResponse, PaginatedUserResponse, UserAdminUpdateRequest, PaginatedCampaignAdminResponse
 
 router = APIRouter()
 
@@ -58,3 +58,27 @@ def delete_user(
 ):
     admin_controller.check_access(current_admin)
     return admin_controller.delete_user(db, user_id)
+
+@router.get("/campaigns", response_model=PaginatedCampaignAdminResponse)
+def get_campaigns_paginated(
+    page: int = 1,
+    limit: int = 5,
+    search: str = None,
+    platform: str = None,
+    type_filter: str = None,
+    sort: str = "desc",
+    date_range: str = "all",
+    db: Session = Depends(get_db),
+    current_admin: User = Depends(get_current_admin)
+):
+    admin_controller.check_access(current_admin)
+    return admin_controller.get_campaigns_paginated(db, page, limit, search, platform, type_filter, sort, date_range)
+
+@router.delete("/campaigns/{campaign_id}")
+def delete_campaign(
+    campaign_id: str,
+    db: Session = Depends(get_db),
+    current_admin: User = Depends(get_current_admin)
+):
+    admin_controller.check_access(current_admin)
+    return admin_controller.delete_campaign(db, campaign_id)
