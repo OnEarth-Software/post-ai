@@ -55,8 +55,6 @@ function LoginContent() {
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
-        setError('');
-
         try {
             const formData = new URLSearchParams();
             formData.append('username', email);
@@ -85,6 +83,19 @@ function LoginContent() {
             }
 
             localStorage.setItem('token', data.access_token);
+            
+            const userResponse = await fetch(`${apiUrl}/auth/me`, {
+                headers: { 'Authorization': `Bearer ${data.access_token}` }
+            });
+            
+            if (userResponse.ok) {
+                const userData = await userResponse.json();
+                if (userData.role === 'admin') {
+                    router.push('/admin/dashboard');
+                    return;
+                }
+            }
+            
             console.log("Giriş Başarılı");
             router.push('/dashboard');
         } catch (err: any) {
@@ -114,6 +125,19 @@ function LoginContent() {
 
             const data = await response.json();
             localStorage.setItem('token', data.access_token);
+            
+            const userResponse = await fetch(`${apiUrl}/auth/me`, {
+                headers: { 'Authorization': `Bearer ${data.access_token}` }
+            });
+            
+            if (userResponse.ok) {
+                const userData = await userResponse.json();
+                if (userData.role === 'admin') {
+                    router.push('/admin/dashboard');
+                    return;
+                }
+            }
+
             router.push('/dashboard');
         } catch (err: any) {
             setError(err.message);
