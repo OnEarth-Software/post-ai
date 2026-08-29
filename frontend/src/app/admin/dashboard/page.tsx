@@ -10,8 +10,12 @@ export default async function AdminDashboardPage() {
     let stats: any = {
         total_users: 1248, // mock fallback
         total_campaigns: 8420,
+        total_tokens_spent: 2400000,
+        total_cost: 142.5,
         users_change_percentage: 14.2,
         campaigns_change_percentage: 5.8,
+        tokens_change_percentage: 32.5,
+        cost_change_percentage: 12.1,
         active_users: [],
         daily_campaigns: []
     };
@@ -94,14 +98,18 @@ export default async function AdminDashboardPage() {
                 {/* Stat Card 3 */}
                 <div className={styles.statCard}>
                     <div className={styles.statHeader}>
-                        <span className={styles.statLabel}>Toplam Gelir</span>
+                        <span className={styles.statLabel}>API Maliyeti</span>
                         <div className={`${styles.statIconWrapper} ${styles.greenIcon}`}>
                             <DollarSign size={16} className={styles.iconColorGreen} />
                         </div>
                     </div>
-                    <div className={styles.statValue}>₺142.5k</div>
+                    <div className={styles.statValue}>${(stats.total_cost || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
                     <div className={styles.statChange}>
-                        <span className={styles.positive}>↗ +12.1%</span> geçen aya göre
+                        {stats.cost_change_percentage >= 0 ? (
+                            <span className={styles.positive}>↗ +{stats.cost_change_percentage}%</span>
+                        ) : (
+                            <span className={styles.negative}>↘ {stats.cost_change_percentage}%</span>
+                        )} geçen aya göre
                     </div>
                 </div>
 
@@ -113,9 +121,19 @@ export default async function AdminDashboardPage() {
                             <Zap size={16} className={styles.iconColorTeal} />
                         </div>
                     </div>
-                    <div className={styles.statValue}>2.4M</div>
+                    <div className={styles.statValue}>
+                        {(stats.total_tokens_spent || 0) >= 1000000 
+                            ? `${(stats.total_tokens_spent / 1000000).toFixed(1)}M` 
+                            : (stats.total_tokens_spent || 0) >= 1000 
+                                ? `${(stats.total_tokens_spent / 1000).toFixed(1)}k` 
+                                : (stats.total_tokens_spent || 0).toLocaleString()}
+                    </div>
                     <div className={styles.statChange}>
-                        <span className={styles.positive}>↗ +32.5%</span> geçen aya göre
+                        {stats.tokens_change_percentage >= 0 ? (
+                            <span className={styles.positive}>↗ +{stats.tokens_change_percentage}%</span>
+                        ) : (
+                            <span className={styles.negative}>↘ {stats.tokens_change_percentage}%</span>
+                        )} geçen aya göre
                     </div>
                 </div>
             </div>
@@ -131,18 +149,18 @@ export default async function AdminDashboardPage() {
                         {(() => {
                             const daily = stats.daily_campaigns || [];
                             if (daily.length === 0) {
-                                return <div style={{padding: '40px', textAlign: 'center', color: '#64748b'}}>Veri bulunamadı.</div>;
+                                return <div style={{ padding: '40px', textAlign: 'center', color: '#64748b' }}>Veri bulunamadı.</div>;
                             }
-                            
+
                             const maxCount = Math.max(...daily.map((d: any) => d.count), 10);
                             // Generate y-axis labels based on maxCount
-                            const yLabels = [maxCount, maxCount * 0.75, maxCount * 0.5, maxCount * 0.25, 0].map(val => 
+                            const yLabels = [maxCount, maxCount * 0.75, maxCount * 0.5, maxCount * 0.25, 0].map(val =>
                                 val > 1000 ? (val / 1000).toFixed(1).replace('.0', '') + 'k' : Math.round(val).toString()
                             );
-                            
+
                             // Map English day names to Turkish short names
                             const daysMap: Record<number, string> = { 0: 'Paz', 1: 'Pzt', 2: 'Sal', 3: 'Çar', 4: 'Per', 5: 'Cum', 6: 'Cmt' };
-                            
+
                             return (
                                 <>
                                     <div className={styles.yAxis}>
@@ -153,7 +171,7 @@ export default async function AdminDashboardPage() {
                                             const dateObj = new Date(day.date);
                                             const dayName = daysMap[dateObj.getDay()];
                                             const heightPercent = Math.max((day.count / maxCount) * 100, 5); // min height 5% for visibility
-                                            
+
                                             // Optional: color intensity based on height
                                             let bgColor = '#bbf7d0';
                                             if (heightPercent > 80) bgColor = '#15803d';
@@ -181,7 +199,7 @@ export default async function AdminDashboardPage() {
                         <h2 className={styles.sectionTitle}>En Aktif Müşteriler</h2>
                         <a href="#" className={styles.viewAllLink}>Tümünü Gör</a>
                     </div>
-                    
+
                     <div className={styles.actionList}>
                         {stats.active_users && stats.active_users.length > 0 ? (
                             stats.active_users.map((user: any, index: number) => (
@@ -190,18 +208,18 @@ export default async function AdminDashboardPage() {
                                         <img src={`https://ui-avatars.com/api/?name=${user.name}+${user.surname}&background=random`} alt={`${user.name} ${user.surname}`} />
                                     </div>
                                     <div className={styles.actionDetails}>
-                                        <p className={styles.actionText} style={{fontWeight: 600, color: '#0f172a'}}>
+                                        <p className={styles.actionText} style={{ fontWeight: 600, color: '#0f172a' }}>
                                             {user.name} {user.surname}
                                         </p>
                                         <span className={styles.actionTime}>{user.campaign_count} Tasarım</span>
                                     </div>
-                                    <div style={{color: index === 0 ? '#059669' : '#475569', fontWeight: 'bold', fontSize: '0.95rem'}}>
+                                    <div style={{ color: index === 0 ? '#059669' : '#475569', fontWeight: 'bold', fontSize: '0.95rem' }}>
                                         #{index + 1}
                                     </div>
                                 </div>
                             ))
                         ) : (
-                            <div style={{padding: '20px', textAlign: 'center', color: '#64748b'}}>
+                            <div style={{ padding: '20px', textAlign: 'center', color: '#64748b' }}>
                                 Henüz aktif müşteri bulunmuyor.
                             </div>
                         )}

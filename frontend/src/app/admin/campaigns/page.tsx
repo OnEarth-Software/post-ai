@@ -63,6 +63,7 @@ export default async function CampaignsPage({ searchParams }: { searchParams: { 
             currentType={type_filter}
             currentSort={sort}
             currentDateRange={date_range}
+            token={token}
         />
     );
 }

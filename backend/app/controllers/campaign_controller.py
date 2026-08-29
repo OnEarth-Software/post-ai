@@ -70,6 +70,15 @@ def create_campaign(db: Session, request: CampaignCreateRequest, current_user: U
     db.add(new_campaign)
     db.commit()
     db.refresh(new_campaign)
+    unlinked_text_expense = db.query(ApiExpense).filter(
+        ApiExpense.user_id == current_user.id,
+        ApiExpense.service_type == "TEXT_GENERATION",
+        ApiExpense.related_entity_id == None
+    ).order_by(ApiExpense.created_at.desc()).first()
+
+    if unlinked_text_expense:
+        unlinked_text_expense.related_entity_id = str(new_campaign.id)
+        db.commit() 
     
     return new_campaign
 

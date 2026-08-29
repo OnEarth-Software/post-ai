@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Response
 from typing import Any
 from sqlalchemy.orm import Session
 
@@ -6,7 +6,7 @@ from app.database.connection import get_db
 from app.models.user import User
 from app.core.deps import get_current_admin
 from app.controllers import admin_controller
-from app.schemas.admin_schema import DashboardStatsResponse, PaginatedUserResponse, UserAdminUpdateRequest, PaginatedCampaignAdminResponse
+from app.schemas.admin_schema import FinancialStatsResponse, DashboardStatsResponse, PaginatedUserResponse, UserAdminUpdateRequest, PaginatedCampaignAdminResponse
 
 router = APIRouter()
 
@@ -82,3 +82,30 @@ def delete_campaign(
 ):
     admin_controller.check_access(current_admin)
     return admin_controller.delete_campaign(db, campaign_id)
+
+
+@router.get("/finance-stats", response_model=FinancialStatsResponse)
+def get_finance_stats(
+    db: Session = Depends(get_db),
+    current_admin: User = Depends(get_current_admin)
+):
+    admin_controller.check_access(current_admin)
+    return admin_controller.get_financial_stats(db)
+
+@router.get("/campaigns/export")
+def export_campaigns(
+    start_date: str,
+    end_date: str,
+    db: Session = Depends(get_db),
+    current_admin: User = Depends(get_current_admin)
+):
+    admin_controller.check_access(current_admin)
+    csv_data = admin_controller.export_campaigns_csv(db, start_date, end_date)
+    
+    return Response(
+        content=csv_data,
+        media_type="text/csv",
+        headers={
+            "Content-Disposition": f"attachment; filename=campaigns_{start_date}_to_{end_date}.csv"
+        }
+    )

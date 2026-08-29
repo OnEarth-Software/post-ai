@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Search, Filter, Camera, Zap, Calendar, MoreHorizontal, X, Trash2, Eye } from 'lucide-react';
+import { Search, Filter, Camera, Zap, Calendar, MoreHorizontal, X, Trash2, Eye, Download } from 'lucide-react';
 import styles from './campaigns.module.css';
 import { deleteCampaign } from './actions';
 
@@ -15,12 +15,19 @@ export default function CampaignsClient({
     currentPlatform,
     currentType,
     currentSort,
-    currentDateRange
+    currentDateRange,
+    token
 }: any) {
     const router = useRouter();
     const [selectedCampaign, setSelectedCampaign] = useState<any>(null); // For Details Modal
     const [campaignToDelete, setCampaignToDelete] = useState<any>(null); // For Delete Modal
     const [isSaving, setIsSaving] = useState(false);
+
+    // For Export
+    const [exportModalOpen, setExportModalOpen] = useState(false);
+    const [exportStart, setExportStart] = useState('');
+    const [exportEnd, setExportEnd] = useState('');
+    const [isExporting, setIsExporting] = useState(false);
 
     // For search
     const [searchValue, setSearchValue] = useState(currentSearch || '');
@@ -106,6 +113,51 @@ export default function CampaignsClient({
             alert("An error occurred.");
         } finally {
             setIsSaving(false);
+        }
+    };
+
+    const handleExport = async () => {
+        if (!exportStart || !exportEnd) {
+            alert("Lütfen başlangıç ve bitiş tarihlerini seçin.");
+            return;
+        }
+
+        setIsExporting(true);
+        try {
+            // Detect API URL
+            let apiUrl = 'http://localhost:8000';
+            if (typeof window !== 'undefined' && (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1')) {
+                apiUrl = `https://${window.location.hostname}:8000`; // simple fallback
+            }
+
+            const res = await fetch(`${apiUrl}/admin/campaigns/export?start_date=${exportStart}&end_date=${exportEnd}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (!res.ok) {
+                alert("Dışa aktarım başarısız oldu. Hata kodu: " + res.status);
+                setIsExporting(false);
+                return;
+            }
+
+            const blob = await res.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `campaigns_${exportStart}_to_${exportEnd}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            window.URL.revokeObjectURL(url);
+            
+            setExportModalOpen(false);
+        } catch (error) {
+            console.error("Export error:", error);
+            alert("Bir hata oluştu.");
+        } finally {
+            setIsExporting(false);
         }
     };
 
@@ -240,6 +292,14 @@ export default function CampaignsClient({
                         </>
                     )}
                 </div>
+
+                <button 
+                    className={styles.filterBtn}
+                    style={{ background: '#0f172a', color: 'white', border: 'none', marginLeft: 'auto' }}
+                    onClick={() => setExportModalOpen(true)}
+                >
+                    <Download size={16} /> Dışa Aktar (CSV)
+                </button>
             </div>
 
             {/* List (Table) Layout */}
@@ -448,6 +508,45 @@ export default function CampaignsClient({
                             <button style={{ padding: '10px 20px', background: 'white', color: '#334155', border: '1px solid #cbd5e1', borderRadius: '8px', cursor: 'pointer', fontWeight: 500 }} onClick={() => setCampaignToDelete(null)} disabled={isSaving}>Cancel</button>
                             <button style={{ padding: '10px 20px', background: '#ef4444', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '8px' }} onClick={confirmDelete} disabled={isSaving}>
                                 {isSaving ? 'Deleting...' : 'Delete Permanently'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {/* Export Modal */}
+            {exportModalOpen && (
+                <div style={{ position: 'fixed', inset: 0, background: 'rgba(15, 23, 42, 0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, backdropFilter: 'blur(4px)' }} onClick={() => setExportModalOpen(false)}>
+                    <div style={{ background: 'white', borderRadius: '16px', width: '100%', maxWidth: '420px', boxShadow: '0 25px 50px -12px rgb(0 0 0 / 0.25)', overflow: 'hidden' }} onClick={(e) => e.stopPropagation()}>
+                        <div style={{ padding: '24px 32px', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8fafc' }}>
+                            <h2 style={{ margin: 0, fontSize: '1.25rem', color: '#0f172a', fontWeight: 600 }}>Dışa Aktar (CSV)</h2>
+                            <button style={{ background: '#e2e8f0', border: 'none', cursor: 'pointer', color: '#475569', width: '32px', height: '32px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={() => setExportModalOpen(false)}>
+                                <X size={18} />
+                            </button>
+                        </div>
+                        <div style={{ padding: '32px' }}>
+                            <div style={{ marginBottom: '16px' }}>
+                                <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#475569', marginBottom: '8px' }}>Başlangıç Tarihi</label>
+                                <input 
+                                    type="date" 
+                                    value={exportStart} 
+                                    onChange={e => setExportStart(e.target.value)} 
+                                    style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px', outline: 'none' }}
+                                />
+                            </div>
+                            <div>
+                                <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#475569', marginBottom: '8px' }}>Bitiş Tarihi</label>
+                                <input 
+                                    type="date" 
+                                    value={exportEnd} 
+                                    onChange={e => setExportEnd(e.target.value)} 
+                                    style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px', outline: 'none' }}
+                                />
+                            </div>
+                        </div>
+                        <div style={{ padding: '20px 32px', background: '#f8fafc', display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
+                            <button style={{ padding: '10px 20px', background: 'white', color: '#334155', border: '1px solid #cbd5e1', borderRadius: '8px', cursor: 'pointer', fontWeight: 500 }} onClick={() => setExportModalOpen(false)} disabled={isExporting}>İptal</button>
+                            <button style={{ padding: '10px 20px', background: '#0f172a', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '8px' }} onClick={handleExport} disabled={isExporting}>
+                                {isExporting ? 'İndiriliyor...' : 'İndir'}
                             </button>
                         </div>
                     </div>

@@ -3,12 +3,22 @@ from datetime import datetime, timedelta, timezone
 from sqlalchemy.orm import Session
 from sqlalchemy import func, desc, cast, Date
 from fastapi import HTTPException
+from typing import Any
+from datetime import datetime, timedelta, timezone
+from sqlalchemy.orm import Session
+from sqlalchemy import func, desc, cast, Date
+from fastapi import HTTPException
 from app.models.user import User
 from app.models.campaign import Campaign
 from app.models.product import Product
 from app.models.plan import Plan
 from app.models.campaign_result import CampaignResult
 from app.schemas.admin_schema import UserAdminUpdateRequest
+from app.models.api_expense import ApiExpense
+from app.models.plan import Plan
+import csv
+import io
+
 
 def check_access(current_admin: User) -> Any:
     """
@@ -47,6 +57,30 @@ def get_dashboard_stats(db: Session) -> dict:
         campaigns_change_percentage = ((current_campaigns_count - previous_campaigns_count) / previous_campaigns_count) * 100
     elif current_campaigns_count > 0:
         campaigns_change_percentage = 100.0
+
+
+    total_tokens_spent = db.query(func.sum(ApiExpense.tokens_used)).scalar() or 0
+    total_cost = db.query(func.sum(ApiExpense.cost)).scalar() or 0.0
+
+    current_tokens = db.query(func.sum(ApiExpense.tokens_used)).filter(ApiExpense.created_at >= thirty_days_ago).scalar() or 0
+    previous_tokens = db.query(func.sum(ApiExpense.tokens_used)).filter(ApiExpense.created_at >= sixty_days_ago, ApiExpense.created_at < thirty_days_ago).scalar() or 0
+
+    tokens_change_percentage = 0.0
+    if previous_tokens > 0:
+        tokens_change_percentage = ((current_tokens- previous_tokens) / previous_tokens) * 100
+    
+    elif current_tokens > 0:
+        tokens_change_percentage = 100.0
+    
+    current_cost = db.query(func.sum(ApiExpense.cost)).filter(ApiExpense.created_at >= thirty_days_ago).scalar() or 0.0
+    previous_cost = db.query(func.sum(ApiExpense.cost)).filter(ApiExpense.created_at >= sixty_days_ago, ApiExpense.created_at < thirty_days_ago).scalar() or 0.0
+
+    cost_change_percentage = 0.0
+    if previous_cost > 0:
+        cost_change_percentage = ((current_cost - previous_cost) / previous_cost) * 100
+    elif current_cost > 0:
+        cost_change_percentage = 100.0
+    
 
     # Get most active users (by campaign count)
     active_users_query = (
@@ -100,8 +134,12 @@ def get_dashboard_stats(db: Session) -> dict:
     return {
         "total_users": total_users,
         "total_campaigns": total_campaigns,
+        "total_tokens_spent": total_tokens_spent,
+        "total_cost": total_cost,
         "users_change_percentage": round(users_change_percentage, 1),
         "campaigns_change_percentage": round(campaigns_change_percentage, 1),
+        "tokens_change_percentage": round(tokens_change_percentage, 1),
+        "cost_change_percentage": round(cost_change_percentage, 1),
         "active_users": active_users,
         "daily_campaigns": daily_campaigns
     }
@@ -266,6 +304,13 @@ def get_campaigns_paginated(
             user_name = f"{user.name} {user.surname}".strip()
             user_avatar = user.name[0].upper() if user.name else "U"
 
+        campaign_expenses = db.query(ApiExpense).filter(
+            ApiExpense.related_entity_id == str(campaign.id)
+        ).all()
+
+        total_tokens = sum([e.tokens_used for e in campaign_expenses])
+        total_c = sum([e.cost for e in campaign_expenses])
+
         items.append({
             "id": str(campaign.id),
             "imageUrl": image_url,
@@ -273,8 +318,8 @@ def get_campaigns_paginated(
             "type": campaign.type,
             "goal": campaign.goal,
             "slogan": campaign.slogan or "",
-            "tokensSpent": 45,
-            "cost": "0.12",
+            "tokensSpent": total_tokens,
+            "cost": f"{total_c:.4f}",
             "user": {
                 "name": user_name,
                 "avatar": user_avatar
@@ -300,3 +345,191 @@ def delete_campaign(db: Session, campaign_id: str) -> dict:
     db.delete(campaign)
     db.commit()
     return {"message": "Campaign deleted successfully"}
+
+
+
+def get_financial_stats(
+    db:Session
+) -> dict:
+
+    thirty_days_ago = datetime.now(timezone.utc) - timedelta(days=30)
+
+    # Gelir (Şimdilik 0)
+    total_revenue = 0.0
+    plan_revenues = []
+
+    # Aktif Aboneler (Gerçek Veri - Planı olan kullanıcılar)
+    active_subs = db.query(User).filter(User.plan_id != None).count()
+    new_subs = db.query(User).filter(
+        User.plan_id != None, 
+        User.created_at >= thirty_days_ago
+    ).count()
+
+    #gider
+    expenses_query = db.query(
+        ApiExpense.service_type,
+        func.sum(ApiExpense.tokens_used).label("total_tokens"),
+        func.sum(ApiExpense.cost).label("total_cost")
+    ).group_by(ApiExpense.service_type).all()
+
+    api_expenses = []
+    total_api_cost = 0.0
+
+    for idx, expense in enumerate(expenses_query):
+        cost = expense.total_cost or 0.0
+        tokens =expense.total_tokens or 0
+        total_api_cost += cost
+
+        token_str = f"{tokens / 1000000:.1f}M" if tokens >= 1000000 else (f"{tokens / 1000:.1f}k" if tokens >= 1000 else str(tokens))
+
+        if cost == 0:
+            cost_str = "$0.00"
+        elif cost < 1.0:
+            cost_str = f"${cost:.4f}"
+        else:
+            cost_str = f"${cost:.2f}"
+
+        api_expenses.append({
+            "id": str(idx),
+            "service": expense.service_type,
+            "tokensUsed": token_str,
+            "totalCost": cost_str,
+            "trend": "Aktif"
+        })
+    
+    #Aylık Grafik
+    monthly_chart = []
+    months_tr = ["Oca", "Şub", "Mar", "Nis", "May", "Haz", "Tem", "Ağu", "Eyl", "Eki", "Kas", "Ara"]
+
+    # Gelirler şimdilik sıfır (Son 6 ay)
+    mock_incomes = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+
+    for i in range(5, -1, -1):
+        month_start = datetime.now(timezone.utc).replace(day=1) - timedelta(days=30 * i)
+        month_idx = month_start.month - 1
+        
+        # Gider gerçek veritabanından
+        month_expense = db.query(func.sum(ApiExpense.cost)).filter(
+            func.extract('month', ApiExpense.created_at) == month_start.month,
+            func.extract('year', ApiExpense.created_at) == month_start.year
+        ).scalar() or 0.0
+        
+        # Gelir sahte
+        month_income = mock_incomes[5 - i]
+        
+        monthly_chart.append({
+            "month": months_tr[month_idx],
+            "income": month_income,
+            "expense": month_expense
+        })
+
+    user_expenses_query = db.query(
+        User.id,
+        User.name,
+        User.surname,
+        User.email,
+        Plan.name.label("plan_name"),
+        func.sum(ApiExpense.tokens_used).label("total_tokens"),
+        func.sum(ApiExpense.cost).label("total_cost")
+    ).join(ApiExpense, User.id == ApiExpense.user_id)\
+     .outerjoin(Plan, User.plan_id == Plan.id)\
+     .group_by(User.id, User.name, User.surname, User.email, Plan.name)\
+     .order_by(func.sum(ApiExpense.cost).desc())\
+     .all()
+
+    user_api_costs = []
+    for u in user_expenses_query:
+        cost = u.total_cost or 0.0
+        tokens = u.total_tokens or 0
+        
+        token_str = f"{tokens / 1000000:.1f}M" if tokens >= 1000000 else (f"{tokens / 1000:.1f}k" if tokens >= 1000 else str(tokens))
+        
+        if cost == 0:
+            cost_str = "$0.00"
+        elif cost < 1.0:
+            cost_str = f"${cost:.4f}"
+        else:
+            cost_str = f"${cost:.2f}"
+
+        user_api_costs.append({
+            "id": str(u.id),
+            "name": f"{u.name} {u.surname}",
+            "email": u.email,
+            "plan": u.plan_name or "Ücretsiz",
+            "tokensUsed": token_str,
+            "totalCost": cost_str
+        })
+
+    return {
+        "totalRevenue": total_revenue,
+        "apiCost": total_api_cost,
+        "netProfit": total_revenue - total_api_cost,
+        "activeSubscribers": active_subs,
+        "revenueGrowth": 0.0,
+        "apiCostGrowth": 0.0,
+        "netProfitGrowth": 0.0,
+        "newSubscribers": new_subs,
+        "planRevenues": plan_revenues,
+        "apiExpenses": api_expenses,
+        "monthlyChart": monthly_chart,
+        "userApiCosts": user_api_costs
+    }
+
+def export_campaigns_csv(db: Session, start_date_str: str, end_date_str: str) -> str:
+    # Parse dates
+    try:
+        start_date = datetime.strptime(start_date_str, "%Y-%m-%d").replace(tzinfo=timezone.utc)
+        end_date = datetime.strptime(end_date_str, "%Y-%m-%d").replace(hour=23, minute=59, second=59, tzinfo=timezone.utc)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid date format. Use YYYY-MM-DD")
+
+    # Query Campaigns within date range, joined with Product and User
+    campaigns = db.query(Campaign, User).join(Product, Campaign.product_id == Product.id).join(User, Product.user_id == User.id).filter(
+        Campaign.created_at >= start_date,
+        Campaign.created_at <= end_date
+    ).order_by(Campaign.created_at.desc()).all()
+
+    # Generate CSV in memory
+    output = io.StringIO()
+    writer = csv.writer(output)
+    
+    # Write header
+    writer.writerow([
+        "Kullanıcı ID", "Kullanıcı Adı", "E-posta", 
+        "Kampanya ID", "Görsel Linki", "Platform", 
+        "Tür", "Hedef", "Harcanan Token", 
+        "Maliyet ($)", "Tarih"
+    ])
+    
+    # Write rows
+    for campaign, user in campaigns:
+        # Avoid timezone errors by safely converting datetime
+        created_str = campaign.created_at.strftime("%Y-%m-%d %H:%M:%S") if campaign.created_at else ""
+        
+        # Determine image url
+        image_url = ""
+        if campaign.results and len(campaign.results) > 0:
+            image_url = campaign.results[0].image_url or ""
+            
+        # Calculate tokens and cost
+        campaign_expenses = db.query(ApiExpense).filter(
+            ApiExpense.related_entity_id == str(campaign.id)
+        ).all()
+        total_tokens = sum([e.tokens_used for e in campaign_expenses])
+        total_c = sum([e.cost for e in campaign_expenses])
+            
+        writer.writerow([
+            str(user.id),
+            f"{user.name} {user.surname}",
+            user.email,
+            str(campaign.id),
+            image_url,
+            campaign.platform,
+            campaign.type,
+            campaign.goal,
+            str(total_tokens),
+            f"{total_c:.4f}".replace(".", ","),
+            created_str
+        ])
+        
+    return output.getvalue()
