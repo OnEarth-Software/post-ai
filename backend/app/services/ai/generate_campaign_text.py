@@ -3,6 +3,7 @@ import os
 import sys
 import json
 from openai import OpenAI
+from app.services.pricing.openai_pricing import calculate_openai_cost
 
 
 client = OpenAI(
@@ -70,8 +71,9 @@ def generate_product_campaing_text(
         })
 
     try:
+        model = "gpt-4o-mini"
         response = client.chat.completions.create(
-            model="gpt-4o-mini", 
+            model=model, 
             messages=[
                 {
                     "role": "user",
@@ -83,23 +85,69 @@ def generate_product_campaing_text(
             response_format={ "type": "json_object" }
         )
         
+        usage = response.usage
+
+        prompt_tokens = usage.prompt_tokens or 0
+        completion_tokens = usage.completion_tokens or 0
+        total_tokens = usage.total_tokens or 0
+
+        cached_tokens = 0
+        
+        if hasattr(usage, "prompt_tokens_details") and usage.prompt_tokens_details:
+            details = usage.prompt_tokens_details
+            if isinstance(details, dict):
+                cached_tokens = details.get("cached_tokens", 0)
+            else:
+                cached_tokens = getattr(details, "cached_tokens", 0)
+
+
+        cost = calculate_openai_cost(
+            model=model,
+            prompt_tokens=prompt_tokens,
+            completion_tokens=completion_tokens,
+            cached_tokens=cached_tokens
+        )
+
         raw_content = response.choices[0].message.content.strip()
         parsed_json = json.loads(raw_content)
-        
-        slogan = parsed_json.get("slogan", "Şıklığı Keşfet!")
-        subtext = parsed_json.get("subtext", "")
-        
+
+        slogan = parsed_json.get(
+            "slogan",
+            "Şıklığı Keşfet!"
+        )
+
+        subtext = parsed_json.get(
+            "subtext",
+            ""
+        )
+
         return {
             "slogan": slogan,
             "subtext": subtext,
-            "prompt_tokens": response.usage.prompt_tokens,
-            "completion_tokens": response.usage.completion_tokens,
-            "total_tokens": response.usage.total_tokens
+
+            # Kullanım bilgileri
+            "model": model,
+            "prompt_tokens": prompt_tokens,
+            "completion_tokens": completion_tokens,
+            "total_tokens": total_tokens,
+            "cached_tokens": cached_tokens,
+
+            # API maliyeti
+            "cost": cost
         }
-        
+
     except Exception as e:
-        print(f"Pazarlama metni üretimi sırasında hata: {e}")
+
+        print(
+            f"Pazarlama metni üretimi sırasında hata: {e}"
+        )
+
         return {
             "slogan": "Şıklığı Keşfet!",
-            "subtext": ""
+            "subtext": "",
+            "prompt_tokens": 0,
+            "completion_tokens": 0,
+            "total_tokens": 0,
+            "cached_tokens": 0,
+            "cost": 0
         }

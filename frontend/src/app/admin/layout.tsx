@@ -14,6 +14,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         redirect('/login');
     }
 
+    let shouldRedirectToLogin = false;
+    let shouldRedirectToDashboard = false;
     try {
         let apiUrl = process.env.API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
         if (apiUrl.includes('localhost') || apiUrl.includes('127.0.0.1')) {
@@ -23,25 +25,27 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             headers: { 'Authorization': `Bearer ${token}` },
             cache: 'no-store'
         });
-
         if (!response.ok) {
-            redirect('/login');
-        }
-
-        const userData = await response.json();
-        
-        if (userData.role !== 'admin') {
-            redirect('/dashboard');
+            shouldRedirectToLogin = true;
+        } else {
+            const userData = await response.json();
+            if (userData.role !== 'admin') {
+                shouldRedirectToDashboard = true;
+            }
         }
     } catch (err) {
         console.error("Server-side auth check failed:", err);
-        redirect('/login');
+        shouldRedirectToLogin = true;
     }
+    // Yönlendirme işlemleri Next.js'in hata fırlatma mantığı gereği 
+    // try-catch bloğunun tamamen dışında yapılmalıdır.
+    if (shouldRedirectToLogin) redirect('/login');
+    if (shouldRedirectToDashboard) redirect('/dashboard');
 
     return (
         <div className={styles.container}>
             <AdminSidebar />
-            
+
             {/* Main Content */}
             <main className={styles.main}>
                 <div className={styles.contentArea}>

@@ -22,20 +22,21 @@ def generate_campaign_text(
     p_tokens = ai_result.get("prompt_tokens", 0)
     c_tokens = ai_result.get("completion_tokens", 0)
     t_tokens = ai_result.get("total_tokens", 0)
-    
-    input_cost = (p_tokens / 1_000_000) * INPUT_PRICE_PER_1M
-    output_cost = (c_tokens / 1_000_000) * OUTPUT_PRICE_PER_1M
-    total_cost = input_cost + output_cost
-
+    cached_toks = ai_result.get("cached_tokens", 0)
+    total_cost = ai_result.get("cost", 0.0)
+    model_used = ai_result.get("model", "gpt-4o-mini")
     text_generate_cost = ApiExpense(
-        user_id= current_user.id,
-        service_type= "TEXT_GENERATION",
+        user_id=current_user.id,
+        service_type="TEXT_GENERATION",
+        model=model_used,
         tokens_used=t_tokens,
         prompt_tokens=p_tokens,
         completion_tokens=c_tokens,
+        cached_tokens=cached_toks,
         cost=total_cost
     )
     db.add(text_generate_cost)
+    
     db.commit()
 
 

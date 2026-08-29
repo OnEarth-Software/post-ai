@@ -1,6 +1,7 @@
 import json 
 import os
 from openai import OpenAI
+from app.services.pricing.openai_pricing import calculate_openai_cost
 
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
@@ -20,10 +21,10 @@ def analyze_product_image_with_ai(
       "marketing_style": "string"
     }
     """
-
+    model = "gpt-4o-mini"
 
     response = client.chat.completions.create(
-            model="gpt-4o-mini", # Vision (görsel) destekli model
+            model=model, # Vision (görsel) destekli model
             messages=[
                 {
                     "role": "user",
@@ -45,7 +46,35 @@ def analyze_product_image_with_ai(
 
     result_text = response.choices[0].message.content
     parsed = json.loads(result_text)
-    parsed["prompt_tokens"] = response.usage.prompt_tokens
-    parsed["completion_tokens"] = response.usage.completion_tokens
-    parsed["total_tokens"] = response.usage.total_tokens
+
+    usage = response.usage
+    prompt_tokens = usage.prompt_tokens or 0
+    completion_tokens = usage.completion_tokens or 0
+    total_tokens = usage.total_tokens or 0
+
+    cached_tokens = 0
+    if hasattr(usage, "prompt_tokens_details") and usage.prompt_tokens_details:
+        details = usage.prompt_tokens_details
+        if isinstance(details, dict):
+            cached_tokens = details.get("cached_tokens", 0)
+        else:
+            cached_tokens = getattr(details, "cached_tokens", 0)
+
+    
+    cost = calculate_openai_cost(
+        model=model,
+        prompt_tokens=prompt_tokens,
+        completion_tokens=completion_tokens,
+        cached_tokens=cached_tokens
+    )
+    
+
+    parsed["model"] = model
+
+    parsed["prompt_tokens"] = prompt_tokens
+    parsed["completion_tokens"] = completion_tokens
+    parsed["total_tokens"] = total_tokens
+    parsed["cached_tokens"] = cached_tokens
+    parsed["cost"] = cost
+
     return parsed

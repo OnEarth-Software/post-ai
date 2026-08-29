@@ -1,8 +1,11 @@
+import uuid
+from typing import List
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from app.database.connection import get_db
 from app.models.user import User
 from app.core.deps import get_current_user
+from app.schemas.campaign_schema import CampaignResultBase
 from app.schemas.campaign_result_schema import (
     CampaignImageGenerateRequest, 
     CampaignImageGenerateResponse,
@@ -37,6 +40,7 @@ def get_social_feed_endpoint(
     Herkese açık (is_public=True) olan sosyal akışı getirir.
     """
     return get_social_feed(db=db, current_user=current_user)
+
 
     
 @router.patch("/{result_id}/social")

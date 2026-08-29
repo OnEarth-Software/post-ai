@@ -5,29 +5,25 @@ import { useRouter } from 'next/navigation';
 import styles from './dashboard.module.css';
 import { Search, Bell, Sparkles, Package, Image as ImageIcon, CheckCircle2, UploadCloud, PlusCircle, Palette, PenTool, Wand2 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
+import { headers } from 'next/headers';
 
-const campaignChartData = [
-    { name: 'Jan', campaigns: 4 },
-    { name: 'Feb', campaigns: 7 },
-    { name: 'Mar', campaigns: 5 },
-    { name: 'Apr', campaigns: 12 },
-    { name: 'May', campaigns: 8 },
-    { name: 'Jun', campaigns: 15 },
-];
+
 
 export default function DashboardPage() {
     const router = useRouter();
     const [loading, setLoading] = useState(true);
     const [productCount, setProductCount] = useState(0);
+    const [campaignsCount, setCampaignsCount] = useState(0);
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     const currentMonthIndex = new Date().getMonth();
-    const initialProductChartData = [];
+    const initialChartData = [];
     for (let i = 5; i >= 0; i--) {
         let mIndex = currentMonthIndex - i;
         if (mIndex < 0) mIndex += 12;
-        initialProductChartData.push({ name: months[mIndex], products: 0 });
+        initialChartData.push({ name: months[mIndex], products: 0, campaigns: 0 });
     }
-    const [productChartData, setProductChartData] = useState<any[]>(initialProductChartData);
+    const [productChartData, setProductChartData] = useState<any[]>(initialChartData);
+    const [campaignChartData, setCampaignChartData] = useState<any[]>(initialChartData);
 
     useEffect(() => {
         const token = localStorage.getItem('token');
@@ -35,17 +31,25 @@ export default function DashboardPage() {
             router.push('/login');
         } else {
             const apiUrl = process.env.NEXT_PUBLIC_API_URL
-            fetch(`${apiUrl}/products/`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            })
-                .then(res => res.json())
-                .then(data => {
 
 
-                    if (Array.isArray(data)) {
-                        setProductCount(data.length);
+            Promise.all([
+                fetch(`${apiUrl}/products/`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                }).then(res => res.json()),
+                fetch(`${apiUrl}/campaigns/`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                }).then(res => res.json())
+            ])
+                .then(([productsData, campaignsData]) => {
+
+
+                    if (Array.isArray(productsData)) {
+                        setProductCount(productsData.length);
 
                         // Ürünleri aya göre gruplayıp grafiğe uygun hale getiriyoruz
                         const monthCounts: Record<string, number> = {};
@@ -63,7 +67,7 @@ export default function DashboardPage() {
                         const counts: Record<string, number> = {};
                         displayMonths.forEach(m => { counts[m] = 0; });
 
-                        data.forEach(product => {
+                        productsData.forEach(product => {
                             if (product.created_at) {
                                 const date = new Date(product.created_at);
                                 const monthName = months[date.getMonth()];
@@ -77,6 +81,35 @@ export default function DashboardPage() {
                         }));
                         setProductChartData([...formattedChartData]);
                     }
+
+                    if (Array.isArray(campaignsData)) {
+                        setCampaignsCount(campaignsData.length);
+
+                        const currentMonthIdx = new Date().getMonth();
+                        const displayMonths: string[] = [];
+                        for (let i = 5; i >= 0; i--) {
+                            let mIdx = currentMonthIdx - i;
+                            if (mIdx < 0) mIdx += 12;
+                            displayMonths.push(months[mIdx]);
+                        }
+                        const campCounts: Record<string, number> = {};
+                        displayMonths.forEach(m => { campCounts[m] = 0; });
+
+                        campaignsData.forEach(campaign => {
+                            if (campaign.created_at) {
+                                const date = new Date(campaign.created_at);
+                                const monthName = months[date.getMonth()];
+                                campCounts[monthName] = (campCounts[monthName] || 0) + 1;
+                            }
+                        });
+
+                        const formattedCampData = displayMonths.map(m => ({
+                            name: m,
+                            campaigns: campCounts[m] || 0
+                        }));
+                        setCampaignChartData([...formattedCampData]);
+                    }
+
                     setLoading(false);
                 })
                 .catch(err => {
@@ -128,7 +161,7 @@ export default function DashboardPage() {
             <div className={styles.topCards}>
                 <div className={styles.statCard}>
                     <div className={styles.statTop}>
-                        <div className={styles.statIconWrapper}>
+                        <div className={`${styles.statIconWrapper} ${styles.iconProduct}`}>
                             <Package size={20} />
                         </div>
 
@@ -139,18 +172,18 @@ export default function DashboardPage() {
 
                 <div className={styles.statCard}>
                     <div className={styles.statTop}>
-                        <div className={styles.statIconWrapper}>
+                        <div className={`${styles.statIconWrapper} ${styles.iconImage}`}>
                             <ImageIcon size={20} />
                         </div>
                         <span className={styles.statTrend}>+12%</span>
                     </div>
                     <div className={styles.statLabel}>Generated Images</div>
-                    <div className={styles.statValue}>840</div>
+                    <div className={styles.statValue}>{campaignsCount}</div>
                 </div>
 
                 <div className={styles.statCard}>
                     <div className={styles.statTop}>
-                        <div className={styles.statIconWrapper} style={{ background: '#dcfce7', color: '#059669' }}>
+                        <div className={`${styles.statIconWrapper} ${styles.iconCredit}`}>
                             <CheckCircle2 size={20} />
                         </div>
                         <span className={styles.statTrend}>High</span>
@@ -165,16 +198,16 @@ export default function DashboardPage() {
 
             {/* Action Cards */}
             <div className={styles.actionCards}>
-                <div className={styles.actionCard} onClick={() => router.push('/dashboard/products/upload')}>
-                    <div className={styles.actionIconWrapper}>
+                <div className={`${styles.actionCard} ${styles.cardUpload}`} onClick={() => router.push('/dashboard/products/upload')}>
+                    <div className={`${styles.actionIconWrapper} ${styles.iconWrapperUpload}`}>
                         <UploadCloud size={32} />
                     </div>
                     <h3 className={styles.actionTitle}>Upload Product</h3>
                     <p className={styles.actionDesc}>Add new inventory for AI processing.</p>
                 </div>
 
-                <div className={styles.actionCard} onClick={() => router.push('/dashboard/campaigns/new')}>
-                    <div className={styles.actionIconWrapper}>
+                <div className={`${styles.actionCard} ${styles.cardCampaign}`} onClick={() => router.push('/dashboard/campaigns/new')}>
+                    <div className={`${styles.actionIconWrapper} ${styles.iconWrapperCampaign}`}>
                         <PlusCircle size={32} />
                     </div>
                     <h3 className={styles.actionTitle}>New Campaign</h3>

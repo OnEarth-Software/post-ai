@@ -1,3 +1,4 @@
+from sqlalchemy import UUID
 import uuid
 import requests
 from fastapi import HTTPException
@@ -91,25 +92,26 @@ def generate_and_save_campaign_image(
     )
     db.add(new_asset)
 
-    quality = "medium"  # API'ye özel kalite yollamadığımız için varsayılan Medium kabul ediyoruz
-    
-    if quality == "high":
-        image_cost = 0.165 if img_size in ["1024x1536", "1536x1024"] else 0.211
-    elif quality == "medium":
-        image_cost = 0.041 if img_size in ["1024x1536", "1536x1024"] else 0.053
-    else:
-        image_cost = 0.006
-        
+    p_tokens = ai_response.get("prompt_tokens", 0)
+    c_tokens = ai_response.get("completion_tokens", 0)
+    cached_toks = ai_response.get("cached_tokens", 0)
+    total_cost = ai_response.get("cost", 0.0)
+    model_used = ai_response.get("model", "gpt-image-2")
     img_cost = ApiExpense(
         user_id=current_user.id,
         service_type="IMAGE_GENERATION",
-        tokens_used=1,              
-        prompt_tokens=0,            
-        completion_tokens=0,
-        cost=image_cost,            
+        model=model_used,
+        tokens_used=(p_tokens + c_tokens) if (p_tokens + c_tokens) > 0 else 1,              
+        prompt_tokens=p_tokens,            
+        completion_tokens=c_tokens,
+        cached_tokens=cached_toks,
+        image_input_tokens=p_tokens,
+        image_output_tokens=c_tokens,
+        cost=total_cost,            
         related_entity_id=campaign.id
     )
     db.add(img_cost)
+
     
     db.commit()
     db.refresh(new_result)
@@ -188,3 +190,4 @@ def get_social_feed(
         ))
         
     return feed
+
