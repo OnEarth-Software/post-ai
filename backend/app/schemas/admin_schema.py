@@ -75,6 +75,23 @@ class PaginatedCampaignAdminResponse(BaseModel):
     limit: int
 
 
+class ProductAdminResponse(BaseModel):
+    id: str
+    imageUrl: str
+    name: str
+    analysisStatus: str
+    tokensSpent: int
+    cost: str
+    user: CampaignUserSchema
+    createdAt: str
+
+class PaginatedProductAdminResponse(BaseModel):
+    items: List[ProductAdminResponse]
+    total: int
+    page: int
+    limit: int
+
+
 class PlanRevenue(BaseModel):
     id: str
     plan: str

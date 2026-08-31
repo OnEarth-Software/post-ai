@@ -337,14 +337,118 @@ def get_campaigns_paginated(
         "limit": limit
     }
 
+def get_products_paginated(
+    db: Session, 
+    page: int = 1, 
+    limit: int = 5, 
+    search: str = None,
+    sort: str = "desc",
+    date_range: str = "all"
+) -> dict:
+    from app.models.product_analyze import ProductAnalyze
+    from app.models.api_expense import ApiExpense
+
+    offset = (page - 1) * limit
+    
+    query = db.query(Product).outerjoin(User, Product.user_id == User.id)
+    
+    if search:
+        search_term = f"%{search}%"
+        from sqlalchemy import or_
+        query = query.filter(or_(
+            Product.name.ilike(search_term),
+            User.name.ilike(search_term),
+            User.surname.ilike(search_term)
+        ))
+
+    if date_range and date_range != "all":
+        now = datetime.now(timezone.utc)
+        if date_range == "7d":
+            query = query.filter(Product.created_at >= now - timedelta(days=7))
+        elif date_range == "1m":
+            query = query.filter(Product.created_at >= now - timedelta(days=30))
+        elif date_range == "6m":
+            query = query.filter(Product.created_at >= now - timedelta(days=180))
+        elif date_range == "1y":
+            query = query.filter(Product.created_at >= now - timedelta(days=365))
+
+    total_products = query.count()
+    
+    if sort == "asc":
+        query = query.order_by(Product.created_at.asc())
+    else:
+        query = query.order_by(desc(Product.created_at))
+        
+    products = query.offset(offset).limit(limit).all()
+
+    items = []
+    for product in products:
+        analyze = db.query(ProductAnalyze).filter(ProductAnalyze.product_id == product.id).first()
+        expenses = db.query(ApiExpense).filter(ApiExpense.related_entity_id == product.id).all()
+        
+        tokens_spent = sum(e.tokens_used for e in expenses if e.tokens_used)
+        total_cost = sum(e.cost for e in expenses if e.cost)
+        
+        user_name = "Unknown User"
+        user_avatar = "?"
+        if product.user:
+            name_part = product.user.name or ""
+            surname_part = product.user.surname or ""
+            full_name = f"{name_part} {surname_part}".strip()
+            user_name = full_name if full_name else "Unknown User"
+            user_avatar = name_part[0].upper() if name_part else "?"
+
+        items.append({
+            "id": str(product.id),
+            "imageUrl": product.image_url,
+            "name": product.name,
+            "analysisStatus": "Analyzed" if analyze else "Pending",
+            "tokensSpent": tokens_spent,
+            "cost": f"{total_cost:.4f}",
+            "user": {
+                "name": user_name,
+                "avatar": user_avatar
+            },
+            "createdAt": product.created_at.strftime("%d.%m.%Y") if product.created_at else ""
+        })
+
+    return {
+        "items": items,
+        "total": total_products,
+        "page": page,
+        "limit": limit
+    }
+
 def delete_campaign(db: Session, campaign_id: str) -> dict:
     campaign = db.query(Campaign).filter(Campaign.id == campaign_id).first()
     if not campaign:
-        raise HTTPException(status_code=404, detail="Campaign not found")
-        
+        return {"error": "Campaign not found"}
+    
     db.delete(campaign)
     db.commit()
     return {"message": "Campaign deleted successfully"}
+
+def delete_product(db: Session, product_id: str) -> dict:
+    from app.models.product_analyze import ProductAnalyze
+    from app.models.api_expense import ApiExpense
+    
+    product = db.query(Product).filter(Product.id == product_id).first()
+    if not product:
+        return {"error": "Product not found"}
+        
+    # Delete associated expenses
+    expenses = db.query(ApiExpense).filter(ApiExpense.related_entity_id == product.id).all()
+    for e in expenses:
+        db.delete(e)
+        
+    # Delete associated analysis
+    analysis = db.query(ProductAnalyze).filter(ProductAnalyze.product_id == product.id).all()
+    for a in analysis:
+        db.delete(a)
+        
+    db.delete(product)
+    db.commit()
+    return {"message": "Product deleted successfully"}
 
 
 

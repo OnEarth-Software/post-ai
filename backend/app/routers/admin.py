@@ -6,7 +6,11 @@ from app.database.connection import get_db
 from app.models.user import User
 from app.core.deps import get_current_admin
 from app.controllers import admin_controller
-from app.schemas.admin_schema import FinancialStatsResponse, DashboardStatsResponse, PaginatedUserResponse, UserAdminUpdateRequest, PaginatedCampaignAdminResponse
+from app.schemas.admin_schema import (
+    DashboardStatsResponse, UserAdminResponse, PaginatedUserResponse,
+    UserAdminUpdateRequest, PaginatedCampaignAdminResponse, FinancialStatsResponse,
+    PaginatedProductAdminResponse
+)
 
 router = APIRouter()
 
@@ -82,6 +86,29 @@ def delete_campaign(
 ):
     admin_controller.check_access(current_admin)
     return admin_controller.delete_campaign(db, campaign_id)
+
+
+@router.get("/products", response_model=PaginatedProductAdminResponse)
+def get_products_paginated(
+    page: int = 1,
+    limit: int = 5,
+    search: str = None,
+    sort: str = "desc",
+    date_range: str = "all",
+    db: Session = Depends(get_db),
+    current_admin: User = Depends(get_current_admin)
+):
+    admin_controller.check_access(current_admin)
+    return admin_controller.get_products_paginated(db, page, limit, search, sort, date_range)
+
+@router.delete("/products/{product_id}")
+def delete_product(
+    product_id: str,
+    db: Session = Depends(get_db),
+    current_admin: User = Depends(get_current_admin)
+):
+    admin_controller.check_access(current_admin)
+    return admin_controller.delete_product(db, product_id)
 
 
 @router.get("/finance-stats", response_model=FinancialStatsResponse)

@@ -151,7 +151,7 @@ export default function CampaignsClient({
             a.click();
             a.remove();
             window.URL.revokeObjectURL(url);
-            
+
             setExportModalOpen(false);
         } catch (error) {
             console.error("Export error:", error);
@@ -293,7 +293,7 @@ export default function CampaignsClient({
                     )}
                 </div>
 
-                <button 
+                <button
                     className={styles.filterBtn}
                     style={{ background: '#0f172a', color: 'white', border: 'none', marginLeft: 'auto' }}
                     onClick={() => setExportModalOpen(true)}
@@ -357,7 +357,7 @@ export default function CampaignsClient({
                                 </td>
                                 <td>
                                     <div className={styles.userBlock}>
-                                        <div className={styles.avatar} style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', color: '#475569' }}>
+                                        <div className={styles.avatar} style={{ width: '24px', height: '24px', fontSize: '0.75rem', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#e2e8f0', borderRadius: '50%', color: '#475569', fontWeight: 600 }}>
                                             {campaign.user.avatar}
                                         </div>
                                         <span className={styles.userName}>{campaign.user.name}</span>
@@ -526,19 +526,19 @@ export default function CampaignsClient({
                         <div style={{ padding: '32px' }}>
                             <div style={{ marginBottom: '16px' }}>
                                 <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#475569', marginBottom: '8px' }}>Başlangıç Tarihi</label>
-                                <input 
-                                    type="date" 
-                                    value={exportStart} 
-                                    onChange={e => setExportStart(e.target.value)} 
+                                <input
+                                    type="date"
+                                    value={exportStart}
+                                    onChange={e => setExportStart(e.target.value)}
                                     style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px', outline: 'none' }}
                                 />
                             </div>
                             <div>
                                 <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#475569', marginBottom: '8px' }}>Bitiş Tarihi</label>
-                                <input 
-                                    type="date" 
-                                    value={exportEnd} 
-                                    onChange={e => setExportEnd(e.target.value)} 
+                                <input
+                                    type="date"
+                                    value={exportEnd}
+                                    onChange={e => setExportEnd(e.target.value)}
                                     style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px', outline: 'none' }}
                                 />
                             </div>
