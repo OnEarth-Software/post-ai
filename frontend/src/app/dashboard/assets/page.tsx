@@ -159,7 +159,12 @@ export default function AssetsPage() {
                                 className={styles.imageContainer}
                                 onClick={() => setSelectedImage(asset.image_url)}
                             >
-                                <img src={asset.image_url} alt="Generated Campaign Asset" className={styles.assetImage} />
+                                <img 
+                                    src={asset.image_url} 
+                                    alt="Generated Campaign Asset" 
+                                    className={styles.assetImage} 
+                                    onError={() => setAssets(prev => prev.filter(a => a.id !== asset.id))}
+                                />
                                 <div className={styles.overlay}></div>
                                 
                                 <div className={styles.actionButtons}>

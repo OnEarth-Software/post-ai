@@ -282,62 +282,64 @@ export default function AIStudioPage({ params }: { params: { id: string } }) {
                         </div>
                     </div>
 
-                    <div className={styles.glassCard}>
-                        <div className={styles.cardHeaderRow}>
-                            <h3 className={styles.cardTitle} style={{ margin: 0 }}>
-                                <FileText size={18} /> Pazarlama Post Açıklaması
-                            </h3>
-                            {campaign.post_text && (
-                                <button 
-                                    onClick={handleCopyText} 
-                                    className={styles.copyButton}
-                                    title="Metni Kopyala"
-                                >
-                                    {copied ? <Check size={14} /> : <Copy size={14} />}
-                                    {copied ? 'Kopyalandı!' : 'Kopyala'}
-                                </button>
+                    {campaign.type?.toLowerCase() !== 'story' && (
+                        <div className={styles.glassCard}>
+                            <div className={styles.cardHeaderRow}>
+                                <h3 className={styles.cardTitle} style={{ margin: 0 }}>
+                                    <FileText size={18} /> Pazarlama Post Açıklaması
+                                </h3>
+                                {campaign.post_text && (
+                                    <button 
+                                        onClick={handleCopyText} 
+                                        className={styles.copyButton}
+                                        title="Metni Kopyala"
+                                    >
+                                        {copied ? <Check size={14} /> : <Copy size={14} />}
+                                        {copied ? 'Kopyalandı!' : 'Kopyala'}
+                                    </button>
+                                )}
+                            </div>
+
+                            {campaign.post_text ? (
+                                <>
+                                    <div className={styles.postTextBox}>
+                                        {campaign.post_text}
+                                    </div>
+                                    <button 
+                                        onClick={handleGeneratePostText} 
+                                        disabled={generatingText}
+                                        className={styles.regenerateButton}
+                                    >
+                                        {generatingText ? (
+                                            <Loader2 size={16} className={styles.spinningIcon} />
+                                        ) : (
+                                            <Sparkles size={16} />
+                                        )}
+                                        {generatingText ? 'Yeniden Üretiliyor...' : 'Metni Yeniden Üret'}
+                                    </button>
+                                </>
+                            ) : (
+                                <div style={{ textAlign: 'center', padding: '0.5rem 0' }}>
+                                    <p style={{ color: '#64748b', fontSize: '0.88rem', lineHeight: '1.5', marginBottom: '1.25rem' }}>
+                                        Sosyal medyada paylaşmak için yapay zeka ile profesyonel bir gönderi açıklaması (hook, gövde, CTA ve etiketler) oluşturun.
+                                    </p>
+                                    <button 
+                                        onClick={handleGeneratePostText} 
+                                        disabled={generatingText}
+                                        className={styles.primaryButton}
+                                        style={{ width: '100%', justifyContent: 'center' }}
+                                    >
+                                        {generatingText ? (
+                                            <Loader2 size={18} className={styles.spinningIcon} />
+                                        ) : (
+                                            <Sparkles size={18} />
+                                        )}
+                                        {generatingText ? 'Yazı Oluşturuluyor...' : 'Pazarlama Yazısı Oluştur'}
+                                    </button>
+                                </div>
                             )}
                         </div>
-
-                        {campaign.post_text ? (
-                            <>
-                                <div className={styles.postTextBox}>
-                                    {campaign.post_text}
-                                </div>
-                                <button 
-                                    onClick={handleGeneratePostText} 
-                                    disabled={generatingText}
-                                    className={styles.regenerateButton}
-                                >
-                                    {generatingText ? (
-                                        <Loader2 size={16} className={styles.spinningIcon} />
-                                    ) : (
-                                        <Sparkles size={16} />
-                                    )}
-                                    {generatingText ? 'Yeniden Üretiliyor...' : 'Metni Yeniden Üret'}
-                                </button>
-                            </>
-                        ) : (
-                            <div style={{ textAlign: 'center', padding: '0.5rem 0' }}>
-                                <p style={{ color: '#64748b', fontSize: '0.88rem', lineHeight: '1.5', marginBottom: '1.25rem' }}>
-                                    Sosyal medyada paylaşmak için yapay zeka ile profesyonel bir gönderi açıklaması (hook, gövde, CTA ve etiketler) oluşturun.
-                                </p>
-                                <button 
-                                    onClick={handleGeneratePostText} 
-                                    disabled={generatingText}
-                                    className={styles.primaryButton}
-                                    style={{ width: '100%', justifyContent: 'center' }}
-                                >
-                                    {generatingText ? (
-                                        <Loader2 size={18} className={styles.spinningIcon} />
-                                    ) : (
-                                        <Sparkles size={18} />
-                                    )}
-                                    {generatingText ? 'Yazı Oluşturuluyor...' : 'Pazarlama Yazısı Oluştur'}
-                                </button>
-                            </div>
-                        )}
-                    </div>
+                    )}
 
                     <div className={styles.glassCard}>
                         <h3 className={styles.cardTitle}><ImageIcon size={18} /> Orijinal Ürün Görseli</h3>
