@@ -25,6 +25,8 @@ class UserResponse(UserBase):
     plan_id: Optional[UUID]
     created_at: datetime
     is_2fa_enabled: bool = False
+    design_limit: Optional[int] = 5
+    product_limit: Optional[int] = 5
     
     model_config = {"from_attributes": True}
 
