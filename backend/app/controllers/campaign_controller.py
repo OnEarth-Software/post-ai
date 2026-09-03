@@ -7,6 +7,9 @@ from app.schemas.campaign_schema import CampaignTextGenerateRequest, CampaignTex
 from app.services.ai.generate_campaign_text import generate_product_campaing_text
 from app.core.config import settings
 from app.models.api_expense import ApiExpense
+from app.services.ai.generate_pots_text import generate_product_post_text
+from app.schemas.campaign_schema import CampaignPostTextGenerateResponse
+from app.models.product import Product
 
 INPUT_PRICE_PER_1M = 0.15
 OUTPUT_PRICE_PER_1M = 0.60
@@ -120,3 +123,84 @@ def get_campaign_detail(db: Session, campaign_id: str, current_user: User):
         raise HTTPException(status_code=404, detail="Kampanya bulunamadı veya erişim yetkiniz yok.")
         
     return campaign
+
+
+def generate_campaign_post_text(
+        db: Session,
+        campaign_id: str,
+        current_user: User
+)->CampaignPostTextGenerateResponse:
+
+    campaign = db.query(Campaign).join(Product).filter(
+        Campaign.id == campaign_id,
+        Product.user_id == current_user.id
+    ).first()
+
+    if not campaign:
+        raise HTTPException(
+            status_code=404, 
+            detail="Kampanya bulunamadı veya erişim yetkiniz yok."
+        )
+
+    product = campaign.product
+    analyze = campaign.product_analyze
+
+    image_url = None
+    if campaign.results and len(campaign.results) > 0:
+        image_url = campaign.results[0].image_url
+    elif product and product.image_url:
+        image_url = product.image_url
+
+    payload = {
+        "analysis_result": {
+            "category": analyze.category if analyze else "",
+            "style": analyze.style if analyze else "",
+            "colors": analyze.colors if analyze else [],
+            "audience": analyze.audience if analyze else "",
+            "marketing_style": analyze.marketing_style if analyze else ""
+        },
+        "campaign_info": {
+            "goal": campaign.goal,
+            "platform": campaign.platform,
+            "type": campaign.type,
+            "user_prompt": campaign.user_prompt or ""
+        },
+        "image_url": image_url,
+        "slogan": campaign.slogan or "",
+        "subtext": campaign.subtext or ""
+    }
+
+    ai_result = generate_product_post_text(payload)
+    generated_caption = ai_result.get("caption", "")
+    campaign.post_text = generated_caption
+
+    p_tokens = ai_result.get("prompt_tokens", 0)
+    c_tokens = ai_result.get("completion_tokens", 0)
+    t_tokens = ai_result.get("total_tokens", 0)
+    cached_toks = ai_result.get("cached_tokens", 0)
+    total_cost = ai_result.get("cost", 0.0)
+    model_used = ai_result.get("model", "gpt-4o-mini")
+    if t_tokens > 0 or total_cost > 0:
+        expense = ApiExpense(
+            user_id=current_user.id,
+            service_type="POST_TEXT_GENERATION",
+            model=model_used,
+            tokens_used=t_tokens,
+            prompt_tokens=p_tokens,
+            completion_tokens=c_tokens,
+            cached_tokens=cached_toks,
+            cost=total_cost,
+            related_entity_id=str(campaign.id)
+        )
+        db.add(expense)
+    db.commit()
+    db.refresh(campaign)
+
+    return CampaignPostTextGenerateResponse(
+        campaign_id=campaign.id,
+        post_text=campaign.post_text or "",
+        hook=ai_result.get("hook", ""),
+        body=ai_result.get("body", ""),
+        call_to_action=ai_result.get("call_to_action", ""),
+        hashtags=ai_result.get("hashtags", [])
+    )

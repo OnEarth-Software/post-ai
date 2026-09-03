@@ -39,6 +39,7 @@ class CampaignResponse(BaseModel):
     system_prompt: str
     slogan: Optional[str] = None
     subtext: Optional[str] = None
+    post_text: Optional[str] = None
 
     class Config:
         from_attributes = True
@@ -67,6 +68,7 @@ class CampaignListResponse(BaseModel):
     type: str
     slogan: Optional[str] = None
     subtext: Optional[str] = None
+    post_text: Optional[str] = None
     created_at: datetime
     product: CampaignProductBase
     results: List[CampaignResultBase] = []
@@ -77,3 +79,11 @@ class CampaignListResponse(BaseModel):
 class CampaignDetailResponse(CampaignListResponse):
     user_prompt: Optional[str] = None
     system_prompt: str
+
+class CampaignPostTextGenerateResponse(BaseModel):
+    campaign_id: uuid.UUID
+    post_text: str
+    hook: Optional[str] = None
+    body: Optional[str] = None
+    call_to_action: Optional[str] = None
+    hashtags: Optional[List[str]] = []

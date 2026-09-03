@@ -1,12 +1,47 @@
 "use client";
 
 import React, { useState } from 'react';
-import { DollarSign, TrendingUp, TrendingDown, Users, CreditCard, Activity, Zap, Box } from 'lucide-react';
+import { DollarSign, TrendingUp, TrendingDown, Users, CreditCard, Activity, Zap, Box, FileText, Image as ImageIcon, Type } from 'lucide-react';
 import styles from './financials.module.css';
 
 interface FinanceClientProps {
     initialStats: any;
 }
+
+const getServiceDisplay = (service: string) => {
+    switch (service) {
+        case 'POST_TEXT_GENERATION':
+            return {
+                label: 'Post Açıklama Metni (Caption & Etiket)',
+                subtext: 'GPT-4o Mini ile sosyal medya açıklama metni ve CTA',
+                icon: <FileText size={18} color="#059669" />
+            };
+        case 'TEXT_GENERATION':
+            return {
+                label: 'Kampanya Tasarım Metinleri (Slogan & Alt Başlık)',
+                subtext: 'Görsel üzerine yerleşecek slogan ve tasarım metinleri',
+                icon: <Type size={18} color="#3b82f6" />
+            };
+        case 'IMAGE_GENERATION':
+            return {
+                label: 'Yapay Zeka Görsel Tasarımı',
+                subtext: 'GPT Image ile nihai pazarlama post görseli',
+                icon: <ImageIcon size={18} color="#8b5cf6" />
+            };
+        case 'VISION_ANALYSIS':
+            return {
+                label: 'Ürün Görsel Analizi (Vision)',
+                subtext: 'GPT-4o Mini ile ürünün kategori, stil ve renk analizi',
+                icon: <Box size={18} color="#6366f1" />
+            };
+        default:
+            return {
+                label: service,
+                subtext: 'API Servis Harcaması',
+                icon: <Zap size={18} color="#f59e0b" />
+            };
+    }
+};
 
 export default function FinanceClient({ initialStats }: FinanceClientProps) {
     const [activeTab, setActiveTab] = useState('Overview');
@@ -195,23 +230,45 @@ export default function FinanceClient({ initialStats }: FinanceClientProps) {
                             </tr>
                         </thead>
                         <tbody>
-                            {stats.apiExpenses.map((expense: any) => (
-                                <tr key={expense.id}>
-                                    <td style={{ fontWeight: 600, color: '#0f172a' }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                            {expense.service.includes('VISION') ? <Box size={16} color="#6366f1" /> : <Zap size={16} color="#f59e0b" />}
-                                            {expense.service}
-                                        </div>
-                                    </td>
-                                    <td>{expense.tokensUsed}</td>
-                                    <td style={{ fontWeight: 700, color: '#dc2626' }}>{expense.totalCost}</td>
-                                    <td>
-                                        <span style={{ color: expense.trend.includes('+') ? '#dc2626' : '#64748b', fontSize: '0.85rem', fontWeight: 600 }}>
-                                            {expense.trend}
-                                        </span>
-                                    </td>
-                                </tr>
-                            ))}
+                            {stats.apiExpenses.map((expense: any) => {
+                                const sDisplay = getServiceDisplay(expense.service);
+                                return (
+                                    <tr key={expense.id}>
+                                        <td>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                                <div style={{
+                                                    padding: '8px',
+                                                    borderRadius: '8px',
+                                                    backgroundColor: '#f8fafc',
+                                                    border: '1px solid #e2e8f0',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center'
+                                                }}>
+                                                    {sDisplay.icon}
+                                                </div>
+                                                <div>
+                                                    <div style={{ fontWeight: 600, color: '#0f172a', fontSize: '0.92rem' }}>
+                                                        {sDisplay.label}
+                                                    </div>
+                                                    {sDisplay.subtext && (
+                                                        <div style={{ fontSize: '0.78rem', color: '#64748b', marginTop: '2px' }}>
+                                                            {sDisplay.subtext}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td style={{ fontWeight: 500 }}>{expense.tokensUsed}</td>
+                                        <td style={{ fontWeight: 700, color: '#dc2626' }}>{expense.totalCost}</td>
+                                        <td>
+                                            <span style={{ color: expense.trend.includes('+') ? '#dc2626' : '#059669', fontSize: '0.85rem', fontWeight: 600 }}>
+                                                {expense.trend}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                );
+                            })}
                             {stats.apiExpenses.length === 0 && (
                                 <tr>
                                     <td colSpan={4} style={{ textAlign: 'center', padding: '20px' }}>Harcanmış API faturası bulunmuyor.</td>

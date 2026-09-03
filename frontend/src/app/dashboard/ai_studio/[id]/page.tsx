@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { Download, ArrowLeft, Loader2, Sparkles, Image as ImageIcon, Zap, Type, Crosshair, Layers } from 'lucide-react';
+import { Download, ArrowLeft, Loader2, Sparkles, Image as ImageIcon, Zap, Type, Crosshair, Layers, FileText, Copy, Check } from 'lucide-react';
 import styles from './ai_studio.module.css';
 
 const formatCapitalize = (text: string) => {
@@ -18,6 +18,8 @@ export default function AIStudioPage({ params }: { params: { id: string } }) {
     const { id } = params;
     const [campaign, setCampaign] = useState<any>(null);
     const [loading, setLoading] = useState(true);
+    const [generatingText, setGeneratingText] = useState(false);
+    const [copied, setCopied] = useState(false);
 
     useEffect(() => {
         const fetchCampaignDetail = async () => {
@@ -97,6 +99,44 @@ export default function AIStudioPage({ params }: { params: { id: string } }) {
             }
         } catch (error) {
             console.error('Paylaşım durumu değiştirilemedi:', error);
+        }
+    };
+
+    const handleGeneratePostText = async () => {
+        setGeneratingText(true);
+        try {
+            const token = localStorage.getItem('token');
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+            const response = await fetch(`${apiUrl}/campaigns/${id}/generate-post-text`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                setCampaign((prev: any) => ({
+                    ...prev,
+                    post_text: data.post_text
+                }));
+            } else {
+                const errData = await response.json().catch(() => ({}));
+                alert(errData.detail || 'Pazarlama yazısı üretilirken bir hata oluştu.');
+            }
+        } catch (error) {
+            console.error('Hata:', error);
+            alert('Sunucuyla bağlantı kurulamadı.');
+        } finally {
+            setGeneratingText(false);
+        }
+    };
+
+    const handleCopyText = () => {
+        if (campaign?.post_text) {
+            navigator.clipboard.writeText(campaign.post_text);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
         }
     };
 
@@ -240,6 +280,63 @@ export default function AIStudioPage({ params }: { params: { id: string } }) {
                                 </>
                             )}
                         </div>
+                    </div>
+
+                    <div className={styles.glassCard}>
+                        <div className={styles.cardHeaderRow}>
+                            <h3 className={styles.cardTitle} style={{ margin: 0 }}>
+                                <FileText size={18} /> Pazarlama Post Açıklaması
+                            </h3>
+                            {campaign.post_text && (
+                                <button 
+                                    onClick={handleCopyText} 
+                                    className={styles.copyButton}
+                                    title="Metni Kopyala"
+                                >
+                                    {copied ? <Check size={14} /> : <Copy size={14} />}
+                                    {copied ? 'Kopyalandı!' : 'Kopyala'}
+                                </button>
+                            )}
+                        </div>
+
+                        {campaign.post_text ? (
+                            <>
+                                <div className={styles.postTextBox}>
+                                    {campaign.post_text}
+                                </div>
+                                <button 
+                                    onClick={handleGeneratePostText} 
+                                    disabled={generatingText}
+                                    className={styles.regenerateButton}
+                                >
+                                    {generatingText ? (
+                                        <Loader2 size={16} className={styles.spinningIcon} />
+                                    ) : (
+                                        <Sparkles size={16} />
+                                    )}
+                                    {generatingText ? 'Yeniden Üretiliyor...' : 'Metni Yeniden Üret'}
+                                </button>
+                            </>
+                        ) : (
+                            <div style={{ textAlign: 'center', padding: '0.5rem 0' }}>
+                                <p style={{ color: '#64748b', fontSize: '0.88rem', lineHeight: '1.5', marginBottom: '1.25rem' }}>
+                                    Sosyal medyada paylaşmak için yapay zeka ile profesyonel bir gönderi açıklaması (hook, gövde, CTA ve etiketler) oluşturun.
+                                </p>
+                                <button 
+                                    onClick={handleGeneratePostText} 
+                                    disabled={generatingText}
+                                    className={styles.primaryButton}
+                                    style={{ width: '100%', justifyContent: 'center' }}
+                                >
+                                    {generatingText ? (
+                                        <Loader2 size={18} className={styles.spinningIcon} />
+                                    ) : (
+                                        <Sparkles size={18} />
+                                    )}
+                                    {generatingText ? 'Yazı Oluşturuluyor...' : 'Pazarlama Yazısı Oluştur'}
+                                </button>
+                            </div>
+                        )}
                     </div>
 
                     <div className={styles.glassCard}>

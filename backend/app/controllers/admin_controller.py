@@ -327,7 +327,8 @@ def get_campaigns_paginated(
             "createdAt": campaign.created_at.isoformat() if campaign.created_at else "",
             "user_prompt": campaign.user_prompt,
             "system_prompt": campaign.system_prompt,
-            "subtext": campaign.subtext
+            "subtext": campaign.subtext,
+            "post_text": campaign.post_text
         })
         
     return {
