@@ -10,8 +10,8 @@ from app.models.api_expense import ApiExpense
 from app.services.ai.generate_pots_text import generate_product_post_text
 from app.schemas.campaign_schema import CampaignPostTextGenerateResponse
 from app.models.product import Product
-from app.services.search.serper_client import search_google_shopping
-from app.services.ai.market_analysis_ai import generate_market_report
+from app.services.search.factory import get_search_provider
+from app.services.ai.market_analysis_ai import generate_market_report, refine_search_query_with_image_insights
 from app.models.brand import Brand
 import uuid
 
@@ -236,7 +236,37 @@ def generate_campaign_market_analysis(
     brand_name = brand.name if brand else "Bilinmeyen Marka"
     brand_desc = brand.description if brand and brand.description else "Bu yeni ve heyecan verici bir marka."
     
-    competitor_data = search_google_shopping(analyze.search_query)
+    image_url = None
+    if campaign.results and len(campaign.results) > 0:
+        image_url = campaign.results[0].image_url
+    elif product and product.image_url:
+        image_url = product.image_url
+
+    provider = get_search_provider()
+    image_insights = None
+    refined_query = analyze.search_query
+    refine_expense = None
+    
+    if image_url:
+        image_insights = provider.get_image_insights(image_url)
+        if image_insights:
+            refine_result = refine_search_query_with_image_insights(product.name, analyze.search_query, image_insights)
+            refined_query = refine_result.get("refined_query", analyze.search_query)
+            
+            if refine_result.get("total_tokens", 0) > 0:
+                refine_expense = ApiExpense(
+                    user_id=current_user.id,
+                    service_type="QUERY_REFINEMENT",
+                    model=refine_result.get("model", "gpt-4o-mini"),
+                    tokens_used=refine_result.get("total_tokens", 0),
+                    prompt_tokens=refine_result.get("prompt_tokens", 0),
+                    completion_tokens=refine_result.get("completion_tokens", 0),
+                    cached_tokens=refine_result.get("cached_tokens", 0),
+                    cost=refine_result.get("cost", 0.0),
+                    related_entity_id=str(campaign.id)
+                )
+
+    competitor_data = provider.get_shopping_results(refined_query)
     if not competitor_data:
         raise HTTPException(status_code=500, detail="Google Alışveriş'te rakip bulunamadı veya Serper API hatası.")
         
@@ -245,8 +275,9 @@ def generate_campaign_market_analysis(
         product_name=product.name,
         brand_name=brand_name,
         brand_desc=brand_desc,
-        search_query=analyze.search_query,
-        competitor_data=competitor_data
+        search_query=refined_query,
+        competitor_data=competitor_data,
+        image_insights=image_insights
     )
     
     
@@ -266,6 +297,8 @@ def generate_campaign_market_analysis(
         related_entity_id=campaign.id
     )
     db.add(new_spending)
+    if refine_expense:
+        db.add(refine_expense)
     db.commit()
     
     return {"message": "Analiz başarıyla tamamlandı", "report": campaign.market_report}
