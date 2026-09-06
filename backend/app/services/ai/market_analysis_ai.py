@@ -11,7 +11,9 @@ def generate_market_report(
     brand_desc: str, 
     search_query: str, 
     competitor_data: list,
-    image_insights: dict = None
+    image_insights: dict = None,
+    analyze_data: dict = None,
+    campaign_image_url: str = None
 ) -> dict:
     image_info = ""
     if image_insights:
@@ -20,32 +22,88 @@ def generate_market_report(
         if titles:
             image_info = f"\n    Ayrıca, ürün görselinden elde edilen benzer pazar eşleşmeleri şunlardır: {', '.join(titles)}\n    Bu veriyi pazarlama stratejisi ve ürün isimlendirmede göz önünde bulundur."
 
+    analyze_info = ""
+    if analyze_data:
+        analyze_info = f"""
+    Hedef Kitle: {analyze_data.get('audience', 'Belirtilmedi')}
+    Kategori: {analyze_data.get('category', 'Belirtilmedi')}
+    Pazarlama Tarzı: {analyze_data.get('marketing_style', 'Belirtilmedi')}
+    """
+
     prompt = f"""
-    Sen uzman bir e-ticaret ve pazar analistisin. 
+    Sen uzman bir e-ticaret, marka stratejisti ve pazar analistisin. 
+    Aşağıda markamız, ürünümüz ve pazar durumuyla ilgili veriler yer almaktadır. Senden bu verileri kullanarak detaylı, profesyonel ve stratejik bir 'Rakip ve Pazar Analizi Raporu' oluşturmanı istiyorum.
     
-    Marka Adımız: {brand_name}
-    Marka Açıklamamız: {brand_desc}
+    # GİRDİ VERİLERİ
+    Marka Adı: {brand_name}
+    Marka Açıklaması: {brand_desc}
     
-    Bizim satacağımız ürünün tam marka ve modeli şudur: '{search_query}'.
-    (Kullanıcının sisteme girdiği isim '{product_name}' olsa da asıl satılacak spesifik ürün modeli '{search_query}' şeklindedir).
+    Asıl Satılacak Ürün / Model: '{search_query}' (Kullanıcı girişi: '{product_name}')
+    {analyze_info}
     {image_info}
     
-    Bu ürün modeli ('{search_query}') için pazardaki satıcı verilerini elde ettik:
-    
+    Pazardaki Rakip Satıcı Verileri (Google Shopping):
     {json.dumps(competitor_data, ensure_ascii=False, indent=2)}
     
-    ÖNEMLİ KURALLAR VE MANTIK (LÜTFEN BUNLARA HARFİYEN UY):
-    1. KESİN FİLTRELEME: Listedeki veriler arasında farklı modeller, çok daha ucuz aksesuarlar (skatez, grip tape vb.) veya kılıflar olabilir. FİYAT ANALİZİ YAPARKEN SADECE BİREBİR AYNI MODEL OLAN '{search_query}' ÜRÜNLERİNİ DİKKATE AL. Diğer tüm alakasız veya farklı fiyat bandındaki ürünleri analizden SİL.
-    2. FİYAT STRATEJİSİ: Yukarıda filtrelediğin, BİREBİR AYNI ürünü satan geçerli platformların ve satıcıların fiyatlarını karşılaştır (Örn: Amazon'da şu kadar, Trendyol'da bu kadar). Bu gerçekçi fiyatlara dayanarak markamız için net ve rekabetçi bir satış fiyatı öner. (Aksesuar fiyatlarını yanlışlıkla ortalamaya eklersen tüm analiz çöker, buna çok dikkat et!)
-    3. REKABET ORTAMI: Sadece '{search_query}' ürününü satan rakiplerin durumunu değerlendir ve pazarın bu ürün özelindeki yapısından bahset.
+    # KURALLAR VE MANTIK:
+    1. FİLTRELEME: Listedeki veriler arasında farklı modeller veya daha ucuz aksesuarlar olabilir. Fiyat analizi yaparken sadece birebir '{search_query}' olanları dikkate al.
+    2. PROFESYONEL DİL: Raporu şık bir Markdown formatında, bir ajansın markaya sunduğu rapor profesyonelliğinde (başlıklar, listeler, kalın yazılar ile) hazırla.
     
-    Lütfen bu kurallara uygun olarak Türkçe, net ve stratejik bir rapor sun.
-    Raporun içeriği şu başlıkları içermeli:
-    1. Fiyatlandırma Stratejisi (Birebir aynı ürün diğer satıcılarda hangi fiyatlara satılıyor? Biz hangi fiyattan satmalıyız?)
-    2. Rekabet Ortamı (Aynı ürünü satan satıcılar/platformlar arasındaki rekabet durumu nedir?)
-    3. Pazarlama ve Farklılaşma Tavsiyesi (Bu ürünü pazarlarken hangi özellikleri öne çıkarmalı, diğer satıcılardan nasıl ayrışmalıyız?)
+    # RAPOR YAPISI (Lütfen bu başlıkları kullanarak Markdown formatında dön):
     
-    Lütfen yanıtını doğrudan metin (Markdown) formatında ver. Başka hiçbir gereksiz açıklama yapma.
+    ## 1. Yönetici Özeti
+    Pazarın genel durumu, rekabet seviyesi ve markamız için en büyük fırsat/risk (4-5 cümle).
+    
+    ## 2. Genel Pazar Görünümü
+    Sektörün mevcut trendleri ve fiyatlandırma eğilimleri.
+    
+    ## 3. Rekabet Yoğunluğu
+    Pazardaki satıcıların sayısı ve fiyat dağılımına göre rekabetin seviyesi (Yüksek, Orta vb.).
+    
+    ## 4. Rakip Analizi
+    Öne çıkan 2-3 rakip/satıcı için fiyat/teklif stratejisi ve markamıza karşı avantaj/dezavantajları.
+    
+    ## 5. Rakiplerin Ortak Stratejileri
+    Satıcıların fiyatlandırma ve konumlandırmadaki ortak eğilimleri.
+    
+    ## 6. Rakiplerin Güçlü ve Zayıf Yönleri
+    Pazardaki genel güçlü ve zayıf yönler.
+    
+    ## 7. Marka Konumlandırma Analizi
+    Markamız pazarda nerede konumlanmalı?
+    
+    ## 8. Hedef Kitle Analizi
+    Hedef kitle beklentileri ve problemleri.
+    
+    ## 9. Tüketici İçgörüleri (Consumer Insights)
+    Tüketici satın alma motivasyonları.
+    
+    ## 10. Farklılaşma Fırsatları
+    Rakiplerden nasıl ayrışabiliriz?
+    
+    ## 11. White Space Analysis
+    Rakiplerin sahiplenmediği pazarlama alanları.
+    
+    ## 12. İçerik Fırsatları
+    Kullanılabilecek içerik formatları.
+    
+    ## 13. Reklam Mesajı Önerileri
+    Ana ve alternatif kanca/mesajlar.
+    
+    ## 14. CTA Önerileri
+    En uygun Call-to-Action metinleri.
+    
+    ## 15. Kampanya Stratejisi
+    Platform, ton ve genel strateji tavsiyesi.
+    
+    ## 16. A/B Test Önerileri
+    Test edilecek varyasyonlar.
+    
+    ## 17. Önceliklendirilmiş Öneriler
+    Aksiyonların öncelik sırası.
+    
+    ## 18. Sonuç
+    Kapanış değerlendirmesi.
     """
     
     model = "gpt-4o-mini" 
@@ -53,10 +111,8 @@ def generate_market_report(
     try:
         response = client.chat.completions.create(
             model=model,
-            messages=[
-                {"role": "user", "content": prompt}
-            ],
-            max_tokens=800
+            messages=[{"role": "user", "content": prompt}],
+            max_tokens=3500
         )
         
         report_text = response.choices[0].message.content

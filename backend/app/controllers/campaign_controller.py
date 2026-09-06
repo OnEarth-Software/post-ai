@@ -270,13 +270,27 @@ def generate_campaign_market_analysis(
         raise HTTPException(status_code=500, detail="Google Alışveriş'te rakip bulunamadı veya Serper API hatası.")
         
     
+    campaign_image_url = None
+    if campaign.results and len(campaign.results) > 0:
+        campaign_image_url = campaign.results[0].image_url
+
+    analyze_data = None
+    if analyze:
+        analyze_data = {
+            "category": analyze.category,
+            "audience": analyze.audience,
+            "marketing_style": analyze.marketing_style
+        }
+
     ai_result = generate_market_report(
         product_name=product.name,
         brand_name=brand_name,
         brand_desc=brand_desc,
         search_query=refined_query,
         competitor_data=competitor_data,
-        image_insights=image_insights
+        image_insights=image_insights,
+        analyze_data=analyze_data,
+        campaign_image_url=campaign_image_url
     )
     
     

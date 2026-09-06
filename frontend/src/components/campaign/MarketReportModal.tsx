@@ -18,11 +18,43 @@ export default function MarketReportModal({ isOpen, onClose, campaign, brand }: 
 
     if (!isOpen || !campaign) return null;
 
-    const handleDownloadPDF = () => {
-        const originalTitle = document.title;
-        document.title = 'AdDesign AI - Rakip Analizi';
-        window.print();
-        document.title = originalTitle;
+    const handleDownloadPDF = async () => {
+        if (!reportRef.current) return;
+
+        const canvas = await html2canvas(reportRef.current, {
+            scale: 2,
+            useCORS: true,
+            logging: false,
+        });
+
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jsPDF({
+            orientation: 'portrait',
+            unit: 'mm',
+            format: 'a4'
+        });
+
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = pdf.internal.pageSize.getHeight();
+        const imgHeight = (canvas.height * pdfWidth) / canvas.width;
+        let heightLeft = imgHeight;
+        let position = 0;
+
+        pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
+        heightLeft -= pdfHeight;
+
+        while (heightLeft >= 0) {
+            position = heightLeft - imgHeight;
+            pdf.addPage();
+            pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
+            heightLeft -= pdfHeight;
+        }
+
+        const productName = campaign?.product?.name
+            ? campaign.product.name.replace(/[^a-zA-Z0-9ğüşöçıİĞÜŞÖÇ]/gi, '_')
+            : 'kampanya';
+
+        pdf.save(`AdDesignAi_${productName}.pdf`);
     };
 
     return (
@@ -95,7 +127,11 @@ export default function MarketReportModal({ isOpen, onClose, campaign, brand }: 
                             </div>
 
                             <div className={styles.reportFooter}>
-                                <p>Ad-DesignAI Stüdyosu tarafından üretilmiştir.</p>
+                                <span style={{ flex: 1, textAlign: 'left' }}>Ad-DesignAI Stüdyosu</span>
+                                <div style={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
+                                    <Image src="/logo2.png" alt="Logo" width={200} height={80} style={{ objectFit: 'contain' }} />
+                                </div>
+                                <span style={{ flex: 1, textAlign: 'right' }}>Gizli ve Markaya Özeldir</span>
                             </div>
                         </div>
                     </div>
