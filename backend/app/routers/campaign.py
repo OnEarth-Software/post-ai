@@ -17,7 +17,8 @@ from app.controllers.campaign_controller import (
     create_campaign, 
     get_user_campaigns, 
     get_campaign_detail,
-    generate_campaign_post_text   
+    generate_campaign_post_text  ,
+    generate_campaign_market_analysis 
 ) 
 from typing import List
 from app.schemas.campaign_schema import CampaignPostTextGenerateResponse
@@ -81,3 +82,11 @@ def generate_campaign_post_text_endpoint(
     Belirli bir kampanya için AI ile pazarlama post açıklaması üretir ve campaigns tablosuna kaydeder.
     """
     return generate_campaign_post_text(db=db, campaign_id=campaign_id, current_user=current_user)
+
+@router.post("/{campaign_id}/market-analysis")
+def create_market_analysis(
+    campaign_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    return generate_campaign_market_analysis(db=db, campaign_id=campaign_id, current_user=current_user)

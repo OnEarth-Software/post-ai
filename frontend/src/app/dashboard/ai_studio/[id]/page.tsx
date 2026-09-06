@@ -3,8 +3,9 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { Download, ArrowLeft, Loader2, Sparkles, Image as ImageIcon, Zap, Type, Crosshair, Layers, FileText, Copy, Check } from 'lucide-react';
+import { Download, ArrowLeft, Loader2, Sparkles, Image as ImageIcon, Zap, Type, Crosshair, Layers, FileText, Copy, Check, BarChart2 } from 'lucide-react';
 import styles from './ai_studio.module.css';
+import MarketReportModal from '../../../../components/campaign/MarketReportModal';
 
 const formatCapitalize = (text: string) => {
     if (!text) return '';
@@ -92,7 +93,7 @@ export default function AIStudioPage({ params }: { params: { id: string } }) {
             if (response.ok) {
                 setCampaign((prev: any) => ({
                     ...prev,
-                    results: prev.results.map((r: any) => 
+                    results: prev.results.map((r: any) =>
                         r.id === resultId ? { ...r, is_public: !currentStatus } : r
                     )
                 }));
@@ -140,6 +141,64 @@ export default function AIStudioPage({ params }: { params: { id: string } }) {
         }
     };
 
+    const [isMarketReportOpen, setIsMarketReportOpen] = useState(false);
+    const [generatingReport, setGeneratingReport] = useState(false);
+    const [brand, setBrand] = useState<any>(null);
+
+    const handleMarketReport = async () => {
+        if (!campaign) return;
+
+        // Fetch brand if not fetched yet
+        if (!brand && campaign.product?.brand_id) {
+            try {
+                const token = localStorage.getItem('token');
+                const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+                const brandRes = await fetch(`${apiUrl}/brands/${campaign.product.brand_id}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (brandRes.ok) {
+                    setBrand(await brandRes.json());
+                }
+            } catch (err) {
+                console.error("Brand fetch error", err);
+            }
+        }
+
+        if (campaign.market_report) {
+            setIsMarketReportOpen(true);
+            return;
+        }
+
+        setGeneratingReport(true);
+        try {
+            const token = localStorage.getItem('token');
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+            const response = await fetch(`${apiUrl}/campaigns/${id}/market-analysis`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                setCampaign((prev: any) => ({
+                    ...prev,
+                    market_report: data.report
+                }));
+                setIsMarketReportOpen(true);
+            } else {
+                const errData = await response.json().catch(() => ({}));
+                alert(errData.detail || 'Rapor üretilirken bir hata oluştu.');
+            }
+        } catch (error) {
+            console.error('Hata:', error);
+            alert('Sunucuyla bağlantı kurulamadı.');
+        } finally {
+            setGeneratingReport(false);
+        }
+    };
+
     if (loading) {
         return (
             <div className={styles.loadingContainer}>
@@ -182,13 +241,30 @@ export default function AIStudioPage({ params }: { params: { id: string } }) {
                     </div>
                 </div>
 
-                {hasResult && (
-                    <button onClick={handleDownload} className={styles.primaryButton}>
-                        <Download size={18} />
-                        Görseli İndir
+                <div style={{ display: 'flex', gap: '1rem' }}>
+                    <button
+                        onClick={handleMarketReport}
+                        className={styles.secondaryButton}
+                        disabled={generatingReport}
+                    >
+                        {generatingReport ? <Loader2 size={18} className={styles.spinningIcon} /> : <BarChart2 size={18} />}
+                        {generatingReport ? 'Rapor Üretiliyor...' : 'Rakip Analiz Raporu'}
                     </button>
-                )}
+                    {hasResult && (
+                        <button onClick={handleDownload} className={styles.primaryButton}>
+                            <Download size={18} />
+                            Görseli İndir
+                        </button>
+                    )}
+                </div>
             </div>
+
+            <MarketReportModal
+                isOpen={isMarketReportOpen}
+                onClose={() => setIsMarketReportOpen(false)}
+                campaign={campaign}
+                brand={brand}
+            />
 
             <div className={styles.studioGrid}>
                 {/* Sol Kolon - Üretilen Görsel (Eskiden Sağdaydı) */}
@@ -202,8 +278,8 @@ export default function AIStudioPage({ params }: { params: { id: string } }) {
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                     <span style={{ fontSize: '12px', color: '#888' }}>Sosyalde Paylaş</span>
                                     <label style={{ position: 'relative', display: 'inline-block', width: '40px', height: '20px' }}>
-                                        <input 
-                                            type="checkbox" 
+                                        <input
+                                            type="checkbox"
                                             checked={campaign.results[0].is_public || false}
                                             onChange={() => handleToggleSocial(campaign.results[0].id, campaign.results[0].is_public)}
                                             style={{ opacity: 0, width: 0, height: 0 }}
@@ -289,8 +365,8 @@ export default function AIStudioPage({ params }: { params: { id: string } }) {
                                     <FileText size={18} /> Pazarlama Post Açıklaması
                                 </h3>
                                 {campaign.post_text && (
-                                    <button 
-                                        onClick={handleCopyText} 
+                                    <button
+                                        onClick={handleCopyText}
                                         className={styles.copyButton}
                                         title="Metni Kopyala"
                                     >
@@ -305,8 +381,8 @@ export default function AIStudioPage({ params }: { params: { id: string } }) {
                                     <div className={styles.postTextBox}>
                                         {campaign.post_text}
                                     </div>
-                                    <button 
-                                        onClick={handleGeneratePostText} 
+                                    <button
+                                        onClick={handleGeneratePostText}
                                         disabled={generatingText}
                                         className={styles.regenerateButton}
                                     >
@@ -323,8 +399,8 @@ export default function AIStudioPage({ params }: { params: { id: string } }) {
                                     <p style={{ color: '#64748b', fontSize: '0.88rem', lineHeight: '1.5', marginBottom: '1.25rem' }}>
                                         Sosyal medyada paylaşmak için yapay zeka ile profesyonel bir gönderi açıklaması (hook, gövde, CTA ve etiketler) oluşturun.
                                     </p>
-                                    <button 
-                                        onClick={handleGeneratePostText} 
+                                    <button
+                                        onClick={handleGeneratePostText}
                                         disabled={generatingText}
                                         className={styles.primaryButton}
                                         style={{ width: '100%', justifyContent: 'center' }}

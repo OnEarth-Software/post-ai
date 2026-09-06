@@ -10,6 +10,10 @@ from app.models.api_expense import ApiExpense
 from app.services.ai.generate_pots_text import generate_product_post_text
 from app.schemas.campaign_schema import CampaignPostTextGenerateResponse
 from app.models.product import Product
+from app.services.search.serper_client import search_google_shopping
+from app.services.ai.market_analysis_ai import generate_market_report
+from app.models.brand import Brand
+import uuid
 
 INPUT_PRICE_PER_1M = 0.15
 OUTPUT_PRICE_PER_1M = 0.60
@@ -204,3 +208,64 @@ def generate_campaign_post_text(
         call_to_action=ai_result.get("call_to_action", ""),
         hashtags=ai_result.get("hashtags", [])
     )
+
+def generate_campaign_market_analysis(
+    db: Session, 
+    campaign_id: str, 
+    current_user: User
+):
+    campaign = db.query(Campaign).filter(
+        Campaign.id == campaign_id
+    ).first()
+
+    if not campaign or campaign.product.user_id != current_user.id:
+        raise HTTPException(
+            status_code=404, 
+            detail="Kampanya bulunamadı veya yetkiniz yok."
+        )
+
+    product = campaign.product
+    analyze = campaign.product_analyze
+    if not analyze or not analyze.search_query:
+        raise HTTPException(
+            status_code=400, 
+            detail="Bu ürün için bir arama terimi bulunamadı."
+        )
+
+    brand = db.query(Brand).filter(Brand.id == product.brand_id).first() if product.brand_id else None
+    brand_name = brand.name if brand else "Bilinmeyen Marka"
+    brand_desc = brand.description if brand and brand.description else "Bu yeni ve heyecan verici bir marka."
+    
+    competitor_data = search_google_shopping(analyze.search_query)
+    if not competitor_data:
+        raise HTTPException(status_code=500, detail="Google Alışveriş'te rakip bulunamadı veya Serper API hatası.")
+        
+    
+    ai_result = generate_market_report(
+        product_name=product.name,
+        brand_name=brand_name,
+        brand_desc=brand_desc,
+        search_query=analyze.search_query,
+        competitor_data=competitor_data
+    )
+    
+    
+    campaign.market_report = ai_result.get("report")
+    db.commit()
+    
+   
+    new_spending = ApiExpense(
+        user_id=current_user.id,
+        service_type="MARKET_ANALYSIS",
+        model=ai_result.get("model", "gpt-4o-mini"),
+        tokens_used=ai_result.get("total_tokens", 0),         
+        prompt_tokens=ai_result.get("prompt_tokens", 0),       
+        completion_tokens=ai_result.get("completion_tokens", 0),
+        cached_tokens=ai_result.get("cached_tokens", 0),
+        cost=ai_result.get("cost", 0.0),          
+        related_entity_id=campaign.id
+    )
+    db.add(new_spending)
+    db.commit()
+    
+    return {"message": "Analiz başarıyla tamamlandı", "report": campaign.market_report}

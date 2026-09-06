@@ -1,0 +1,329 @@
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(15, 23, 42, 0.8);
+    backdrop-filter: blur(4px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    padding: 2rem;
+}
+
+.modalContainer {
+    background-color: #0f172a;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    width: 100%;
+    max-width: 900px;
+    height: 90vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+.modalHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    background-color: rgba(15, 23, 42, 0.95);
+}
+
+.headerTitle {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: #f8fafc;
+}
+
+.headerTitle h2 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.headerActions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.downloadButton {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.downloadButton:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.closeButton {
+    background: none;
+    border: none;
+    color: #94a3b8;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.closeButton:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.modalBody {
+    flex: 1;
+    overflow-y: auto;
+    padding: 2rem;
+    background-color: #1e293b;
+    display: flex;
+    justify-content: center;
+}
+
+.a4PageWrapper {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.a4Page {
+    width: 794px; /* A4 width roughly in pixels at 96dpi */
+    min-height: 1123px;
+    height: max-content;
+    background-color: white;
+    color: #0f172a;
+    padding: 3rem 4rem;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    font-family: 'Inter', -apple-system, sans-serif;
+    border-radius: 8px; /* Slightly rounded in modal, print will override */
+}
+
+.reportHeader {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 1.5rem;
+    margin-bottom: 2rem;
+    break-inside: avoid;
+}
+
+.brandLogo {
+    width: 120px;
+    height: 120px;
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
+    flex-shrink: 0;
+}
+
+.brandInfo {
+    flex: 1;
+}
+
+.brandInfo h1 {
+    margin: 0 0 0.25rem 0;
+    font-size: 2.2rem;
+    color: #0f172a;
+    font-weight: 800;
+}
+
+.brandInfo p {
+    margin: 0;
+    color: #64748b;
+    font-size: 1.1rem;
+}
+
+.productSection {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 2.5rem;
+    break-inside: avoid;
+}
+
+.productInfoBox h3 {
+    margin: 0 0 1rem 0;
+    font-size: 1.6rem;
+    color: #1e293b;
+}
+
+.productDetails {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.productDetails p {
+    margin: 0;
+    font-size: 1rem;
+    color: #475569;
+}
+
+.productDetails strong {
+    color: #0f172a;
+}
+
+.productImage {
+    width: 120px;
+    height: 120px;
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid #cbd5e1;
+    background-color: white;
+    flex-shrink: 0;
+}
+
+.campaignDesignSection {
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 2.5rem;
+    break-inside: avoid;
+}
+
+.campaignDesignSection h3 {
+    margin: 0 0 1rem 0;
+    font-size: 1.4rem;
+    color: #1e293b;
+}
+
+.campaignDesignImage {
+    width: 100%;
+    height: 350px;
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid #cbd5e1;
+    background-color: white;
+}
+
+.markdownContent {
+    line-height: 1.7;
+    color: #334155;
+    font-size: 1.05rem;
+}
+
+.markdownContent h1, 
+.markdownContent h2, 
+.markdownContent h3,
+.markdownContent p,
+.markdownContent ul,
+.markdownContent ol,
+.markdownContent li {
+    break-inside: avoid;
+    page-break-inside: avoid;
+}
+
+.markdownContent h1, 
+.markdownContent h2, 
+.markdownContent h3 {
+    color: #0f172a;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    font-weight: 700;
+}
+
+.markdownContent h1 { font-size: 1.5rem; }
+.markdownContent h2 { font-size: 1.3rem; border-bottom: 1px solid #e2e8f0; padding-bottom: 0.5rem; }
+.markdownContent h3 { font-size: 1.1rem; }
+
+.markdownContent p {
+    margin-bottom: 1.2rem;
+}
+
+.markdownContent ul, 
+.markdownContent ol {
+    margin-bottom: 1.2rem;
+    padding-left: 1.5rem;
+}
+
+.markdownContent li {
+    margin-bottom: 0.5rem;
+}
+
+.markdownContent strong {
+    color: #0f172a;
+}
+
+.reportFooter {
+    margin-top: 4rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e2e8f0;
+    text-align: center;
+    color: #94a3b8;
+    font-size: 0.85rem;
+}
+
+@media print {
+    @page {
+        size: auto;
+        margin: 0mm;
+    }
+    
+    .modalOverlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: white !important;
+        z-index: 99999 !important;
+        display: block !important;
+    }
+    
+    .modalContainer {
+        box-shadow: none !important;
+        border: none !important;
+        height: auto !important;
+        max-width: none !important;
+        background-color: white !important;
+    }
+
+    .modalBody {
+        background-color: white !important;
+        padding: 0 !important;
+        overflow: visible !important;
+    }
+
+    .a4Page {
+        width: 100% !important;
+        min-height: auto !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+        color: black !important;
+    }
+
+    .downloadButton, .closeButton, .modalHeader {
+        display: none !important;
+    }
+}
+

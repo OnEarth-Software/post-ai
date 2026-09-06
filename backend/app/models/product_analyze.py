@@ -16,6 +16,7 @@ class ProductAnalyze(Base):
     colors = Column(ARRAY(String), nullable=False)
     audience = Column(String, nullable=False)
     marketing_style = Column(String, nullable=False)
+    search_query = Column(String, nullable=True)
 
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 

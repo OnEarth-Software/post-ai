@@ -40,6 +40,7 @@ class CampaignResponse(BaseModel):
     slogan: Optional[str] = None
     subtext: Optional[str] = None
     post_text: Optional[str] = None
+    market_report: Optional[str] = None
 
     class Config:
         from_attributes = True
@@ -58,6 +59,7 @@ class CampaignProductBase(BaseModel):
     id: uuid.UUID
     name: str
     image_url: str
+    brand_id: Optional[uuid.UUID] = None
     class Config:
         from_attributes = True
 
@@ -69,6 +71,7 @@ class CampaignListResponse(BaseModel):
     slogan: Optional[str] = None
     subtext: Optional[str] = None
     post_text: Optional[str] = None
+    market_report: Optional[str] = None
     created_at: datetime
     product: CampaignProductBase
     results: List[CampaignResultBase] = []

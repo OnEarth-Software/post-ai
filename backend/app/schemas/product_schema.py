@@ -18,6 +18,7 @@ class ProductAnalyzeResponse(BaseModel):
     colors: List[str]
     audience: str
     marketing_style: str
+    search_query: Optional[str] = None
     
     class Config:
         from_attributes = True
@@ -28,6 +29,7 @@ class ProductAnalysisUpdate(BaseModel):
     colors: Optional[List[str]] = None
     audience: Optional[str] = None
     marketing_style: Optional[str] = None
+    search_query: Optional[str] = None
 
 class ProductResponse(ProductBase):
     id: uuid.UUID

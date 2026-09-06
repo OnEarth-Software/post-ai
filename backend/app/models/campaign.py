@@ -22,6 +22,7 @@ class Campaign(Base):
     slogan = Column(String, nullable=True)
     subtext = Column(String, nullable=True)
     post_text = Column(String, nullable=True)
+    market_report = Column(String, nullable=True)
     
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 

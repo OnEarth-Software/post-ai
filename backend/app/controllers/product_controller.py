@@ -51,7 +51,8 @@ def create_product_with_image(
                 style=ai_result.get("style", "Bilinmiyor"),
                 colors=ai_result.get("colors", []),
                 audience=ai_result.get("audience", "Bilinmiyor"),
-                marketing_style=ai_result.get("marketing_style", "Bilinmiyor")
+                marketing_style=ai_result.get("marketing_style", "Bilinmiyor"),
+                search_query=ai_result.get("search_query", "")
             )
             db.add(new_analysis)
 
@@ -134,7 +135,8 @@ def update_product_analysis(db: Session, product_id: uuid.UUID, update_data: Pro
             style=update_data.style or "Bilinmiyor",
             colors=update_data.colors or [],
             audience=update_data.audience or "Bilinmiyor",
-            marketing_style=update_data.marketing_style or "Bilinmiyor"
+            marketing_style=update_data.marketing_style or "Bilinmiyor",
+            search_query=update_data.search_query or ""
         )
         db.add(analysis)
     else:
@@ -148,6 +150,8 @@ def update_product_analysis(db: Session, product_id: uuid.UUID, update_data: Pro
             analysis.audience = update_data.audience
         if update_data.marketing_style is not None:
             analysis.marketing_style = update_data.marketing_style
+        if update_data.search_query is not None:
+            analysis.search_query = update_data.search_query
             
     db.commit()
     db.refresh(analysis)

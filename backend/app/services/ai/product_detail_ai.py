@@ -12,13 +12,16 @@ def analyze_product_image_with_ai(
 
     prompt = """
     Lütfen aşağıdaki ürün görselini analiz et ve sonucu YALNIZCA aşağıdaki JSON formatında döndür. 
-    Başka hiçbir metin veya açıklama ekleme:
+    Başka hiçbir metin veya açıklama ekleme.
+    Ayrıca bu ürünü Google Alışveriş'te (Google Shopping Türkiye) aratmak ve benzer rakip ürünleri bulmak için kullanılabilecek en uygun 1 adet Türkçe arama terimini 'search_query' alanına ekle.
+    
     {
       "category": "string",
       "style": "string",
       "colors": ["string", "string"],
       "audience": "string",
-      "marketing_style": "string"
+      "marketing_style": "string",
+      "search_query": "string"
     }
     """
     model = "gpt-4o-mini"

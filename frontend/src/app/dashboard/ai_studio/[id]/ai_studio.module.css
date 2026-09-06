@@ -116,6 +116,33 @@
     box-shadow: 0 8px 20px rgba(5, 150, 105, 0.3);
 }
 
+.secondaryButton {
+    background: #ffffff;
+    border: 2px solid #e2e8f0;
+    color: #334155;
+    padding: 0.875rem 1.5rem;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+
+.secondaryButton:hover:not(:disabled) {
+    background: #f8fafc;
+    border-color: #059669;
+    color: #059669;
+    transform: translateY(-1px);
+}
+
+.secondaryButton:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
 .backButton {
     background: #ffffff;
     border: 1px solid #e2e8f0;
