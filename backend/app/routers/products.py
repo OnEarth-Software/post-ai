@@ -28,6 +28,7 @@ def get_user_products(
 @router.post("/upload", response_model=ProductResponse)
 def upload_product_image(
     name: str = Form(...),
+    brand_id: uuid.UUID = Form(None),
     file: UploadFile = File(...),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
@@ -35,7 +36,7 @@ def upload_product_image(
     """
     Form üzerinden gelen resim ve name bilgisini Pydantic şemasına çevirip Controller'a iletir.
     """
-    product_in = ProductCreate(name=name)
+    product_in = ProductCreate(name=name, brand_id=brand_id)
     new_product = product_controller.create_product_with_image(
         db=db, 
         product_in=product_in, 

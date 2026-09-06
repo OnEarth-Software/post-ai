@@ -6,9 +6,11 @@ import uuid
 class ProductBase(BaseModel):
     name: str
     image_url: str
+    brand_id: Optional[uuid.UUID] = None
 
 class ProductCreate(BaseModel):
     name: str
+    brand_id: Optional[uuid.UUID] = None
 
 class ProductAnalyzeResponse(BaseModel):
     category: str

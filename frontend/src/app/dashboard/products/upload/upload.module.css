@@ -2,7 +2,8 @@
 
 .pageWrapper {
     min-height: 100vh;
-    margin: -3rem; /* Neutralize dashboard padding */
+    margin: -3rem;
+    /* Neutralize dashboard padding */
     width: calc(100% + 6rem);
     position: relative;
     display: flex;
@@ -22,8 +23,8 @@
     width: 200%;
     height: 200%;
     background: radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.08), transparent 40%),
-                radial-gradient(circle at 30% 70%, rgba(14, 165, 233, 0.05), transparent 40%),
-                radial-gradient(circle at 70% 30%, rgba(5, 150, 105, 0.08), transparent 40%);
+        radial-gradient(circle at 30% 70%, rgba(14, 165, 233, 0.05), transparent 40%),
+        radial-gradient(circle at 70% 30%, rgba(5, 150, 105, 0.08), transparent 40%);
     background-size: 100% 100%;
     animation: slowRotate 25s linear infinite;
     z-index: 0;
@@ -43,8 +44,13 @@
 }
 
 @keyframes slowRotate {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 /* Main Content Container */
@@ -61,7 +67,10 @@
 }
 
 @keyframes floatUp {
-    to { opacity: 1; transform: translateY(0); }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* Glassmorphism Panel */
@@ -83,8 +92,8 @@
     inset: 0;
     border-radius: 24px;
     padding: 2px;
-    background: linear-gradient(135deg, rgba(5, 150, 105, 0.3), rgba(59, 130, 246, 0.3));
-    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    /* background: linear-gradient(135deg, rgba(5, 150, 105, 0.3), rgba(59, 130, 246, 0.3)); */
+    /* -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); */
     -webkit-mask-composite: xor;
     mask-composite: exclude;
     opacity: 0;
@@ -164,7 +173,7 @@
     transform: translateX(-50%);
 }
 
-.borderlessInput:focus ~ .inputLine {
+.borderlessInput:focus~.inputLine {
     width: 100%;
 }
 
@@ -238,13 +247,20 @@
     overflow: hidden;
     position: relative;
     animation: popIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-    box-shadow: 0 10px 25px -10px rgba(0,0,0,0.15);
+    box-shadow: 0 10px 25px -10px rgba(0, 0, 0, 0.15);
     border: 1px solid #e2e8f0;
 }
 
 @keyframes popIn {
-    0% { transform: scale(0.9) translateY(20px); opacity: 0; }
-    100% { transform: scale(1) translateY(0); opacity: 1; }
+    0% {
+        transform: scale(0.9) translateY(20px);
+        opacity: 0;
+    }
+
+    100% {
+        transform: scale(1) translateY(0);
+        opacity: 1;
+    }
 }
 
 .previewImage {
@@ -342,7 +358,9 @@
     overflow: hidden;
 }
 
-.magicSparkle1, .magicSparkle2, .magicSparkle3 {
+.magicSparkle1,
+.magicSparkle2,
+.magicSparkle3 {
     position: absolute;
     border-radius: 50%;
     filter: blur(20px);
@@ -379,9 +397,20 @@
 }
 
 @keyframes floatSparkle {
-    0% { transform: translate(0, 0) scale(0.8); opacity: 0.4; }
-    50% { transform: translate(30px, -30px) scale(1.1); opacity: 0.8; }
-    100% { transform: translate(-20px, 30px) scale(0.9); opacity: 0.5; }
+    0% {
+        transform: translate(0, 0) scale(0.8);
+        opacity: 0.4;
+    }
+
+    50% {
+        transform: translate(30px, -30px) scale(1.1);
+        opacity: 0.8;
+    }
+
+    100% {
+        transform: translate(-20px, 30px) scale(0.9);
+        opacity: 0.5;
+    }
 }
 
 .uploadingText {
@@ -399,8 +428,15 @@
 }
 
 @keyframes pulseMagicText {
-    0% { opacity: 0.8; transform: scale(0.98); }
-    100% { opacity: 1; transform: scale(1.02); }
+    0% {
+        opacity: 0.8;
+        transform: scale(0.98);
+    }
+
+    100% {
+        opacity: 1;
+        transform: scale(1.02);
+    }
 }
 
 .uploadingIcon {
@@ -410,13 +446,259 @@
 }
 
 @keyframes magicFloat {
-    0%, 100% { transform: translateY(0) rotate(-5deg); }
-    50% { transform: translateY(-10px) rotate(5deg); }
+
+    0%,
+    100% {
+        transform: translateY(0) rotate(-5deg);
+    }
+
+    50% {
+        transform: translateY(-10px) rotate(5deg);
+    }
 }
 
 @keyframes magicGlow {
-    0% { filter: drop-shadow(0 0 5px rgba(52, 211, 153, 0.4)); }
-    100% { filter: drop-shadow(0 0 20px rgba(52, 211, 153, 0.9)); }
+    0% {
+        filter: drop-shadow(0 0 5px rgba(52, 211, 153, 0.4));
+    }
+
+    100% {
+        filter: drop-shadow(0 0 20px rgba(52, 211, 153, 0.9));
+    }
+}
+
+/* Loading Spin */
+.spin {
+    animation: spin 1s linear infinite;
+}
+
+
+
+/* Image Preview with 3D Pop Effect */
+.previewContainer {
+    width: 100%;
+    border-radius: 16px;
+    overflow: hidden;
+    position: relative;
+    animation: popIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 10px 25px -10px rgba(0, 0, 0, 0.15);
+    border: 1px solid #e2e8f0;
+}
+
+@keyframes popIn {
+    0% {
+        transform: scale(0.9) translateY(20px);
+        opacity: 0;
+    }
+
+    100% {
+        transform: scale(1) translateY(0);
+        opacity: 1;
+    }
+}
+
+.previewImage {
+    width: 100%;
+    height: 350px;
+    object-fit: cover;
+    display: block;
+}
+
+.previewOverlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.4);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.previewContainer:hover .previewOverlay {
+    opacity: 1;
+}
+
+.changeImageBtn {
+    background: white;
+    color: #0f172a;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.changeImageBtn:hover {
+    transform: scale(1.05);
+}
+
+/* Floating Action Button (Submit) */
+.submitBtn {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    color: white;
+    border: none;
+    padding: 1rem 2.5rem;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 1.05rem;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0 auto;
+    box-shadow: 0 4px 15px rgba(5, 150, 105, 0.3);
+    width: 100%;
+}
+
+.submitBtn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(5, 150, 105, 0.4);
+}
+
+.submitBtn:active {
+    transform: translateY(0);
+}
+
+.submitBtn:disabled {
+    background: #e2e8f0;
+    color: #94a3b8;
+    box-shadow: none;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Uploading Animation Overlay */
+.uploadingOverlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.65);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    overflow: hidden;
+}
+
+.magicSparkle1,
+.magicSparkle2,
+.magicSparkle3 {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(20px);
+    animation: floatSparkle 5s ease-in-out infinite alternate;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.magicSparkle1 {
+    width: 200px;
+    height: 200px;
+    top: -50px;
+    left: -50px;
+    background: rgba(16, 185, 129, 0.5);
+    animation-delay: 0s;
+}
+
+.magicSparkle2 {
+    width: 250px;
+    height: 250px;
+    bottom: -80px;
+    right: -50px;
+    background: rgba(14, 165, 233, 0.4);
+    animation-delay: 1.5s;
+}
+
+.magicSparkle3 {
+    width: 150px;
+    height: 150px;
+    top: 40%;
+    left: 60%;
+    background: rgba(52, 211, 153, 0.4);
+    animation-delay: 3s;
+}
+
+@keyframes floatSparkle {
+    0% {
+        transform: translate(0, 0) scale(0.8);
+        opacity: 0.4;
+    }
+
+    50% {
+        transform: translate(30px, -30px) scale(1.1);
+        opacity: 0.8;
+    }
+
+    100% {
+        transform: translate(-20px, 30px) scale(0.9);
+        opacity: 0.5;
+    }
+}
+
+.uploadingText {
+    position: relative;
+    z-index: 2;
+    color: white;
+    font-size: 1.25rem;
+    font-weight: 600;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    text-shadow: 0 0 15px rgba(16, 185, 129, 0.6);
+    animation: pulseMagicText 2s ease-in-out infinite alternate;
+}
+
+@keyframes pulseMagicText {
+    0% {
+        opacity: 0.8;
+        transform: scale(0.98);
+    }
+
+    100% {
+        opacity: 1;
+        transform: scale(1.02);
+    }
+}
+
+.uploadingIcon {
+    color: #34d399;
+    filter: drop-shadow(0 0 10px rgba(52, 211, 153, 0.6));
+    animation: magicFloat 3s ease-in-out infinite, magicGlow 2s ease-in-out infinite alternate;
+}
+
+@keyframes magicFloat {
+
+    0%,
+    100% {
+        transform: translateY(0) rotate(-5deg);
+    }
+
+    50% {
+        transform: translateY(-10px) rotate(5deg);
+    }
+}
+
+@keyframes magicGlow {
+    0% {
+        filter: drop-shadow(0 0 5px rgba(52, 211, 153, 0.4));
+    }
+
+    100% {
+        filter: drop-shadow(0 0 20px rgba(52, 211, 153, 0.9));
+    }
 }
 
 /* Loading Spin */
@@ -425,6 +707,106 @@
 }
 
 @keyframes spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.brandSelectorWrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 1.25rem 1.5rem;
+    background: #ffffff;
+    border-radius: 16px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 6px -4px rgba(15, 23, 42, 0.05);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.brandSelectorWrapper:hover {
+    border-color: #10b981;
+    box-shadow: 0 8px 15px -5px rgba(5, 150, 105, 0.1);
+    transform: translateY(-2px);
+}
+
+.brandSelectorWrapper::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: linear-gradient(to bottom, #059669, #10b981);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.brandSelectorWrapper:hover::before {
+    opacity: 1;
+}
+
+.brandLabel {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.brandLabel svg {
+    color: #059669;
+}
+
+.selectContainer {
+    position: relative;
+    width: 100%;
+}
+
+.brandSelect {
+    width: 100%;
+    padding: 1rem 1.25rem;
+    border-radius: 12px;
+    border: 2px solid #f1f5f9;
+    background: #f8fafc;
+    font-size: 1rem;
+    font-weight: 500;
+    color: #0f172a;
+    outline: none;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+}
+
+.brandSelect:hover {
+    background: #ffffff;
+    border-color: #e2e8f0;
+}
+
+.brandSelect:focus {
+    background: #ffffff;
+    border-color: #059669;
+    box-shadow: 0 0 0 4px rgba(5, 150, 105, 0.1);
+}
+
+.selectIcon {
+    position: absolute;
+    right: 1.25rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #64748b;
+    pointer-events: none;
+    transition: color 0.2s ease;
+}
+
+.brandSelect:focus+.selectIcon {
+    color: #059669;
 }

@@ -17,6 +17,7 @@ interface Product {
     id: string;
     name: string;
     image_url: string;
+    brand_id?: string;
     created_at: string;
     analysis?: ProductAnalysis;
 }
@@ -30,9 +31,31 @@ export default function ProductsPage() {
     const [productToDelete, setProductToDelete] = useState<string | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
 
+    const [brands, setBrands] = useState<{id: string, name: string}[]>([]);
+
     useEffect(() => {
         fetchProducts();
+        fetchBrands();
     }, []);
+
+    const fetchBrands = async () => {
+        try {
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+            const token = localStorage.getItem('token');
+            if (!token) return;
+
+            const response = await fetch(`${apiUrl}/brands/`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                setBrands(data);
+            }
+        } catch (err) {
+            console.error("Failed to fetch brands", err);
+        }
+    };
 
     const fetchProducts = async () => {
         try {
@@ -117,6 +140,12 @@ export default function ProductsPage() {
         };
         const normalized = colorName.toLowerCase().trim();
         return colors[normalized] || '#cbd5e1';
+    };
+
+    const getBrandName = (brandId?: string) => {
+        if (!brandId) return null;
+        const brand = brands.find(b => b.id === brandId);
+        return brand ? brand.name : null;
     };
 
     const filteredProducts = products.filter(p => 
@@ -227,7 +256,14 @@ export default function ProductsPage() {
                                 <div className={styles.productHeader}>
                                     <div>
                                         <h3 className={styles.productName}>{product.name}</h3>
-                                        <span className={styles.productDate}>Added {formatDate(product.created_at)}</span>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
+                                            <span className={styles.productDate}>Added {formatDate(product.created_at)}</span>
+                                            {getBrandName(product.brand_id) && (
+                                                <span className={`${styles.badge}`} style={{ background: '#ecfdf5', color: '#047857', border: '1px solid #d1fae5', fontSize: '0.65rem' }}>
+                                                    {getBrandName(product.brand_id)}
+                                                </span>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
 

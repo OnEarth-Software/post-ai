@@ -1,9 +1,14 @@
 "use client";
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { CloudUpload, Camera, ArrowRight, Loader2, Sparkles } from 'lucide-react';
+import { CloudUpload, Camera, ArrowRight, Loader2, Sparkles, Building2, ChevronDown } from 'lucide-react';
 import styles from './upload.module.css';
+
+interface Brand {
+    id: string;
+    name: string;
+}
 
 export default function UploadProductPage() {
     const router = useRouter();
@@ -13,7 +18,33 @@ export default function UploadProductPage() {
     const [isDragging, setIsDragging] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
+    const [brands, setBrands] = useState<Brand[]>([]);
+    const [selectedBrand, setSelectedBrand] = useState<string>('');
+
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        fetchBrands();
+    }, []);
+
+    const fetchBrands = async () => {
+        try {
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+            const token = localStorage.getItem('token');
+            if (!token) return;
+
+            const response = await fetch(`${apiUrl}/brands/`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                setBrands(data);
+            }
+        } catch (err) {
+            console.error("Failed to fetch brands", err);
+        }
+    };
 
     const handleDragOver = (e: React.DragEvent) => {
         e.preventDefault();
@@ -56,12 +87,15 @@ export default function UploadProductPage() {
         setIsSubmitting(true);
 
         try {
-            const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
             const token = localStorage.getItem('token');
 
             const formData = new FormData();
             formData.append('name', productName);
             formData.append('file', selectedImage);
+            if (selectedBrand) {
+                formData.append('brand_id', selectedBrand);
+            }
 
             const response = await fetch(`${apiUrl}/products/upload`, {
                 method: 'POST',
@@ -101,9 +135,9 @@ export default function UploadProductPage() {
                         <p className={styles.subtitle}>Bring your next great idea to life with AdDesign AI.</p>
                     </div>
 
-                    <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '3rem' }}>
+                    <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
 
-                        {/* Borderless Input */}
+                        {/* Borderless Input for Product Name */}
                         <div className={styles.inputGroup}>
                             <input
                                 type="text"
@@ -115,6 +149,29 @@ export default function UploadProductPage() {
                             />
                             <div className={styles.inputLine}></div>
                         </div>
+
+                        {/* Brand Selector */}
+                        {brands.length > 0 && (
+                            <div className={styles.brandSelectorWrapper}>
+                                <label className={styles.brandLabel}>
+                                    <Building2 size={18} />
+                                    Assign to Brand (Optional)
+                                </label>
+                                <div className={styles.selectContainer}>
+                                    <select
+                                        className={styles.brandSelect}
+                                        value={selectedBrand}
+                                        onChange={(e) => setSelectedBrand(e.target.value)}
+                                    >
+                                        <option value="">Bu Ürünü Bir Markaya Atayın</option>
+                                        {brands.map(brand => (
+                                            <option key={brand.id} value={brand.id}>{brand.name}</option>
+                                        ))}
+                                    </select>
+                                    <ChevronDown size={20} className={styles.selectIcon} />
+                                </div>
+                            </div>
+                        )}
 
                         {/* Magic Dropzone or Preview */}
                         <div>

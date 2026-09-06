@@ -27,6 +27,7 @@ import styles from './Sidebar.module.css';
 
 const menuItems = [
     { name: 'Dashboard', path: '/dashboard', icon: LayoutGrid },
+    { name: 'Brand', path: '/dashboard/brand', icon: Sparkles },
     { name: 'Products', path: '/dashboard/products', icon: Package },
     { name: 'Campaigns', path: '/dashboard/campaigns', icon: Megaphone },
     { name: 'Assets', path: '/dashboard/assets', icon: Folder },

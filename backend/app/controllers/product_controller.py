@@ -35,7 +35,8 @@ def create_product_with_image(
         new_product = Product(
             user_id=current_user.id,
             name=product_in.name,
-            image_url=public_url
+            image_url=public_url,
+            brand_id=product_in.brand_id
         )
         db.add(new_product)
         db.commit()
