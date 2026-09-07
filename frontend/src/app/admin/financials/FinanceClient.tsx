@@ -133,14 +133,14 @@ export default function FinanceClient({ initialStats }: FinanceClientProps) {
 
                         <div className={styles.statCard}>
                             <div className={styles.statHeader}>
-                                <span className={styles.statLabel}>Aktif Aboneler</span>
+                                <span className={styles.statLabel}>Yeni Kullanıcılar</span>
                                 <div className={`${styles.statIcon} ${styles.iconPurple}`}>
                                     <Users size={20} />
                                 </div>
                             </div>
-                            <div className={styles.statValue}>{stats.activeSubscribers}</div>
+                            <div className={styles.statValue}>{stats.newSubscribers}</div>
                             <div className={styles.statChange}>
-                                <span className={styles.positive}>↗ +{stats.newSubscribers} Yeni</span> bu ay
+                                <span className={styles.positive}>Son 30 gün içinde</span>
                             </div>
                         </div>
                     </div>
@@ -297,7 +297,6 @@ export default function FinanceClient({ initialStats }: FinanceClientProps) {
                         <thead>
                             <tr>
                                 <th>Kullanıcı</th>
-                                <th>Plan</th>
                                 <th>Harcanan Token</th>
                                 <th>Toplam Maliyet</th>
                             </tr>
@@ -311,18 +310,13 @@ export default function FinanceClient({ initialStats }: FinanceClientProps) {
                                             <span style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 'normal' }}>{user.email}</span>
                                         </div>
                                     </td>
-                                    <td>
-                                        <span className={`${styles.badge} ${user.plan === 'Pro' ? styles.badgePro : user.plan === 'Enterprise' ? styles.badgeEnterprise : ''}`}>
-                                            {user.plan}
-                                        </span>
-                                    </td>
                                     <td>{user.tokensUsed}</td>
                                     <td style={{ fontWeight: 700, color: '#dc2626' }}>{user.totalCost}</td>
                                 </tr>
                             ))}
                             {(!stats.userApiCosts || stats.userApiCosts.length === 0) && (
                                 <tr>
-                                    <td colSpan={4} style={{ textAlign: 'center', padding: '20px' }}>Kullanıcı maliyeti bulunmuyor.</td>
+                                    <td colSpan={3} style={{ textAlign: 'center', padding: '20px' }}>Kullanıcı maliyeti bulunmuyor.</td>
                                 </tr>
                             )}
                         </tbody>

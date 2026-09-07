@@ -11,6 +11,7 @@ from app.services.ai.product_detail_ai import analyze_product_image_with_ai
 from app.models.campaign import Campaign
 from app.models.campaign_result import CampaignResult
 from app.models.api_expense import ApiExpense
+from app.services.pricing.credit_service import CreditService
 
 
 def create_product_with_image(
@@ -19,6 +20,12 @@ def create_product_with_image(
     file: UploadFile,
     current_user: User
 ) -> Product:
+    CreditService.deduct_credits(
+        db,
+        current_user.id,
+        CreditService.COST_PRODUCT_UPLOAD
+    )
+
     supabase = get_supabase_client()
     file_extension = file.filename.split(".")[-1]
     unique_filename = f"{uuid.uuid4()}.{file_extension}"

@@ -28,9 +28,7 @@ export default function UserManagementClient({ initialUsers, total, currentPage,
             email: user.email,
             role: user.role,
             status: user.status,
-            plan: user.plan,
-            designLimit: user.designLimit,
-            productLimit: user.productLimit
+            credits: user.credits || 0
         });
     };
 
@@ -102,9 +100,7 @@ export default function UserManagementClient({ initialUsers, total, currentPage,
                         <tr>
                             <th>Kullanıcı</th>
                             <th>Rol</th>
-                            <th>Plan</th>
-                            <th>Tasarım (Kul/Lim)</th>
-                            <th>Ürün (Kul/Lim)</th>
+                            <th>Kredi Bakiyesi</th>
                             <th>Durum</th>
                         </tr>
                     </thead>
@@ -133,15 +129,10 @@ export default function UserManagementClient({ initialUsers, total, currentPage,
                                     </span>
                                 </td>
                                 <td>
-                                    <span className={`${styles.badge} ${user.plan === 'Free' ? styles.badgeFree : styles.badgePro}`}>
-                                        {user.plan}
-                                    </span>
-                                </td>
-                                <td>
-                                    <strong>{user.designUsage}</strong> / {user.designLimit}
-                                </td>
-                                <td>
-                                    <strong>{user.productUsage}</strong> / {user.productLimit}
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                        <Zap size={16} color="#eab308" />
+                                        <strong>{user.credits}</strong> Kredi
+                                    </div>
                                 </td>
                                 <td>
                                     <span style={{ color: user.status === 'Active' ? '#059669' : '#dc2626', fontWeight: 600 }}>
@@ -219,25 +210,22 @@ export default function UserManagementClient({ initialUsers, total, currentPage,
                                 </div>
                             </div>
 
-                            {/* Plan & Limits Section */}
+                            {/* Credits Section */}
                             <div className={styles.formSection} style={{marginBottom: 0}}>
-                                <h3 className={styles.sectionTitle}><Zap size={18} /> Abonelik & Limitler</h3>
+                                <h3 className={styles.sectionTitle}><Zap size={18} /> Kredi Yönetimi</h3>
                                 <div className={styles.formGrid}>
-                                    <div className={styles.formGroup}>
-                                        <label className={styles.label}>Aktif Plan</label>
-                                        <select className={styles.select} value={editForm.plan} onChange={e => setEditForm({...editForm, plan: e.target.value})}>
-                                            <option value="Free">Free</option>
-                                            <option value="Pro">Pro Plan</option>
-                                            <option value="Enterprise">Enterprise</option>
-                                        </select>
-                                    </div>
-                                    <div className={styles.formGroup}>
-                                        <label className={styles.label}>Aylık Tasarım Hakkı</label>
-                                        <input type="number" className={styles.input} value={editForm.designLimit} onChange={e => setEditForm({...editForm, designLimit: parseInt(e.target.value) || 0})} />
-                                    </div>
-                                    <div className={styles.formGroup}>
-                                        <label className={styles.label}>Aylık Ürün Yükleme Hakkı</label>
-                                        <input type="number" className={styles.input} value={editForm.productLimit} onChange={e => setEditForm({...editForm, productLimit: parseInt(e.target.value) || 0})} />
+                                    <div className={styles.formGroup} style={{ gridColumn: 'span 2' }}>
+                                        <label className={styles.label}>Kullanıcı Kredisi</label>
+                                        <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                                            <div style={{ position: 'absolute', left: '12px', color: '#eab308' }}><Zap size={18} /></div>
+                                            <input 
+                                                type="number" 
+                                                className={styles.input} 
+                                                style={{ paddingLeft: '38px', fontSize: '16px', fontWeight: 'bold' }}
+                                                value={editForm.credits} 
+                                                onChange={e => setEditForm({...editForm, credits: parseInt(e.target.value) || 0})} 
+                                            />
+                                        </div>
                                     </div>
                                 </div>
                             </div>

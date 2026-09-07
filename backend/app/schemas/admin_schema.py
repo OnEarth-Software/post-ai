@@ -27,11 +27,7 @@ class UserAdminResponse(BaseModel):
     name: str
     email: str
     role: str
-    plan: str
-    designUsage: int
-    designLimit: int
-    productUsage: int
-    productLimit: int
+    credits: int
     status: str
 
 class PaginatedUserResponse(BaseModel):
@@ -45,9 +41,7 @@ class UserAdminUpdateRequest(BaseModel):
     email: Optional[str] = None
     role: Optional[str] = None
     status: Optional[str] = None
-    plan: Optional[str] = None
-    designLimit: Optional[int] = None
-    productLimit: Optional[int] = None
+    credits: Optional[int] = None
 
 class CampaignUserSchema(BaseModel):
     name: str
@@ -116,7 +110,6 @@ class UserApiCost(BaseModel):
     id: str
     name: str
     email: str
-    plan: str
     tokensUsed: str
     totalCost: str
 

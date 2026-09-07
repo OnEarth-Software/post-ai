@@ -152,25 +152,12 @@ def get_users_paginated(db: Session, page: int = 1, limit: int = 5) -> dict:
     
     items = []
     for user in users:
-        design_usage = db.query(Campaign).join(Product).filter(Product.user_id == user.id).count()
-        product_usage = db.query(Product).filter(Product.user_id == user.id).count()
-        
-        plan_name = "Free"
-        if user.plan_id:
-            plan = db.query(Plan).filter(Plan.id == user.plan_id).first()
-            if plan:
-                plan_name = plan.name
-                
         items.append({
             "id": str(user.id),
             "name": f"{user.name} {user.surname}".strip(),
             "email": user.email,
             "role": user.role,
-            "plan": plan_name,
-            "designUsage": design_usage,
-            "designLimit": user.design_limit,
-            "productUsage": product_usage,
-            "productLimit": user.product_limit,
+            "credits": user.credits,
             "status": "Active" if user.is_active else "Inactive"
         })
         
@@ -198,34 +185,8 @@ def update_user_profile(db: Session, user_id: str, update_data: UserAdminUpdateR
         user.role = update_data.role
     if update_data.status is not None:
         user.is_active = update_data.status == "Active"
-    if update_data.designLimit is not None:
-        user.design_limit = update_data.designLimit
-    if update_data.productLimit is not None:
-        user.product_limit = update_data.productLimit
-        
-    # Handling plan changes
-    if update_data.plan is not None:
-        new_plan = None
-        if update_data.plan != "Free":
-            new_plan = db.query(Plan).filter(Plan.name == update_data.plan).first()
-        
-        # Check if plan actually changed
-        current_plan_name = user.plan.name if user.plan else "Free"
-        if current_plan_name != update_data.plan:
-            if new_plan:
-                user.plan_id = new_plan.id
-                # Only sync limits if the admin didn't manually change them in this request
-                # A heuristic: if the incoming limits are identical to the old user limits, it means they didn't touch the inputs.
-                if update_data.designLimit == user.design_limit:
-                    user.design_limit = new_plan.design_limit
-                if update_data.productLimit == user.product_limit:
-                    user.product_limit = new_plan.product_limit
-            elif update_data.plan == "Free":
-                user.plan_id = None
-                if update_data.designLimit == user.design_limit:
-                    user.design_limit = 5
-                if update_data.productLimit == user.product_limit:
-                    user.product_limit = 5
+    if update_data.credits is not None:
+        user.credits = update_data.credits
             
     db.commit()
     return {"message": "User updated successfully"}
@@ -463,10 +424,8 @@ def get_financial_stats(
     total_revenue = 0.0
     plan_revenues = []
 
-    # Aktif Aboneler (Gerçek Veri - Planı olan kullanıcılar)
-    active_subs = db.query(User).filter(User.plan_id != None).count()
+    # Aktif Kullanıcılar (Kredili sisteme geçtik, sadece kayıtları sayabiliriz)
     new_subs = db.query(User).filter(
-        User.plan_id != None, 
         User.created_at >= thirty_days_ago
     ).count()
 
@@ -533,12 +492,10 @@ def get_financial_stats(
         User.name,
         User.surname,
         User.email,
-        Plan.name.label("plan_name"),
         func.sum(ApiExpense.tokens_used).label("total_tokens"),
         func.sum(ApiExpense.cost).label("total_cost")
     ).join(ApiExpense, User.id == ApiExpense.user_id)\
-     .outerjoin(Plan, User.plan_id == Plan.id)\
-     .group_by(User.id, User.name, User.surname, User.email, Plan.name)\
+     .group_by(User.id, User.name, User.surname, User.email)\
      .order_by(func.sum(ApiExpense.cost).desc())\
      .all()
 
@@ -558,9 +515,8 @@ def get_financial_stats(
 
         user_api_costs.append({
             "id": str(u.id),
-            "name": f"{u.name} {u.surname}",
+            "name": f"{u.name} {u.surname}".strip(),
             "email": u.email,
-            "plan": u.plan_name or "Ücretsiz",
             "tokensUsed": token_str,
             "totalCost": cost_str
         })
@@ -569,7 +525,7 @@ def get_financial_stats(
         "totalRevenue": total_revenue,
         "apiCost": total_api_cost,
         "netProfit": total_revenue - total_api_cost,
-        "activeSubscribers": active_subs,
+        "activeSubscribers": 0,
         "revenueGrowth": 0.0,
         "apiCostGrowth": 0.0,
         "netProfitGrowth": 0.0,

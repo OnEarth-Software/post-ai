@@ -20,7 +20,8 @@ import {
     Sparkles,
     Menu,
     X,
-    Globe
+    Globe,
+    Zap
 } from 'lucide-react';
 import NotificationsDropdown from '../NotificationsDropdown';
 import styles from './Sidebar.module.css';
@@ -40,7 +41,7 @@ const menuItems = [
 export default function Sidebar() {
     const pathname = usePathname();
     const router = useRouter();
-    const [user, setUser] = useState<{ name: string; surname: string; email: string } | null>(null);
+    const [user, setUser] = useState<{ name: string; surname: string; email: string, credits?: number } | null>(null);
     const [isMobileOpen, setIsMobileOpen] = useState(false);
 
     // Close sidebar on route change on mobile
@@ -81,8 +82,8 @@ export default function Sidebar() {
     return (
         <>
             {/* Mobile Toggle Button */}
-            <button 
-                className={styles.mobileToggleBtn} 
+            <button
+                className={styles.mobileToggleBtn}
                 onClick={() => setIsMobileOpen(true)}
                 aria-label="Open menu"
             >
@@ -91,8 +92,8 @@ export default function Sidebar() {
 
             {/* Mobile Overlay */}
             {isMobileOpen && (
-                <div 
-                    className={styles.mobileOverlay} 
+                <div
+                    className={styles.mobileOverlay}
                     onClick={() => setIsMobileOpen(false)}
                 />
             )}
@@ -108,8 +109,8 @@ export default function Sidebar() {
                                 <Image src="/logo3.png" alt="AdDesign AI Logo" width={50} height={50} style={{ objectFit: 'contain' }} priority />
                             </div>
                         </Link>
-                        <button 
-                            className={styles.mobileCloseBtn} 
+                        <button
+                            className={styles.mobileCloseBtn}
                             onClick={() => setIsMobileOpen(false)}
                             aria-label="Close menu"
                         >
@@ -117,60 +118,79 @@ export default function Sidebar() {
                         </button>
                     </div>
 
-                <nav className={styles.navMenu}>
-                    {menuItems.map((item) => {
-                        const Icon = item.icon;
-                        const isActive = pathname === item.path;
+                    <nav className={styles.navMenu}>
+                        {menuItems.map((item) => {
+                            const Icon = item.icon;
+                            const isActive = pathname === item.path;
 
-                        return (
-                            <Link
-                                key={item.name}
-                                href={item.path}
-                                className={`${styles.navItem} ${isActive ? styles.active : ''}`}
-                            >
-                                <Icon size={20} className={styles.navIcon} />
-                                <span>{item.name}</span>
-                            </Link>
-                        );
-                    })}
-                </nav>
-            </div>
-
-            <div className={styles.bottomSection}>
-                {user && (
-                    <div className={styles.userProfile}>
-                        <div className={styles.userAvatar}>
-                            {user.name.charAt(0)}{user.surname.charAt(0)}
-                        </div>
-                        <div className={styles.userInfo}>
-                            <span className={styles.userName}>{user.name} {user.surname}</span>
-                            <span className={styles.userEmail}>{user.email}</span>
-                        </div>
-                        <div style={{ marginLeft: 'auto' }}>
-                            <NotificationsDropdown />
-                        </div>
-                    </div>
-                )}
-                
-                <div className={styles.divider}></div>
-
-                <button className={styles.newCampaignBtn}>
-                    <Plus size={20} />
-                    <span>New Campaign</span>
-                </button>
-
-                <div className={styles.footerLinks}>
-                    <Link href="/help" className={styles.footerItem}>
-                        <HelpCircle size={20} className={styles.footerIcon} />
-                        <span>Help</span>
-                    </Link>
-                    <button onClick={handleLogout} className={styles.footerItem}>
-                        <LogOut size={20} className={styles.footerIcon} />
-                        <span>Logout</span>
-                    </button>
+                            return (
+                                <Link
+                                    key={item.name}
+                                    href={item.path}
+                                    className={`${styles.navItem} ${isActive ? styles.active : ''}`}
+                                >
+                                    <Icon size={20} className={styles.navIcon} />
+                                    <span>{item.name}</span>
+                                </Link>
+                            );
+                        })}
+                    </nav>
                 </div>
-            </div>
-        </aside>
+
+                <div className={styles.bottomSection}>
+                    {user && (
+                        <div className={styles.userProfile}>
+                            <div className={styles.userAvatar}>
+                                {user.name.charAt(0)}{user.surname.charAt(0)}
+                            </div>
+                            <div className={styles.userInfo}>
+                                <span className={styles.userName}>{user.name} {user.surname}</span>
+                                <span className={styles.userEmail}>{user.email}</span>
+                                {user.credits !== undefined && (
+                                    <div style={{ marginTop: '8px', width: '100%', maxWidth: '130px' }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px', fontSize: '11px', fontWeight: 600 }}>
+                                            <span style={{ display: 'flex', alignItems: 'center', gap: '3px', color: '#eab308' }}>
+                                                <Zap size={12} /> Kredi
+                                            </span>
+                                            <span style={{ color: '#475569' }}>{user.credits}</span>
+                                        </div>
+                                        <div style={{ width: '100%', height: '4px', backgroundColor: '#e2e8f0', borderRadius: '2px', overflow: 'hidden' }}>
+                                            <div style={{ 
+                                                width: `${Math.min(100, Math.round((user.credits / 1000) * 100))}%`, 
+                                                height: '100%', 
+                                                backgroundColor: '#eab308',
+                                                borderRadius: '2px',
+                                                transition: 'width 0.5s ease-out'
+                                            }} />
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                            <div style={{ marginLeft: 'auto' }}>
+                                <NotificationsDropdown />
+                            </div>
+                        </div>
+                    )}
+
+                    <div className={styles.divider}></div>
+
+                    <button className={styles.newCampaignBtn}>
+                        <Plus size={20} />
+                        <span>New Campaign</span>
+                    </button>
+
+                    <div className={styles.footerLinks}>
+                        <Link href="/help" className={styles.footerItem}>
+                            <HelpCircle size={20} className={styles.footerIcon} />
+                            <span>Help</span>
+                        </Link>
+                        <button onClick={handleLogout} className={styles.footerItem}>
+                            <LogOut size={20} className={styles.footerIcon} />
+                            <span>Logout</span>
+                        </button>
+                    </div>
+                </div>
+            </aside>
         </>
     );
 }

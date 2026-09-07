@@ -14,6 +14,8 @@ from app.services.search.factory import get_search_provider
 from app.services.ai.market_analysis_ai import generate_market_report, refine_search_query_with_image_insights
 from app.models.brand import Brand
 import uuid
+from app.services.pricing.credit_service import CreditService
+
 
 INPUT_PRICE_PER_1M = 0.15
 OUTPUT_PRICE_PER_1M = 0.60
@@ -53,7 +55,18 @@ def generate_campaign_text(
         subtext=ai_result.get("subtext", "")
     )
 
-def create_campaign(db: Session, request: CampaignCreateRequest, current_user: User) -> Campaign:
+def create_campaign(
+    db: Session, 
+    request: CampaignCreateRequest, 
+    current_user: User
+) -> Campaign:
+
+    CreditService.deduct_credits(
+        db,
+        current_user.id,
+        CreditService.COST_CAMPAIGN_GENERATION
+    )
+
     # 1. ProductAnalyze kaydını bul (en son analizi alıyoruz)
     product_analyze = db.query(ProductAnalyze).filter(
         ProductAnalyze.product_id == request.product_id
@@ -135,6 +148,12 @@ def generate_campaign_post_text(
         current_user: User
 )->CampaignPostTextGenerateResponse:
 
+    CreditService.deduct_credits(
+        db, 
+        current_user.id, 
+        CreditService.COST_POST_TEXT_GENERATION
+    )
+
     campaign = db.query(Campaign).join(Product).filter(
         Campaign.id == campaign_id,
         Product.user_id == current_user.id
@@ -214,6 +233,12 @@ def generate_campaign_market_analysis(
     campaign_id: str, 
     current_user: User
 ):
+    CreditService.deduct_credits(
+        db, 
+        current_user.id, 
+        CreditService.COST_MARKET_ANALYSIS
+    )
+
     campaign = db.query(Campaign).filter(
         Campaign.id == campaign_id
     ).first()

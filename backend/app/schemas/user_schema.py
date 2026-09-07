@@ -11,7 +11,6 @@ class UserBase(BaseModel):
 
 class UserCreate(UserBase):
     password: str 
-    plan_id: Optional[UUID] = None
 
 
 class UserUpdate(BaseModel):
@@ -22,12 +21,9 @@ class UserUpdate(BaseModel):
 
 class UserResponse(UserBase):
     id: UUID
-    plan_id: Optional[UUID]
     created_at: datetime
     is_2fa_enabled: bool = False
-    design_limit: Optional[int] = 5
-    product_limit: Optional[int] = 5
-    
+    credits: int = 1000
     model_config = {"from_attributes": True}
 
 class ChangePassword(BaseModel):

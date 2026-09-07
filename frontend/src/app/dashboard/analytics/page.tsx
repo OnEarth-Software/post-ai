@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
@@ -17,7 +17,8 @@ import {
     Package,
     ShieldCheck,
     Layers,
-    Clock
+    Clock,
+    Zap
 } from 'lucide-react';
 import styles from './analytics.module.css';
 
@@ -51,9 +52,7 @@ interface UserProfile {
     surname: string;
     email: string;
     role: string;
-    plan_id?: string;
-    design_limit?: number;
-    product_limit?: number;
+    credits?: number;
 }
 
 export default function AnalyticsPage() {
@@ -120,16 +119,9 @@ export default function AnalyticsPage() {
     const totalPostTexts = campaigns.filter(c => c.post_text && c.post_text.trim() !== '').length;
     const totalPublicPosts = campaigns.reduce((acc, c) => acc + (c.results?.filter(r => r.is_public)?.length || 0), 0);
 
-    // Limitler
-    const designLimit = user?.design_limit || 5;
-    const designUsage = totalCampaigns;
-    const designPercent = Math.min(100, Math.round((designUsage / designLimit) * 100));
-
-    const productLimit = user?.product_limit || 5;
-    const productUsage = productsCount;
-    const productPercent = Math.min(100, Math.round((productUsage / productLimit) * 100));
-
-    const planName = user?.role === 'admin' ? 'Yönetici' : (user?.plan_id ? 'Pro Plan' : 'Ücretsiz Plan');
+    // Kredi Bakiyesi
+    const credits = user?.credits || 0;
+    const planName = user?.role === 'admin' ? 'Yönetici' : 'Standart Kullanıcı';
 
     // Platform Dağılımı
     const platformCounts: Record<string, number> = {};
@@ -262,62 +254,30 @@ export default function AnalyticsPage() {
                 </div>
             </div>
 
-            {/* 2. LİMİT VE KOTA BİLGİLERİ KARTI */}
+            {/* 2. KREDİ BİLGİLERİ KARTI */}
             <div className={styles.limitsSection}>
                 <div className={styles.sectionHeader}>
                     <h2 className={styles.sectionTitle}>
-                        <ShieldCheck size={22} color="#059669" />
-                        Abonelik Planı & Kullanım Limitleri
+                        <ShieldCheck size={22} color="#eab308" />
+                        Hesap Bakiyesi & Krediler
                     </h2>
-                    <span className={styles.planBadge}>
+                    <span className={styles.planBadge} style={{ background: '#fef9c3', color: '#854d0e', border: '1px solid #fef08a' }}>
                         <Sparkles size={14} /> {planName}
                     </span>
                 </div>
 
-                <div className={styles.limitsGrid}>
-                    {/* Tasarım Limiti */}
-                    <div className={styles.limitCard}>
-                        <div className={styles.limitCardHeader}>
-                            <span className={styles.limitName}>Tasarım / Kampanya Üretim Kotası</span>
-                            <span className={styles.limitNumbers}>{designUsage} / {designLimit}</span>
+                <div className={styles.limitsGrid} style={{ gridTemplateColumns: '1fr' }}>
+                    <div className={styles.limitCard} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '2rem' }}>
+                        <div>
+                            <span className={styles.limitName} style={{ fontSize: '1.1rem' }}>Mevcut Kredi Bakiyeniz</span>
+                            <p style={{ color: '#64748b', fontSize: '0.9rem', marginTop: '0.5rem', marginBottom: 0 }}>
+                                Platform içerisindeki ürün yükleme, pazar analizi ve kampanya üretimleri için kullanılır.
+                            </p>
                         </div>
-                        <div className={styles.progressBar}>
-                            <div 
-                                className={styles.progressFill} 
-                                style={{ 
-                                    width: `${designPercent}%`, 
-                                    backgroundColor: getBarColor(designPercent) 
-                                }} 
-                            />
-                        </div>
-                        <div className={styles.limitMeta}>
-                            <span>Kullanım: %{designPercent}</span>
-                            <span style={{ fontWeight: 600, color: designLimit - designUsage <= 1 ? '#ef4444' : '#059669' }}>
-                                Kalan Hak: {Math.max(0, designLimit - designUsage)}
-                            </span>
-                        </div>
-                    </div>
-
-                    {/* Ürün Limiti */}
-                    <div className={styles.limitCard}>
-                        <div className={styles.limitCardHeader}>
-                            <span className={styles.limitName}>Ürün Yükleme Kotası</span>
-                            <span className={styles.limitNumbers}>{productUsage} / {productLimit}</span>
-                        </div>
-                        <div className={styles.progressBar}>
-                            <div 
-                                className={styles.progressFill} 
-                                style={{ 
-                                    width: `${productPercent}%`, 
-                                    backgroundColor: getBarColor(productPercent) 
-                                }} 
-                            />
-                        </div>
-                        <div className={styles.limitMeta}>
-                            <span>Kullanım: %{productPercent}</span>
-                            <span style={{ fontWeight: 600, color: productLimit - productUsage <= 1 ? '#ef4444' : '#059669' }}>
-                                Kalan Hak: {Math.max(0, productLimit - productUsage)}
-                            </span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', background: '#fefce8', padding: '16px 32px', borderRadius: '16px', border: '1px solid #fef08a' }}>
+                            <Zap size={32} color="#eab308" />
+                            <span style={{ fontSize: '2.5rem', fontWeight: 800, color: '#854d0e', lineHeight: 1 }}>{credits}</span>
+                            <span style={{ fontSize: '1.1rem', fontWeight: 600, color: '#a16207', alignSelf: 'flex-end', paddingBottom: '4px' }}>Kredi</span>
                         </div>
                     </div>
                 </div>

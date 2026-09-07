@@ -4,11 +4,11 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from './settings.module.css';
 import { QRCodeSVG } from 'qrcode.react';
-import { Shield, Key, ChevronRight } from 'lucide-react';
+import { Shield, Key, ChevronRight, Zap } from 'lucide-react';
 
 export default function SettingsPage() {
     const router = useRouter();
-    const [user, setUser] = useState<{ name: string; surname: string; email: string } | null>(null);
+    const [user, setUser] = useState<{ name: string; surname: string; email: string, credits?: number } | null>(null);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('profile');
     const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
@@ -302,15 +302,17 @@ export default function SettingsPage() {
                         {/* Right Sidebar widgets for Profile */}
                         <div>
                             <div className={`${styles.card} ${styles.creditCard}`}>
-                                <h3 className={styles.cardTitle} style={{ marginBottom: '0' }}>Credit Balance</h3>
-                                <div className={styles.creditAmount}>
-                                    8,450 <span className={styles.creditTotal}>/ 10,000</span>
+                                <h3 className={styles.cardTitle} style={{ marginBottom: '0', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                    <Zap size={18} color="#eab308" /> Kredi Bakiyeniz
+                                </h3>
+                                <div className={styles.creditAmount} style={{ color: '#0f172a' }}>
+                                    {user?.credits || 0} <span className={styles.creditTotal} style={{ fontSize: '1rem', fontWeight: 500, color: '#64748b' }}>Kredi</span>
                                 </div>
                                 <div className={styles.progressBar}>
-                                    <div className={styles.progressFill}></div>
+                                    <div className={styles.progressFill} style={{ width: `${Math.min(100, Math.round(((user?.credits || 0) / 1000) * 100))}%`, backgroundColor: '#eab308' }}></div>
                                 </div>
-                                <div className={styles.renewText}>Renews in 12 days</div>
-                                <button className={styles.upgradeBtn}>Upgrade Plan</button>
+                                <div className={styles.renewText}>Ürün yükleme, analiz ve kampanya üretimi için kullanılır.</div>
+                                <button className={styles.upgradeBtn} style={{ background: '#fefce8', color: '#854d0e', border: '1px solid #fef08a' }}>Kredi Yükle</button>
                             </div>
                         </div>
                     </>
