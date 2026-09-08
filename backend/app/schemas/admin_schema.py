@@ -126,3 +126,21 @@ class FinancialStatsResponse(BaseModel):
     apiExpenses: List[ApiExpenseItem]
     monthlyChart: List[MonthlyChartData]
     userApiCosts: List[UserApiCost]
+
+class MarketReportAdminResponse(BaseModel):
+    id: str
+    campaignId: str
+    productName: str
+    campaignGoal: str
+    tokensSpent: int
+    cost: str = "0.00"
+    creditsSpent: int
+    user: CampaignUserSchema
+    createdAt: str
+    marketReportText: str
+
+class PaginatedMarketReportAdminResponse(BaseModel):
+    items: List[MarketReportAdminResponse]
+    total: int
+    page: int
+    limit: int

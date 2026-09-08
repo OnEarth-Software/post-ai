@@ -117,11 +117,6 @@ export default function CampaignsClient({
     };
 
     const handleExport = async () => {
-        if (!exportStart || !exportEnd) {
-            alert("Lütfen başlangıç ve bitiş tarihlerini seçin.");
-            return;
-        }
-
         setIsExporting(true);
         try {
             // Detect API URL
@@ -130,7 +125,16 @@ export default function CampaignsClient({
                 apiUrl = `https://${window.location.hostname}:8000`; // simple fallback
             }
 
-            const res = await fetch(`${apiUrl}/admin/campaigns/export?start_date=${exportStart}&end_date=${exportEnd}`, {
+            const params = new URLSearchParams();
+            if (searchValue) params.set('search', searchValue);
+            if (platform && platform !== 'all') params.set('platform', platform);
+            if (typeFilter && typeFilter !== 'all') params.set('type_filter', typeFilter);
+            if (sortOrder) params.set('sort', sortOrder);
+            if (dateRange) params.set('date_range', dateRange);
+            if (exportStart) params.set('start_date', exportStart);
+            if (exportEnd) params.set('end_date', exportEnd);
+
+            const res = await fetch(`${apiUrl}/admin/campaigns/export?${params.toString()}`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
@@ -524,8 +528,11 @@ export default function CampaignsClient({
                             </button>
                         </div>
                         <div style={{ padding: '32px' }}>
+                            <p style={{ fontSize: '0.9rem', color: '#64748b', marginBottom: '20px', lineHeight: 1.5 }}>
+                                Opsiyonel: Özel bir tarih aralığı seçebilirsiniz. Eğer tarih seçmezseniz, dışa aktarım işleminde tablodaki arama ve filtreleriniz kullanılacaktır. Varsayılan olarak son 7 günün verisi indirilir.
+                            </p>
                             <div style={{ marginBottom: '16px' }}>
-                                <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#475569', marginBottom: '8px' }}>Başlangıç Tarihi</label>
+                                <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#475569', marginBottom: '8px' }}>Başlangıç Tarihi (İsteğe Bağlı)</label>
                                 <input
                                     type="date"
                                     value={exportStart}
@@ -534,7 +541,7 @@ export default function CampaignsClient({
                                 />
                             </div>
                             <div>
-                                <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#475569', marginBottom: '8px' }}>Bitiş Tarihi</label>
+                                <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#475569', marginBottom: '8px' }}>Bitiş Tarihi (İsteğe Bağlı)</label>
                                 <input
                                     type="date"
                                     value={exportEnd}

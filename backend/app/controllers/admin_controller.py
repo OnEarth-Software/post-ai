@@ -412,6 +412,97 @@ def delete_product(db: Session, product_id: str) -> dict:
     db.commit()
     return {"message": "Product deleted successfully"}
 
+def export_products_csv(
+    db: Session, 
+    start_date_str: str = None, 
+    end_date_str: str = None,
+    search: str = None,
+    sort: str = "desc",
+    date_range: str = "all"
+) -> str:
+    from app.models.product_analyze import ProductAnalyze
+    from app.models.api_expense import ApiExpense
+
+    query = db.query(Product).outerjoin(User, Product.user_id == User.id)
+    
+    if search:
+        search_term = f"%{search}%"
+        from sqlalchemy import or_
+        query = query.filter(or_(
+            Product.name.ilike(search_term),
+            User.name.ilike(search_term),
+            User.surname.ilike(search_term)
+        ))
+
+    # Parse dates
+    if start_date_str and end_date_str:
+        try:
+            start_date = datetime.strptime(start_date_str, "%Y-%m-%d").replace(tzinfo=timezone.utc)
+            end_date = datetime.strptime(end_date_str, "%Y-%m-%d").replace(hour=23, minute=59, second=59, tzinfo=timezone.utc)
+            query = query.filter(
+                Product.created_at >= start_date,
+                Product.created_at <= end_date
+            )
+        except ValueError:
+            raise HTTPException(status_code=400, detail="Invalid date format. Use YYYY-MM-DD")
+    else:
+        effective_range = "7d" if (not date_range or date_range == "all") else date_range
+        now = datetime.now(timezone.utc)
+        if effective_range == "7d":
+            query = query.filter(Product.created_at >= now - timedelta(days=7))
+        elif effective_range == "1m":
+            query = query.filter(Product.created_at >= now - timedelta(days=30))
+        elif effective_range == "6m":
+            query = query.filter(Product.created_at >= now - timedelta(days=180))
+        elif effective_range == "1y":
+            query = query.filter(Product.created_at >= now - timedelta(days=365))
+
+    if sort == "asc":
+        query = query.order_by(Product.created_at.asc())
+    else:
+        query = query.order_by(desc(Product.created_at))
+
+    products = query.all()
+
+    output = io.StringIO()
+    output.write('\ufeff') # UTF-8 BOM
+    writer = csv.writer(output, delimiter=';')
+    
+    writer.writerow([
+        "Ürün ID", "Kullanıcı Adı", "Ürün Adı", "Analiz Durumu", 
+        "Harcanan Token", "Maliyet ($)", "Tarih"
+    ])
+    
+    for product in products:
+        created_str = product.created_at.strftime("%Y-%m-%d %H:%M:%S") if product.created_at else ""
+        
+        user_name = "Bilinmeyen Kullanıcı"
+        if product.user:
+            name_part = product.user.name or ""
+            surname_part = product.user.surname or ""
+            full_name = f"{name_part} {surname_part}".strip()
+            user_name = full_name if full_name else "Bilinmeyen Kullanıcı"
+
+        analyze = db.query(ProductAnalyze).filter(ProductAnalyze.product_id == product.id).first()
+        expenses = db.query(ApiExpense).filter(ApiExpense.related_entity_id == product.id).all()
+        
+        tokens_spent = sum(e.tokens_used for e in expenses if e.tokens_used)
+        total_cost = sum(e.cost for e in expenses if e.cost)
+        
+        analysis_status = "Analyzed" if analyze else "Pending"
+            
+        writer.writerow([
+            str(product.id),
+            user_name,
+            product.name,
+            analysis_status,
+            str(tokens_spent),
+            f"{total_cost:.4f}".replace(".", ","),
+            created_str
+        ])
+        
+    return output.getvalue()
+
 
 
 def get_financial_stats(
@@ -536,23 +627,68 @@ def get_financial_stats(
         "userApiCosts": user_api_costs
     }
 
-def export_campaigns_csv(db: Session, start_date_str: str, end_date_str: str) -> str:
-    # Parse dates
-    try:
-        start_date = datetime.strptime(start_date_str, "%Y-%m-%d").replace(tzinfo=timezone.utc)
-        end_date = datetime.strptime(end_date_str, "%Y-%m-%d").replace(hour=23, minute=59, second=59, tzinfo=timezone.utc)
-    except ValueError:
-        raise HTTPException(status_code=400, detail="Invalid date format. Use YYYY-MM-DD")
+def export_campaigns_csv(
+    db: Session, 
+    start_date_str: str = None, 
+    end_date_str: str = None,
+    search: str = None,
+    platform: str = None,
+    type_filter: str = None,
+    sort: str = "desc",
+    date_range: str = "all"
+) -> str:
+    query = db.query(Campaign, User).join(Product, Campaign.product_id == Product.id).join(User, Product.user_id == User.id)
 
-    # Query Campaigns within date range, joined with Product and User
-    campaigns = db.query(Campaign, User).join(Product, Campaign.product_id == Product.id).join(User, Product.user_id == User.id).filter(
-        Campaign.created_at >= start_date,
-        Campaign.created_at <= end_date
-    ).order_by(Campaign.created_at.desc()).all()
+    if search:
+        search_term = f"%{search}%"
+        from sqlalchemy import or_
+        query = query.filter(or_(
+            Campaign.goal.ilike(search_term),
+            Campaign.slogan.ilike(search_term),
+            User.name.ilike(search_term),
+            User.surname.ilike(search_term)
+        ))
+
+    if platform and platform != "all":
+        query = query.filter(Campaign.platform == platform)
+        
+    if type_filter and type_filter != "all":
+        query = query.filter(Campaign.type == type_filter)
+
+    # Parse dates
+    if start_date_str and end_date_str:
+        try:
+            start_date = datetime.strptime(start_date_str, "%Y-%m-%d").replace(tzinfo=timezone.utc)
+            end_date = datetime.strptime(end_date_str, "%Y-%m-%d").replace(hour=23, minute=59, second=59, tzinfo=timezone.utc)
+            query = query.filter(
+                Campaign.created_at >= start_date,
+                Campaign.created_at <= end_date
+            )
+        except ValueError:
+            raise HTTPException(status_code=400, detail="Invalid date format. Use YYYY-MM-DD")
+    else:
+        effective_range = "7d" if (not date_range or date_range == "all") else date_range
+        now = datetime.now(timezone.utc)
+        if effective_range == "7d":
+            query = query.filter(Campaign.created_at >= now - timedelta(days=7))
+        elif effective_range == "1m":
+            query = query.filter(Campaign.created_at >= now - timedelta(days=30))
+        elif effective_range == "6m":
+            query = query.filter(Campaign.created_at >= now - timedelta(days=180))
+        elif effective_range == "1y":
+            query = query.filter(Campaign.created_at >= now - timedelta(days=365))
+
+    if sort == "asc":
+        query = query.order_by(Campaign.created_at.asc())
+    else:
+        query = query.order_by(desc(Campaign.created_at))
+
+    campaigns = query.all()
 
     # Generate CSV in memory
     output = io.StringIO()
-    writer = csv.writer(output)
+    output.write('\ufeff') # UTF-8 BOM
+    writer = csv.writer(output, delimiter=';')
     
     # Write header
     writer.writerow([
@@ -590,6 +726,187 @@ def export_campaigns_csv(db: Session, start_date_str: str, end_date_str: str) ->
             campaign.goal,
             str(total_tokens),
             f"{total_c:.4f}".replace(".", ","),
+            created_str
+        ])
+        
+    return output.getvalue()
+
+def get_market_reports_paginated(
+    db: Session, 
+    page: int = 1, 
+    limit: int = 5, 
+    search: str = None,
+    sort: str = "desc",
+    date_range: str = "all"
+) -> dict:
+    from app.services.pricing.credit_service import CreditService
+    
+    offset = (page - 1) * limit
+    
+    query = db.query(Campaign).join(Product, Campaign.product_id == Product.id).join(User, Product.user_id == User.id).filter(Campaign.market_report.isnot(None))
+    
+    if search:
+        search_term = f"%{search}%"
+        from sqlalchemy import or_
+        query = query.filter(or_(
+            Campaign.goal.ilike(search_term),
+            Product.name.ilike(search_term),
+            User.name.ilike(search_term),
+            User.surname.ilike(search_term)
+        ))
+
+    if date_range and date_range != "all":
+        now = datetime.now(timezone.utc)
+        if date_range == "7d":
+            query = query.filter(Campaign.created_at >= now - timedelta(days=7))
+        elif date_range == "1m":
+            query = query.filter(Campaign.created_at >= now - timedelta(days=30))
+        elif date_range == "6m":
+            query = query.filter(Campaign.created_at >= now - timedelta(days=180))
+        elif date_range == "1y":
+            query = query.filter(Campaign.created_at >= now - timedelta(days=365))
+
+    total_reports = query.count()
+    
+    if sort == "asc":
+        query = query.order_by(Campaign.created_at.asc())
+    else:
+        query = query.order_by(desc(Campaign.created_at))
+        
+    campaigns = query.offset(offset).limit(limit).all()
+
+    items = []
+    for campaign in campaigns:
+        product = campaign.product
+        user = product.user
+        
+        user_name = f"{user.name} {user.surname}".strip() if user else "Bilinmeyen"
+        user_avatar = user.name[0].upper() if user and user.name else "U"
+
+        expense = db.query(ApiExpense).filter(
+            ApiExpense.related_entity_id == str(campaign.id),
+            ApiExpense.service_type == "MARKET_ANALYSIS"
+        ).first()
+
+        tokens_spent = expense.tokens_used if expense else 0
+        total_cost = expense.cost if expense and expense.cost else 0.0
+
+        items.append({
+            "id": str(campaign.id),
+            "campaignId": str(campaign.id),
+            "productName": product.name if product else "Bilinmeyen Ürün",
+            "campaignGoal": campaign.goal,
+            "tokensSpent": tokens_spent,
+            "cost": f"{total_cost:.4f}",
+            "creditsSpent": CreditService.COST_MARKET_ANALYSIS,
+            "user": {
+                "name": user_name,
+                "avatar": user_avatar
+            },
+            "createdAt": campaign.created_at.isoformat() if campaign.created_at else "",
+            "marketReportText": campaign.market_report or ""
+        })
+        
+    return {
+        "items": items,
+        "total": total_reports,
+        "page": page,
+        "limit": limit
+    }
+
+def delete_market_report(db: Session, campaign_id: str) -> dict:
+    campaign = db.query(Campaign).filter(Campaign.id == campaign_id).first()
+    if not campaign:
+        return {"error": "Campaign not found"}
+    
+    campaign.market_report = None
+    db.commit()
+    return {"message": "Market report deleted successfully"}
+
+def export_market_reports_csv(
+    db: Session, 
+    start_date_str: str = None, 
+    end_date_str: str = None,
+    search: str = None,
+    sort: str = "desc",
+    date_range: str = "all"
+) -> str:
+    from app.services.pricing.credit_service import CreditService
+    
+    query = db.query(Campaign).join(Product, Campaign.product_id == Product.id).join(User, Product.user_id == User.id).filter(Campaign.market_report.isnot(None))
+    
+    if search:
+        search_term = f"%{search}%"
+        from sqlalchemy import or_
+        query = query.filter(or_(
+            Campaign.goal.ilike(search_term),
+            Product.name.ilike(search_term),
+            User.name.ilike(search_term),
+            User.surname.ilike(search_term)
+        ))
+
+    if start_date_str and end_date_str:
+        try:
+            start_date = datetime.strptime(start_date_str, "%Y-%m-%d").replace(tzinfo=timezone.utc)
+            end_date = datetime.strptime(end_date_str, "%Y-%m-%d").replace(hour=23, minute=59, second=59, tzinfo=timezone.utc)
+            query = query.filter(
+                Campaign.created_at >= start_date,
+                Campaign.created_at <= end_date
+            )
+        except ValueError:
+            raise HTTPException(status_code=400, detail="Invalid date format. Use YYYY-MM-DD")
+    else:
+        effective_range = "7d" if (not date_range or date_range == "all") else date_range
+        now = datetime.now(timezone.utc)
+        if effective_range == "7d":
+            query = query.filter(Campaign.created_at >= now - timedelta(days=7))
+        elif effective_range == "1m":
+            query = query.filter(Campaign.created_at >= now - timedelta(days=30))
+        elif effective_range == "6m":
+            query = query.filter(Campaign.created_at >= now - timedelta(days=180))
+        elif effective_range == "1y":
+            query = query.filter(Campaign.created_at >= now - timedelta(days=365))
+
+    if sort == "asc":
+        query = query.order_by(Campaign.created_at.asc())
+    else:
+        query = query.order_by(desc(Campaign.created_at))
+
+    campaigns = query.all()
+
+    output = io.StringIO()
+    # Excel'in Türkçe karakterleri sorunsuz okuyabilmesi için UTF-8 BOM ekliyoruz
+    output.write('\ufeff')
+    # Sütunların iç içe girmesini engellemek için noktalı virgül kullanıyoruz
+    writer = csv.writer(output, delimiter=';')
+    
+    writer.writerow([
+        "Rapor ID", "Kullanıcı", "Ürün", "Kampanya Hedefi", 
+        "Harcanan Token", "Harcanan Kredi", "Tarih"
+    ])
+    
+    for campaign in campaigns:
+        created_str = campaign.created_at.strftime("%Y-%m-%d %H:%M:%S") if campaign.created_at else ""
+        product = campaign.product
+        user = product.user
+        
+        user_name = f"{user.name} {user.surname}" if user else "Bilinmeyen"
+        product_name = product.name if product else "Bilinmeyen Ürün"
+        
+        expense = db.query(ApiExpense).filter(
+            ApiExpense.related_entity_id == str(campaign.id),
+            ApiExpense.service_type == "MARKET_ANALYSIS"
+        ).first()
+
+        tokens_spent = expense.tokens_used if expense else 0
+            
+        writer.writerow([
+            str(campaign.id),
+            user_name,
+            product_name,
+            campaign.goal,
+            str(tokens_spent),
+            str(CreditService.COST_MARKET_ANALYSIS),
             created_str
         ])
         

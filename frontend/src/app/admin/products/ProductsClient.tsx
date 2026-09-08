@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Search, Filter, Box, Zap, Calendar, MoreHorizontal, X, Trash2, Eye } from 'lucide-react';
+import { Search, Filter, Box, Zap, Calendar, MoreHorizontal, X, Trash2, Eye, Download } from 'lucide-react';
 import styles from '../campaigns/campaigns.module.css'; // Reusing styles from campaigns
 import { deleteProduct } from './actions';
 
@@ -13,12 +13,19 @@ export default function ProductsClient({
     totalPages,
     currentSearch,
     currentSort,
-    currentDateRange
+    currentDateRange,
+    token
 }: any) {
     const router = useRouter();
     const [selectedProduct, setSelectedProduct] = useState<any>(null); // For Details Modal
     const [productToDelete, setProductToDelete] = useState<any>(null); // For Delete Modal
     const [isSaving, setIsSaving] = useState(false);
+
+    // For Export
+    const [exportModalOpen, setExportModalOpen] = useState(false);
+    const [exportStart, setExportStart] = useState('');
+    const [exportEnd, setExportEnd] = useState('');
+    const [isExporting, setIsExporting] = useState(false);
 
     // For search
     const [searchValue, setSearchValue] = useState(currentSearch || '');
@@ -110,6 +117,52 @@ export default function ProductsClient({
         router.push(`/admin/products?${params.toString()}`);
     };
 
+    const handleExport = async () => {
+        setIsExporting(true);
+        try {
+            let apiUrl = 'http://localhost:8000';
+            if (typeof window !== 'undefined' && (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1')) {
+                apiUrl = `https://${window.location.hostname}:8000`;
+            }
+
+            const params = new URLSearchParams();
+            if (searchValue) params.set('search', searchValue);
+            if (sortOrder) params.set('sort', sortOrder);
+            if (dateRange) params.set('date_range', dateRange);
+            if (exportStart) params.set('start_date', exportStart);
+            if (exportEnd) params.set('end_date', exportEnd);
+
+            const res = await fetch(`${apiUrl}/admin/products/export?${params.toString()}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (!res.ok) {
+                alert("Dışa aktarım başarısız oldu. Hata kodu: " + res.status);
+                setIsExporting(false);
+                return;
+            }
+
+            const blob = await res.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `products_${exportStart || 'filtered'}_to_${exportEnd || 'export'}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            window.URL.revokeObjectURL(url);
+
+            setExportModalOpen(false);
+        } catch (error) {
+            console.error("Export error:", error);
+            alert("Bir hata oluştu.");
+        } finally {
+            setIsExporting(false);
+        }
+    };
+
     return (
         <div className={styles.container}>
             {/* Overlay for clicking outside to close menus */}
@@ -134,16 +187,13 @@ export default function ProductsClient({
 
             {/* Filters */}
             <div className={styles.filterBar}>
-                <div className={styles.searchWrapper}>
-                    <Search className={styles.searchIcon} size={18} />
-                    <input 
-                        type="text" 
-                        placeholder="Search by product name or user..." 
-                        className={styles.searchInput}
-                        value={searchValue}
-                        onChange={(e) => setSearchValue(e.target.value)}
-                    />
-                </div>
+                <input 
+                    type="text" 
+                    placeholder="Search by product name or user..." 
+                    className={styles.searchInput}
+                    value={searchValue}
+                    onChange={(e) => setSearchValue(e.target.value)}
+                />
                 
                 <div style={{ position: 'relative' }}>
                     <button 
@@ -195,6 +245,14 @@ export default function ProductsClient({
                         </div>
                     )}
                 </div>
+                
+                <button
+                    className={styles.filterBtn}
+                    style={{ background: '#0f172a', color: 'white', border: 'none', marginLeft: 'auto' }}
+                    onClick={() => setExportModalOpen(true)}
+                >
+                    <Download size={16} /> Dışa Aktar (CSV)
+                </button>
             </div>
 
             {/* List (Table) Layout */}
@@ -265,23 +323,33 @@ export default function ProductsClient({
                                         </button>
 
                                         {openMenuId === product.id && (
-                                            <div className={styles.actionMenu}>
-                                                <div className={styles.actionItem} onClick={() => {
-                                                    setSelectedProduct(product);
-                                                    setOpenMenuId(null);
-                                                }}>
-                                                    <Eye size={16} /> View Details
-                                                </div>
-                                                <div 
-                                                    className={`${styles.actionItem} ${styles.deleteItem}`}
-                                                    onClick={() => {
-                                                        setProductToDelete(product);
-                                                        setOpenMenuId(null);
-                                                    }}
+                                            <>
+                                                <div
+                                                    style={{ position: 'fixed', inset: 0, zIndex: 40 }}
+                                                    onClick={(e) => { e.stopPropagation(); setOpenMenuId(null); }}
+                                                />
+                                                <div
+                                                    onClick={(e) => e.stopPropagation()}
+                                                    style={{ position: 'absolute', right: '40px', top: '10%', background: 'white', border: '1px solid #e2e8f0', borderRadius: '8px', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)', zIndex: 50, padding: '4px', minWidth: '160px' }}
                                                 >
-                                                    <Trash2 size={16} /> Delete Product
+                                                    <button
+                                                        style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px', background: 'none', border: 'none', cursor: 'pointer', fontSize: '14px', color: '#334155', textAlign: 'left', borderRadius: '4px' }}
+                                                        onClick={(e) => { e.stopPropagation(); setSelectedProduct(product); setOpenMenuId(null); }}
+                                                        onMouseOver={(e) => e.currentTarget.style.background = '#f8fafc'}
+                                                        onMouseOut={(e) => e.currentTarget.style.background = 'none'}
+                                                    >
+                                                        <Eye size={16} /> View Details
+                                                    </button>
+                                                    <button
+                                                        style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px', background: 'none', border: 'none', cursor: 'pointer', fontSize: '14px', color: '#ef4444', textAlign: 'left', borderRadius: '4px' }}
+                                                        onClick={(e) => { e.stopPropagation(); setProductToDelete(product); setOpenMenuId(null); }}
+                                                        onMouseOver={(e) => e.currentTarget.style.background = '#fef2f2'}
+                                                        onMouseOut={(e) => e.currentTarget.style.background = 'none'}
+                                                    >
+                                                        <Trash2 size={16} /> Delete Product
+                                                    </button>
                                                 </div>
-                                            </div>
+                                            </>
                                         )}
                                     </td>
                                 </tr>
@@ -404,6 +472,49 @@ export default function ProductsClient({
                                     {isSaving ? 'Deleting...' : 'Delete'}
                                 </button>
                             </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Export Modal */}
+            {exportModalOpen && (
+                <div style={{ position: 'fixed', inset: 0, background: 'rgba(15, 23, 42, 0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, backdropFilter: 'blur(4px)' }} onClick={() => setExportModalOpen(false)}>
+                    <div style={{ background: 'white', borderRadius: '16px', width: '100%', maxWidth: '420px', boxShadow: '0 25px 50px -12px rgb(0 0 0 / 0.25)', overflow: 'hidden' }} onClick={(e) => e.stopPropagation()}>
+                        <div style={{ padding: '24px 32px', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8fafc' }}>
+                            <h2 style={{ margin: 0, fontSize: '1.25rem', color: '#0f172a', fontWeight: 600 }}>Dışa Aktar (CSV)</h2>
+                            <button style={{ background: '#e2e8f0', border: 'none', cursor: 'pointer', color: '#475569', width: '32px', height: '32px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={() => setExportModalOpen(false)}>
+                                <X size={18} />
+                            </button>
+                        </div>
+                        <div style={{ padding: '32px' }}>
+                            <p style={{ fontSize: '0.9rem', color: '#64748b', marginBottom: '20px', lineHeight: 1.5 }}>
+                                Opsiyonel: Özel bir tarih aralığı seçebilirsiniz. Eğer tarih seçmezseniz, dışa aktarım işleminde tablodaki arama ve filtreleriniz kullanılacaktır. Varsayılan olarak son 7 günün verisi indirilir.
+                            </p>
+                            <div style={{ marginBottom: '16px' }}>
+                                <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#475569', marginBottom: '8px' }}>Başlangıç Tarihi (İsteğe Bağlı)</label>
+                                <input
+                                    type="date"
+                                    value={exportStart}
+                                    onChange={e => setExportStart(e.target.value)}
+                                    style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px', outline: 'none' }}
+                                />
+                            </div>
+                            <div>
+                                <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#475569', marginBottom: '8px' }}>Bitiş Tarihi (İsteğe Bağlı)</label>
+                                <input
+                                    type="date"
+                                    value={exportEnd}
+                                    onChange={e => setExportEnd(e.target.value)}
+                                    style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px', outline: 'none' }}
+                                />
+                            </div>
+                        </div>
+                        <div style={{ padding: '20px 32px', background: '#f8fafc', display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
+                            <button style={{ padding: '10px 20px', background: 'white', color: '#334155', border: '1px solid #cbd5e1', borderRadius: '8px', cursor: 'pointer', fontWeight: 500 }} onClick={() => setExportModalOpen(false)} disabled={isExporting}>İptal</button>
+                            <button style={{ padding: '10px 20px', background: '#0f172a', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '8px' }} onClick={handleExport} disabled={isExporting}>
+                                {isExporting ? 'İndiriliyor...' : 'İndir'}
+                            </button>
                         </div>
                     </div>
                 </div>

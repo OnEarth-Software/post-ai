@@ -11,7 +11,8 @@ import {
     Megaphone,
     Box,
     CreditCard,
-    HelpCircle
+    HelpCircle,
+    FileText
 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -57,6 +58,10 @@ export default function AdminSidebar() {
                 <Link href="/admin/products" className={`${styles.navItem} ${pathname === '/admin/products' ? styles.active : ''}`}>
                     <Box size={20} />
                     <span>Products</span>
+                </Link>
+                <Link href="/admin/market-reports" className={`${styles.navItem} ${pathname === '/admin/market-reports' ? styles.active : ''}`}>
+                    <FileText size={20} />
+                    <span>Market Reports</span>
                 </Link>
                 <Link href="/admin/financials" className={`${styles.navItem} ${pathname === '/admin/financials' ? styles.active : ''}`}>
                     <CreditCard size={20} />

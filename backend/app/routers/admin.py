@@ -9,7 +9,7 @@ from app.controllers import admin_controller
 from app.schemas.admin_schema import (
     DashboardStatsResponse, UserAdminResponse, PaginatedUserResponse,
     UserAdminUpdateRequest, PaginatedCampaignAdminResponse, FinancialStatsResponse,
-    PaginatedProductAdminResponse
+    PaginatedProductAdminResponse, PaginatedMarketReportAdminResponse
 )
 
 router = APIRouter()
@@ -110,6 +110,32 @@ def delete_product(
     admin_controller.check_access(current_admin)
     return admin_controller.delete_product(db, product_id)
 
+@router.get("/products/export")
+def export_products(
+    start_date: str = None,
+    end_date: str = None,
+    search: str = None,
+    sort: str = "desc",
+    date_range: str = "all",
+    db: Session = Depends(get_db),
+    current_admin: User = Depends(get_current_admin)
+):
+    admin_controller.check_access(current_admin)
+    csv_data = admin_controller.export_products_csv(
+        db, start_date, end_date, search, sort, date_range
+    )
+    
+    s_date = start_date or "filtered"
+    e_date = end_date or "export"
+    
+    return Response(
+        content=csv_data,
+        media_type="text/csv",
+        headers={
+            "Content-Disposition": f"attachment; filename=products_{s_date}_to_{e_date}.csv"
+        }
+    )
+
 
 @router.get("/finance-stats", response_model=FinancialStatsResponse)
 def get_finance_stats(
@@ -121,18 +147,76 @@ def get_finance_stats(
 
 @router.get("/campaigns/export")
 def export_campaigns(
-    start_date: str,
-    end_date: str,
+    start_date: str = None,
+    end_date: str = None,
+    search: str = None,
+    platform: str = None,
+    type_filter: str = None,
+    sort: str = "desc",
+    date_range: str = "all",
     db: Session = Depends(get_db),
     current_admin: User = Depends(get_current_admin)
 ):
     admin_controller.check_access(current_admin)
-    csv_data = admin_controller.export_campaigns_csv(db, start_date, end_date)
+    csv_data = admin_controller.export_campaigns_csv(
+        db, start_date, end_date, search, platform, type_filter, sort, date_range
+    )
+    
+    s_date = start_date or "filtered"
+    e_date = end_date or "export"
     
     return Response(
         content=csv_data,
         media_type="text/csv",
         headers={
-            "Content-Disposition": f"attachment; filename=campaigns_{start_date}_to_{end_date}.csv"
+            "Content-Disposition": f"attachment; filename=campaigns_{s_date}_to_{e_date}.csv"
+        }
+    )
+
+@router.get("/market-reports", response_model=PaginatedMarketReportAdminResponse)
+def get_market_reports_paginated(
+    page: int = 1,
+    limit: int = 5,
+    search: str = None,
+    sort: str = "desc",
+    date_range: str = "all",
+    db: Session = Depends(get_db),
+    current_admin: User = Depends(get_current_admin)
+):
+    admin_controller.check_access(current_admin)
+    return admin_controller.get_market_reports_paginated(db, page, limit, search, sort, date_range)
+
+@router.delete("/market-reports/{campaign_id}")
+def delete_market_report(
+    campaign_id: str,
+    db: Session = Depends(get_db),
+    current_admin: User = Depends(get_current_admin)
+):
+    admin_controller.check_access(current_admin)
+    return admin_controller.delete_market_report(db, campaign_id)
+
+@router.get("/market-reports/export")
+def export_market_reports(
+    start_date: str = None,
+    end_date: str = None,
+    search: str = None,
+    sort: str = "desc",
+    date_range: str = "all",
+    db: Session = Depends(get_db),
+    current_admin: User = Depends(get_current_admin)
+):
+    admin_controller.check_access(current_admin)
+    csv_data = admin_controller.export_market_reports_csv(
+        db, start_date, end_date, search, sort, date_range
+    )
+    
+    s_date = start_date or "filtered"
+    e_date = end_date or "export"
+    
+    return Response(
+        content=csv_data,
+        media_type="text/csv",
+        headers={
+            "Content-Disposition": f"attachment; filename=market_reports_{s_date}_to_{e_date}.csv"
         }
     )

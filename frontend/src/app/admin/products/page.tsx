@@ -61,6 +61,7 @@ export default async function ProductsPage({ searchParams }: { searchParams: { p
             currentSort={sort}
             currentDateRange={date_range}
             errorMessage={errorMessage}
+            token={token}
         />
     );
 }
