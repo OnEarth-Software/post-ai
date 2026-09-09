@@ -274,6 +274,11 @@ def get_campaigns_paginated(
         total_tokens = sum([e.tokens_used for e in campaign_expenses])
         total_c = sum([e.cost for e in campaign_expenses])
 
+        image_tokens = sum([e.tokens_used for e in campaign_expenses if e.service_type == 'IMAGE_GENERATION'])
+        image_cost = sum([e.cost for e in campaign_expenses if e.service_type == 'IMAGE_GENERATION'])
+        text_tokens = sum([e.tokens_used for e in campaign_expenses if e.service_type == 'TEXT_GENERATION'])
+        text_cost = sum([e.cost for e in campaign_expenses if e.service_type == 'TEXT_GENERATION'])
+
         items.append({
             "id": str(campaign.id),
             "imageUrl": image_url,
@@ -283,6 +288,10 @@ def get_campaigns_paginated(
             "slogan": campaign.slogan or "",
             "tokensSpent": total_tokens,
             "cost": f"{total_c:.4f}",
+            "imageTokens": image_tokens,
+            "imageCost": f"{image_cost:.4f}",
+            "textTokens": text_tokens,
+            "textCost": f"{text_cost:.4f}",
             "user": {
                 "name": user_name,
                 "avatar": user_avatar

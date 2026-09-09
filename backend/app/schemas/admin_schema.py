@@ -61,6 +61,10 @@ class CampaignAdminResponse(BaseModel):
     user_prompt: Optional[str] = None
     system_prompt: Optional[str] = None
     subtext: Optional[str] = None
+    imageTokens: Optional[int] = 0
+    imageCost: Optional[str] = "0.0000"
+    textTokens: Optional[int] = 0
+    textCost: Optional[str] = "0.0000"
 
 class PaginatedCampaignAdminResponse(BaseModel):
     items: List[CampaignAdminResponse]
