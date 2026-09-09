@@ -22,8 +22,8 @@ def create_product_with_image(
 ) -> Product:
     CreditService.deduct_credits(
         db,
-        current_user.id,
-        CreditService.COST_PRODUCT_UPLOAD
+        current_user,
+        operation="product_upload"
     )
 
     supabase = get_supabase_client()

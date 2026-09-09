@@ -71,7 +71,7 @@ export default function AdminSidebar() {
 
             <div className={styles.footer}>
                 <nav className={styles.bottomNav}>
-                    <Link href="#" className={styles.navItem}>
+                    <Link href="/admin/settings" className={`${styles.navItem} ${pathname === '/admin/settings' ? styles.active : ''}`}>
                         <Settings size={20} />
                         <span>Settings</span>
                     </Link>

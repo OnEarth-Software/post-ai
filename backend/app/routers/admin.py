@@ -9,7 +9,7 @@ from app.controllers import admin_controller
 from app.schemas.admin_schema import (
     DashboardStatsResponse, UserAdminResponse, PaginatedUserResponse,
     UserAdminUpdateRequest, PaginatedCampaignAdminResponse, FinancialStatsResponse,
-    PaginatedProductAdminResponse, PaginatedMarketReportAdminResponse
+    PaginatedProductAdminResponse, PaginatedMarketReportAdminResponse, SystemConfigUpdate
 )
 
 router = APIRouter()
@@ -220,3 +220,20 @@ def export_market_reports(
             "Content-Disposition": f"attachment; filename=market_reports_{s_date}_to_{e_date}.csv"
         }
     )
+
+@router.get("/configs")
+def configs(
+    db: Session = Depends(get_db),
+    current_admin = Depends(get_current_admin)
+):
+    admin_controller.check_access(current_admin)
+    return admin_controller.get_system_configs(db)
+
+@router.put("/configs")
+def update_config(
+    config_data: SystemConfigUpdate, 
+    db: Session = Depends(get_db), 
+    current_admin=Depends(get_current_admin)
+):
+    admin_controller.check_access(current_admin)
+    return admin_controller.update_system_config(db, config_data)

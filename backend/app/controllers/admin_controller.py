@@ -16,6 +16,8 @@ from app.models.campaign_result import CampaignResult
 from app.schemas.admin_schema import UserAdminUpdateRequest
 from app.models.api_expense import ApiExpense
 from app.models.plan import Plan
+from app.models.system_config import SystemConfig
+from app.schemas.admin_schema import SystemConfigUpdate
 import csv
 import io
 
@@ -798,7 +800,7 @@ def get_market_reports_paginated(
             "campaignGoal": campaign.goal,
             "tokensSpent": tokens_spent,
             "cost": f"{total_cost:.4f}",
-            "creditsSpent": CreditService.COST_MARKET_ANALYSIS,
+            "creditsSpent": CreditService.get_config_value(db, "COST_MARKET_ANALYSIS", 100),
             "user": {
                 "name": user_name,
                 "avatar": user_avatar
@@ -906,8 +908,39 @@ def export_market_reports_csv(
             product_name,
             campaign.goal,
             str(tokens_spent),
-            str(CreditService.COST_MARKET_ANALYSIS),
+            str(CreditService.get_config_value(db, "COST_MARKET_ANALYSIS", 100)),
             created_str
         ])
         
     return output.getvalue()
+
+def get_system_configs(
+    db: Session
+):
+    return db.query(SystemConfig).all()
+
+def update_system_config(
+        db: Session,
+        config_data: SystemConfigUpdate
+):
+    config = db.query(SystemConfig).filter(
+        SystemConfig.key == config_data.key
+    ).first()
+
+    if not config:
+        config = SystemConfig(
+            key=config_data.key,
+            value = config_data.value,
+            description=config_data.description
+        )
+
+        db.add(config)
+
+    else:
+        config.value = config_data.value
+        if config_data.description is not None:
+            config.description = config_data.description
+
+    db.commit()
+    db.refresh(config)
+    return config

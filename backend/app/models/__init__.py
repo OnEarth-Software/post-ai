@@ -10,3 +10,5 @@ from app.models.like import Like
 from app.models.notification import Notification
 from app.models.asset import Asset
 from app.models.api_expense import ApiExpense
+from app.models.system_config import SystemConfig
+

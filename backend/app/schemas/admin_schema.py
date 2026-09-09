@@ -144,3 +144,9 @@ class PaginatedMarketReportAdminResponse(BaseModel):
     total: int
     page: int
     limit: int
+
+class SystemConfigUpdate(BaseModel):
+    key: str
+    value: str
+    description: str | None = None
+

@@ -63,8 +63,8 @@ def create_campaign(
 
     CreditService.deduct_credits(
         db,
-        current_user.id,
-        CreditService.COST_CAMPAIGN_GENERATION
+        current_user,
+        operation="campaign_generation"
     )
 
     # 1. ProductAnalyze kaydını bul (en son analizi alıyoruz)
@@ -149,9 +149,9 @@ def generate_campaign_post_text(
 )->CampaignPostTextGenerateResponse:
 
     CreditService.deduct_credits(
-        db, 
-        current_user.id, 
-        CreditService.COST_POST_TEXT_GENERATION
+        db,
+        current_user,
+        operation="post_text"
     )
 
     campaign = db.query(Campaign).join(Product).filter(
@@ -234,9 +234,9 @@ def generate_campaign_market_analysis(
     current_user: User
 ):
     CreditService.deduct_credits(
-        db, 
-        current_user.id, 
-        CreditService.COST_MARKET_ANALYSIS
+        db,
+        current_user,
+        operation="market_analysis"
     )
 
     campaign = db.query(Campaign).filter(
