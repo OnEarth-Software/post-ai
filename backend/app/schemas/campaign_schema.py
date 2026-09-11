@@ -37,6 +37,7 @@ class CampaignResponse(BaseModel):
     type: str
     user_prompt: Optional[str] = None
     system_prompt: str
+    market_report: str
     slogan: Optional[str] = None
     subtext: Optional[str] = None
     post_text: Optional[str] = None

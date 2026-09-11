@@ -405,6 +405,9 @@
     color: #059669;
 }
 
+
+
+
 @media (max-width: 1024px) {
     .contentGrid {
         grid-template-columns: 1fr;

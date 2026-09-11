@@ -37,6 +37,7 @@ interface Campaign {
     slogan?: string;
     subtext?: string;
     post_text?: string;
+    market_report?: string;
     created_at: string;
     results: CampaignResult[];
     product?: {

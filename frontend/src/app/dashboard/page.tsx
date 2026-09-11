@@ -24,6 +24,7 @@ export default function DashboardPage() {
     }
     const [productChartData, setProductChartData] = useState<any[]>(initialChartData);
     const [campaignChartData, setCampaignChartData] = useState<any[]>(initialChartData);
+    const [userCredits, setUserCredits] = useState(0);
 
     useEffect(() => {
         const token = localStorage.getItem('token');
@@ -43,10 +44,19 @@ export default function DashboardPage() {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
+                }).then(res => res.json()),
+                fetch(`${apiUrl}/auth/me`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
                 }).then(res => res.json())
             ])
-                .then(([productsData, campaignsData]) => {
+                .then(([productsData, campaignsData, userData]) => {
 
+
+                    if(userData && userData.credits !== undefined){
+                        setUserCredits(userData.credits);
+                    }
 
                     if (Array.isArray(productsData)) {
                         setProductCount(productsData.length);
@@ -175,7 +185,7 @@ export default function DashboardPage() {
                         <div className={`${styles.statIconWrapper} ${styles.iconImage}`}>
                             <ImageIcon size={20} />
                         </div>
-                        <span className={styles.statTrend}>+12%</span>
+                        {/* <span className={styles.statTrend}>+12%</span> */}
                     </div>
                     <div className={styles.statLabel}>Generated Images</div>
                     <div className={styles.statValue}>{campaignsCount}</div>
@@ -188,11 +198,9 @@ export default function DashboardPage() {
                         </div>
                         <span className={styles.statTrend}>High</span>
                     </div>
-                    <div className={styles.statLabel}>Credits Remaining</div>
-                    <div className={styles.statValue}>85%</div>
-                    <div className={styles.progressBarContainer}>
-                        <div className={styles.progressBarFill} style={{ width: '85%' }}></div>
-                    </div>
+                    <div className={styles.statLabel}>Total Credits</div>
+                    <div className={styles.statValue}>{userCredits}</div>
+                    
                 </div>
             </div>
 
