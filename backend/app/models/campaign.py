@@ -1,5 +1,5 @@
 import uuid
-from sqlalchemy import Column, String, DateTime, ForeignKey
+from sqlalchemy import Column, String, DateTime, ForeignKey, Boolean
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
@@ -23,6 +23,8 @@ class Campaign(Base):
     subtext = Column(String, nullable=True)
     post_text = Column(String, nullable=True)
     market_report = Column(String, nullable=True)
+    image_model = Column(String, nullable=True, default="gpt-image-2")
+    status = Column(Boolean, default=False)
     
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 

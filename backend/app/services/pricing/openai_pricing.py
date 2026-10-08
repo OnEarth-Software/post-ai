@@ -20,6 +20,18 @@ def calculate_openai_cost(
             "image_input": 8.00,
             "image_output": 30.00,
         },
+        "gpt-image-2.5-sunburst": {
+            "text_input": 5.00,
+            "cached_input": 1.25,
+            "image_input": 8.00,
+            "image_output": 30.00,
+        },
+        "gpt-image-2.5-flare": {
+            "text_input": 5.00,
+            "cached_input": 1.25,
+            "image_input": 8.00,
+            "image_output": 30.00,
+        },
     }
 
     if model not in PRICING:
@@ -43,7 +55,7 @@ def calculate_openai_cost(
             completion_tokens / 1_000_000
         ) * rates["output"]
 
-    elif model == "gpt-image-2":
+    elif model in ["gpt-image-2", "gpt-image-2.5-sunburst", "gpt-image-2.5-flare"]:
         total_cost += (
             prompt_tokens / 1_000_000
         ) * rates["text_input"]

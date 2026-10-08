@@ -85,7 +85,8 @@ def create_campaign(
         user_prompt=request.user_prompt,
         system_prompt=settings.SYSTEM_PROMPT,
         slogan=request.slogan,
-        subtext=request.subtext
+        subtext=request.subtext,
+        image_model=request.image_model
     )
     
     db.add(new_campaign)
@@ -113,7 +114,8 @@ def get_user_campaigns(db: Session, current_user: User):
     from sqlalchemy.orm import joinedload
     
     campaigns = db.query(Campaign).join(Product).filter(
-        Product.user_id == current_user.id
+        Product.user_id == current_user.id,
+        Campaign.status == True
     ).options(
         joinedload(Campaign.product),
         joinedload(Campaign.results)

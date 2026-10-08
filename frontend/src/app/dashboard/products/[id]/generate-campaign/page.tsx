@@ -20,6 +20,7 @@ export default function GenerateCampaignPage() {
     const [platform, setPlatform] = useState<string>('instagram'); // Defaulting to instagram as requested
     const [type, setType] = useState<string>('');
     const [userPrompt, setUserPrompt] = useState<string>('');
+    const [imageModel, setImageModel] = useState<string>('gpt-image-2');
 
     // System prompt hidden from user, set based on requirements
     const [systemPrompt, setSystemPrompt] = useState<string>(
@@ -127,7 +128,8 @@ export default function GenerateCampaignPage() {
                 type: type,
                 user_prompt: userPrompt,
                 slogan: generateData.slogan,
-                subtext: generateData.subtext
+                subtext: generateData.subtext,
+                image_model: imageModel
             };
 
             const createResponse = await fetch(`${apiUrl}/campaigns/create`, {
@@ -274,6 +276,24 @@ export default function GenerateCampaignPage() {
                             <div className={styles.optionTitle}>Story (Tam Ekran)</div>
                         </div>
                     </div>
+
+                    <h3 className={styles.sectionLabel} style={{ marginTop: '2rem' }}>Görsel Üretim Modeli</h3>
+                    <div className={styles.optionsGrid}>
+                        <div className={`${styles.optionCard} ${imageModel === 'gpt-image-2' ? styles.selected : ''}`} onClick={() => setImageModel('gpt-image-2')}>
+                            <ImageIcon size={32} className={styles.optionIcon} />
+                            <div className={styles.optionTitle}>Klasik Model (gpt-image-2)</div>
+                            <p style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '0.5rem', textAlign: 'center' }}>
+                                Ürün resmini olduğu gibi koyar, aslına sadık kalır.
+                            </p>
+                        </div>
+                        <div className={`${styles.optionCard} ${imageModel === 'gpt-image-2.5-flare' ? styles.selected : ''}`} onClick={() => setImageModel('gpt-image-2.5-flare')}>
+                            <Sparkles size={32} className={styles.optionIcon} />
+                            <div className={styles.optionTitle}>Gelişmiş Model (gpt-image-2.5-flare)</div>
+                            <p style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '0.5rem', textAlign: 'center' }}>
+                                Ürün renklerini tasarıma uyumlu hale getirir ve ortamı daha iyi tasarlar.
+                            </p>
+                        </div>
+                    </div>
                 </div>
             )}
 
@@ -358,6 +378,10 @@ export default function GenerateCampaignPage() {
                                         <div className={styles.summaryItem}>
                                             <span className={styles.summaryLabel}>Talimatınız:</span>
                                             <span className={styles.summaryValue}>{userPrompt || "Yaratıcılık yapay zekaya bırakıldı"}</span>
+                                        </div>
+                                        <div className={styles.summaryItem}>
+                                            <span className={styles.summaryLabel}>Model:</span>
+                                            <span className={styles.summaryValue}>{imageModel === 'gpt-image-2' ? 'Klasik Model' : 'Gelişmiş Model'}</span>
                                         </div>
                                     </div>
                                 </div>

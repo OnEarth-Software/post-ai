@@ -52,7 +52,8 @@ def generate_and_save_campaign_image(
             user_prompt=campaign.user_prompt,
             system_prompt=campaign.system_prompt,
             slogan=campaign.slogan,
-            subtext=campaign.subtext
+            subtext=campaign.subtext,
+            image_model=campaign.image_model or "gpt-image-2"
         )
         img_bytes = ai_response["image_bytes"]
         img_size = ai_response["size"]
@@ -111,8 +112,8 @@ def generate_and_save_campaign_image(
         related_entity_id=campaign.id
     )
     db.add(img_cost)
-
     
+    campaign.status = True
     db.commit()
     db.refresh(new_result)
     

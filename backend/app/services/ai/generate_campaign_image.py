@@ -27,7 +27,8 @@ def generate_product_campaign_image(
     user_prompt: str,
     system_prompt: str,
     slogan: str,
-    subtext: str
+    subtext: str,
+    image_model: str = "gpt-image-2"
 ) -> dict:
 
     if not slogan:
@@ -47,7 +48,7 @@ def generate_product_campaign_image(
         else "1024x1024"
     )
 
-    model = "gpt-image-2"
+    model = image_model
 
     prompt_data = {
         "category": category,
@@ -64,6 +65,7 @@ def generate_product_campaign_image(
         "subtext": subtext
     }
 
+    # PROMPT AYNI
     prompt_text = f"""
     Create a highly aesthetic marketing image based on the following configuration.
 
@@ -92,8 +94,10 @@ def generate_product_campaign_image(
             image=image_file,
             prompt=prompt_text,
             size=size,
+            quality="high",
             n=1,
         )
+
         usage_data = {}
 
         if hasattr(response, "usage") and response.usage:
@@ -124,7 +128,6 @@ def generate_product_campaign_image(
             0
         )
 
-
         image_cost = calculate_openai_cost(
             model=model,
             prompt_tokens=input_tokens,
@@ -132,10 +135,15 @@ def generate_product_campaign_image(
             cached_tokens=cached_tokens
         )
 
-
         image_data = response.data[0]
 
-        if image_data.url:
+        if hasattr(image_data, "b64_json") and image_data.b64_json:
+
+            img_bytes = base64.b64decode(
+                image_data.b64_json
+            )
+
+        elif hasattr(image_data, "url") and image_data.url:
 
             img_response = requests.get(
                 image_data.url,
@@ -145,12 +153,6 @@ def generate_product_campaign_image(
             img_response.raise_for_status()
 
             img_bytes = img_response.content
-
-        elif hasattr(image_data, "b64_json") and image_data.b64_json:
-
-            img_bytes = base64.b64decode(
-                image_data.b64_json
-            )
 
         else:
             raise Exception(

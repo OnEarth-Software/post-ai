@@ -26,6 +26,7 @@ class CampaignCreateRequest(BaseModel):
     user_prompt: str
     slogan: str
     subtext: str
+    image_model: str = "gpt-image-2"
     
 
 class CampaignResponse(BaseModel):
@@ -42,6 +43,7 @@ class CampaignResponse(BaseModel):
     subtext: Optional[str] = None
     post_text: Optional[str] = None
     market_report: Optional[str] = None
+    image_model: Optional[str] = None
 
     class Config:
         from_attributes = True
@@ -73,6 +75,7 @@ class CampaignListResponse(BaseModel):
     subtext: Optional[str] = None
     post_text: Optional[str] = None
     market_report: Optional[str] = None
+    image_model: Optional[str] = None
     created_at: datetime
     product: CampaignProductBase
     results: List[CampaignResultBase] = []
