@@ -86,7 +86,7 @@ Analiz sonuçları, araştırma sırasında erişilebilen web verilerine dayanı
 | Frontend | Next.js, React, TypeScript |
 | UI / Styling | Tailwind CSS, shadcn/ui |
 | Backend | Python, FastAPI |
-|Backend Architecture	Router | Controller | Service |
+|Backend Architecture	| Router, Controller, Service |
 | Database | Supabase (PostgreSQL) |
 | AI Integration | OpenAI API |
 | Search Integration | Serper API |
