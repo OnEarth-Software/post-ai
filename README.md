@@ -1,3 +1,8 @@
+<div align="center">
+  <img src="frontend/public/logo2.png" alt="AdDesign AI Logo" width="250">
+</div>
+
+
 # AdDesign AI
 
 **AI-Powered Advertising Design & Competitor Intelligence Platform**
@@ -188,7 +193,7 @@ AdDesign AI üzerinde yapay zekâ entegrasyonları, reklam üretim kalitesi, rak
 
 ## Geliştiriciler
 
-Bu proje **Talha Yıldız** ve **Furkan** tarafından geliştirilmektedir.
+Bu proje **Talha Yıldız** ve **Furkan Koşar** tarafından geliştirilmektedir.
 
 ---
 
