@@ -1,3 +1,4 @@
+![AdDesign AI Logo](frontend/public/logo2.png)
 # AdDesign AI
 
 **AI-Powered Advertising Design & Competitor Intelligence Platform**
