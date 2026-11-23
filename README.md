@@ -193,7 +193,7 @@ AdDesign AI üzerinde yapay zekâ entegrasyonları, reklam üretim kalitesi, rak
 
 ## Geliştiriciler
 
-Bu proje **Talha Yıldız** ve **Furkan** tarafından geliştirilmektedir.
+Bu proje **Talha Yıldız** ve **Furkan Koşar** tarafından geliştirilmektedir.
 
 ---
 
