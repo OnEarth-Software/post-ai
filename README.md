@@ -1,4 +1,6 @@
-![AdDesign AI Logo](frontend/public/logo2.png)
+<div align="center">
+  <img src="frontend/public/logo2.png" alt="AdDesign AI Logo" width="250">
+</div>
 # AdDesign AI
 
 **AI-Powered Advertising Design & Competitor Intelligence Platform**
